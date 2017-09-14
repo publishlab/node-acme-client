@@ -1,10 +1,8 @@
-acme-client
+acme-client [![Build Status](https://travis-ci.org/publishlab/node-acme-client.svg?branch=master)](https://travis-ci.org/publishlab/node-acme-client)
 ===========
 
 
 *A simple and unopinionated ACME client.*
-
-[![Build Status](https://travis-ci.org/publishlab/node-acme-client.svg?branch=master)](https://travis-ci.org/publishlab/node-acme-client)
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
 If you are looking for an all-in-one solution with features like
