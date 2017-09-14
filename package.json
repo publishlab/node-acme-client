@@ -1,0 +1,47 @@
+{
+    "name": "acme-client",
+    "description": "Simple and unopinionated ACME client",
+    "author": "nmorsman",
+    "version": "0.1.0",
+    "main": "acme.js",
+    "license": "MIT",
+    "homepage": "https://github.com/publishlab/node-acme-client",
+    "dependencies": {
+        "async": "2.5.0",
+        "debug": "3.0.1",
+        "merge": "1.2.0",
+        "openssl-wrapper": "0.3.4",
+        "request": "2.81.0",
+        "tempfile": "2.0.0"
+    },
+    "devDependencies": {
+        "chai": "3.5.0",
+        "eslint": "2.13.0",
+        "eslint-config-airbnb-base": "3.0.1",
+        "eslint-plugin-import": "1.8.1",
+        "grunt": "1.0.1",
+        "grunt-eslint": "18.1.0",
+        "grunt-jsdoc-to-markdown": "3.0.0",
+        "grunt-mocha-test": "0.13.2",
+        "mocha": "3.2.0"
+    },
+    "scripts": {
+        "test": "./node_modules/.bin/grunt"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/publishlab/node-acme-client"
+    },
+    "keywords": [
+        "simple",
+        "acme",
+        "client",
+        "boulder",
+        "async",
+        "lets",
+        "encrypt"
+    ],
+    "bugs": {
+        "url": "https://github.com/publishlab/node-acme-client/issues"
+    }
+}
