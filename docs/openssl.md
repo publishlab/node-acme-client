@@ -114,7 +114,7 @@ Read domains from a Certificate Signing Request
 | Param | Type | Description |
 | --- | --- | --- |
 | csr | <code>buffer</code> \| <code>string</code> | PEM encoded Certificate Signing Request |
-| callback | <code>function</code> | `{string}` err, `{array}` domains |
+| callback | <code>function</code> | `{string}` err, `{object}` {commonName, altNames} |
 
 <a name="readCertificateInfo"></a>
 

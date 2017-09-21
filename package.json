@@ -2,7 +2,7 @@
     "name": "acme-client",
     "description": "Simple and unopinionated ACME client",
     "author": "nmorsman",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "main": "acme.js",
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
