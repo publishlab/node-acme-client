@@ -158,8 +158,11 @@ describe('openssl', function() {
     it('should resolve domains from CSR', function(done) {
         openssl.readCsrDomains(testCsr, function(err, domains) {
             assert.isNull(err);
-            assert.isArray(domains);
-            assert.include(domains, testCsrDomain);
+            assert.isObject(domains);
+            assert.isString(domains.commonName);
+            assert.isArray(domains.altNames);
+            assert.strictEqual(domains.commonName, testCsrDomain);
+            assert.strictEqual(domains.altNames.length, 0);
 
             done();
         });
@@ -168,8 +171,11 @@ describe('openssl', function() {
     it('should resolve domains from SAN CSR', function(done) {
         openssl.readCsrDomains(testSanCsr, function(err, domains) {
             assert.isNull(err);
-            assert.isArray(domains);
-            assert.deepEqual(domains, testSanCsrDomains);
+            assert.isObject(domains);
+            assert.isString(domains.commonName);
+            assert.isArray(domains.altNames);
+            assert.strictEqual(domains.commonName, testSanCsrDomains[0]);
+            assert.deepEqual(domains.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
 
             done();
         });
@@ -184,8 +190,13 @@ describe('openssl', function() {
         openssl.readCertificateInfo(testCert, function(err, info) {
             assert.isNull(err);
             assert.isObject(info);
-            assert.isArray(info.domains);
-            assert.include(info.domains, 'example.com');
+
+            assert.isObject(info.domains);
+            assert.isString(info.domains.commonName);
+            assert.isArray(info.domains.altNames);
+            assert.strictEqual(info.domains.commonName, testCsrDomain);
+            assert.strictEqual(info.domains.altNames.length, 0);
+
             assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
             assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
 
@@ -197,8 +208,13 @@ describe('openssl', function() {
         openssl.readCertificateInfo(testSanCert, function(err, info) {
             assert.isNull(err);
             assert.isObject(info);
-            assert.isArray(info.domains);
-            assert.deepEqual(info.domains, testSanCsrDomains);
+
+            assert.isObject(info.domains);
+            assert.isString(info.domains.commonName);
+            assert.isArray(info.domains.altNames);
+            assert.strictEqual(info.domains.commonName, testSanCsrDomains[0]);
+            assert.deepEqual(info.domains.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
+
             assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
             assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
 
