@@ -17,10 +17,12 @@ describe('openssl', function() {
     var testCsr;
     var testSanCsr;
     var testCert;
+    var testSanCert;
 
     var testCsrDomain = 'example.com';
     var testSanCsrDomains = ['example.com', 'test.example.com', 'abc.example.com'];
     var testCertPath = path.join(__dirname, 'fixtures', 'certificate.crt');
+    var testSanCertPath = path.join(__dirname, 'fixtures', 'san-certificate.crt');
 
 
     /*
@@ -33,6 +35,16 @@ describe('openssl', function() {
             assert.strictEqual(Buffer.isBuffer(file), true);
 
             testCert = file;
+            done();
+        });
+    });
+
+    it('should read SAN certificate fixture', function(done) {
+        fs.readFile(testSanCertPath, function(err, file) {
+            assert.isNull(err);
+            assert.strictEqual(Buffer.isBuffer(file), true);
+
+            testSanCert = file;
             done();
         });
     });
@@ -131,8 +143,8 @@ describe('openssl', function() {
 
     it('should generate a SAN CSR', function(done) {
         openssl.createCsr({
-            commonName: testSanCsrDomains.shift(),
-            altNames: testSanCsrDomains
+            commonName: testSanCsrDomains[0],
+            altNames: testSanCsrDomains.slice(1, testSanCsrDomains.length)
         }, function(err, data) {
             assert.isNull(err);
             assert.strictEqual(Buffer.isBuffer(data.key), true);
@@ -157,10 +169,7 @@ describe('openssl', function() {
         openssl.readCsrDomains(testSanCsr, function(err, domains) {
             assert.isNull(err);
             assert.isArray(domains);
-
-            testSanCsrDomains.forEach(function(domain) {
-                assert.include(domains, domain);
-            });
+            assert.deepEqual(domains, testSanCsrDomains);
 
             done();
         });
@@ -177,6 +186,19 @@ describe('openssl', function() {
             assert.isObject(info);
             assert.isArray(info.domains);
             assert.include(info.domains, 'example.com');
+            assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
+            assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
+
+            done();
+        });
+    });
+
+    it('should read info from SAN certificate', function(done) {
+        openssl.readCertificateInfo(testSanCert, function(err, info) {
+            assert.isNull(err);
+            assert.isObject(info);
+            assert.isArray(info.domains);
+            assert.deepEqual(info.domains, testSanCsrDomains);
             assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
             assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
 
