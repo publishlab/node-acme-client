@@ -1,5 +1,4 @@
-acme-client [![Build Status](https://travis-ci.org/publishlab/node-acme-client.svg?branch=master)](https://travis-ci.org/publishlab/node-acme-client)
-===========
+# acme-client [![Build Status](https://travis-ci.org/publishlab/node-acme-client.svg?branch=master)](https://travis-ci.org/publishlab/node-acme-client)
 
 
 *A simple and unopinionated ACME client.*
@@ -18,8 +17,7 @@ For more information on how the Boulder/Let's Encrypt API diverges from the ACME
 
 
 
-Installation
-------------
+## Installation
 
 `acme-client` requires OpenSSL to be installed.
 
@@ -29,8 +27,7 @@ $ npm install acme-client
 
 
 
-Usage
------
+## Usage
 
 ```js
 var acme = require('acme-client');
@@ -54,8 +51,7 @@ acme.directory.letsencrypt.production;
 
 
 
-Easy mode
----------
+## Easy mode
 
 For convenience an `easy` method is included in the client that takes a single config object.
 This method will handle the entire process of getting a certificate for one or multiple domains.
@@ -84,8 +80,7 @@ client.easy(easyConfig, function(err, data) {
 
 
 
-OpenSSL utils
--------------
+## OpenSSL utils
 
 Some OpenSSL utility methods are included for creating keys and Certificate Signing Requests, exposed through `acme.openssl`.
 
@@ -120,8 +115,7 @@ acme.openssl.createPrivateKey(4096, function(err, key) { });
 
 
 
-API
----
+## API
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
 
@@ -156,8 +150,7 @@ client.registerDomain(data, function(err, domain) {
 
 
 
-Debugging
----------
+## Debugging
 
 `acme-client` uses [debug](https://www.npmjs.com/package/debug) for debugging which can be enabled by running
 
@@ -167,7 +160,6 @@ DEBUG=acme-client node file.js
 
 
 
-License
--------
+## License
 
 [MIT](LICENSE)
