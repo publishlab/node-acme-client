@@ -83,7 +83,7 @@ describe('client', function() {
         testClient.registerAccount(function(err, account) {
             assert.isNull(err);
             assert.isObject(account);
-            assert.strictEqual(account.Status, 'valid');
+            assert.strictEqual(account.status, 'valid');
 
             testAccount = account;
             done();
@@ -114,7 +114,7 @@ describe('client', function() {
         testSecondaryClient.registerAccount(function(err, account) {
             assert.isNull(err);
             assert.isObject(account);
-            assert.strictEqual(account.Status, 'valid');
+            assert.strictEqual(account.status, 'valid');
             assert.strictEqual(testAccount.id, account.id);
 
             done();
@@ -147,7 +147,7 @@ describe('client', function() {
         testClient.changeAccountKey(testSecondaryPrivateKey, function(err, account) {
             assert.isNull(err);
             assert.isObject(account);
-            assert.strictEqual(account.Status, 'valid');
+            assert.strictEqual(account.status, 'valid');
 
             done();
         });
@@ -208,7 +208,7 @@ describe('client', function() {
         testClient.updateAccount(data, function(err, account) {
             assert.isNull(err);
             assert.isObject(account);
-            assert.strictEqual(account.Status, 'deactivated');
+            assert.strictEqual(account.status, 'deactivated');
 
             done();
         });
