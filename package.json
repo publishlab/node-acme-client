@@ -33,7 +33,7 @@
         "babel": "babel -d lib/ src/",
         "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/openssl.js > docs/openssl.md",
         "grunt": "grunt",
-        "lint": "eslint --ignore-path .gitignore .",
+        "lint": "eslint .",
         "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
         "prepublish": "npm run babel",
         "test": "npm run babel && npm run lint && npm run mocha && npm run docs"
