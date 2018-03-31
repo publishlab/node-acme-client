@@ -9,8 +9,8 @@ module.exports = function(grunt) {
         jsdoc2md: {
             separateOutputFiles: {
                 files: [
-                    { src: 'lib/client.js', dest: 'docs/client.md' },
-                    { src: 'lib/openssl.js', dest: 'docs/openssl.md' }
+                    { src: 'src/client.js', dest: 'docs/client.md' },
+                    { src: 'src/openssl.js', dest: 'docs/openssl.md' }
                 ]
             }
         }

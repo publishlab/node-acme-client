@@ -1,3 +1,4 @@
-/nbproject/
-/node_modules/
+lib/
+nbproject/
+node_modules/
 npm-debug.log

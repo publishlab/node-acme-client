@@ -6,10 +6,8 @@
     "main": "acme.js",
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
-    "engines": {
-        "node": ">= 7.7.0"
-    },
     "dependencies": {
+        "babel-runtime": "^6.26.0",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^3.0.0",
@@ -19,6 +17,10 @@
         "tempfile": "^2.0.0"
     },
     "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-plugin-transform-runtime": "^6.23.0",
+        "babel-preset-env": "^1.6.1",
+        "babel-register": "^6.26.0",
         "chai": "^4.1.0",
         "chai-as-promised": "^7.0.0",
         "eslint": "^4.19.0",
@@ -29,10 +31,12 @@
         "mocha": "^5.0.0"
     },
     "scripts": {
-        "lint": "eslint .",
-        "mocha": "mocha -b -t 30000 \"test/setup.js\" \"test/**/*.spec.js\"",
+        "lint": "eslint --ignore-path .gitignore .",
+        "babel": "babel -d lib/ src/",
+        "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
         "grunt": "grunt",
-        "test": "npm run lint && npm run mocha && npm run grunt"
+        "test": "npm run babel && npm run lint && npm run mocha && npm run grunt",
+        "prepublish": "npm run babel"
     },
     "repository": {
         "type": "git",
