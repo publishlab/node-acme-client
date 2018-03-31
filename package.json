@@ -19,24 +19,24 @@
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-preset-env": "^1.6.1",
+        "babel-preset-env": "^1.6.0",
         "babel-register": "^6.26.0",
         "chai": "^4.1.0",
         "chai-as-promised": "^7.0.0",
         "eslint": "^4.19.0",
         "eslint-config-airbnb-base": "^12.1.0",
         "eslint-plugin-import": "^2.10.0",
-        "grunt": "^1.0.0",
-        "grunt-jsdoc-to-markdown": "^4.0.0",
+        "jsdoc-to-markdown": "^4.0.0",
         "mocha": "^5.0.0"
     },
     "scripts": {
-        "lint": "eslint --ignore-path .gitignore .",
         "babel": "babel -d lib/ src/",
-        "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
+        "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/openssl.js > docs/openssl.md",
         "grunt": "grunt",
-        "test": "npm run babel && npm run lint && npm run mocha && npm run grunt",
-        "prepublish": "npm run babel"
+        "lint": "eslint --ignore-path .gitignore .",
+        "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
+        "prepublish": "npm run babel",
+        "test": "npm run babel && npm run lint && npm run mocha && npm run docs"
     },
     "repository": {
         "type": "git",
