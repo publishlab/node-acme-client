@@ -1,10 +1,10 @@
-language: "node_js"
+language: node_js
 sudo: false
 email: false
 
 node_js:
-  - "4"
-  - "stable"
+  - 8
+  - 9
 
 script:
-  - "npm test"
+  - npm test

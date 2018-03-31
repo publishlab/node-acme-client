@@ -2,16 +2,17 @@
  * Example of acme.Client.easy
  */
 
-var fs = require('fs');
-var acme = require('./../');
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const acme = require('./../');
 
 
 function stdout(m) {
-    process.stdout.write(m + '\n');
+    process.stdout.write(`${m}\n`);
 }
 
 function stderr(m) {
-    process.stderr.write(m + '\n');
+    process.stderr.write(`${m}\n`);
 }
 
 
@@ -21,33 +22,32 @@ function stderr(m) {
  * @param {string} keyAuthorization String containing the challenge response
  * @param {object} challenge The challenge object returned from the ACME API
  * @param {string} domain The domain name for the current challenge
- * @param {function} callback `{string}` err, `{object}` verify
+ * @returns {Promise} verify
  */
 
-function challengeCreate(keyAuthorization, challenge, domain, callback) {
-    var fileName = '/var/www/html/.well-known/acme-challenge/' + challenge.token;
-    var fileContents = keyAuthorization;
+async function challengeCreateFn(keyAuthorization, challenge, domain) {
+    const fileName = `/var/www/html/.well-known/acme-challenge/${challenge.token}`;
+    const fileContents = keyAuthorization;
 
-    fs.writeFile(fileName, fileContents, function(err) {
-        if (err) return callback(err);
+    stdout(`Creating challenge for ${domain} on path: ${fileName}`);
+    await fs.writeFileAsync(fileName, fileContents);
 
 
-        /**
-         * Calling back without `verify` triggers no challenge verification
-         * before updating status with ACME provider.
-         *
-         * When calling back with `verify.http` acme-client will ensure that
-         * the challenge is satisfied (HTTP) before notifying the ACME provider.
-         *
-         * When calling back with `verify.https` acme-client will ensure that
-         * the challenge is satisfied (HTTPS) before notifying the ACME provider.
-         */
+    /**
+     * Returning nothing triggers no challenge verification before updating
+     * status with the ACME provider.
+     *
+     * Returning `http` will ensure that the challenge is satisfied (HTTP)
+     * before notifying the ACME provider.
+     *
+     * Returning `https` will ensure that the challenge is satisfied (HTTPS)
+     * before notifying the ACME provider.
+     */
 
-        callback(null, {
-            http: 'http://' + domain
-            // https: 'https://' + domain
-        });
-    });
+    return {
+        http: `http://${domain}`
+        // https: `https://${domain}`
+    };
 }
 
 
@@ -56,13 +56,14 @@ function challengeCreate(keyAuthorization, challenge, domain, callback) {
  *
  * @param {object} challenge The challenge object returned from the ACME API
  * @param {string} domain The domain name for the current challenge
- * @param {function} callback `{string}` err
+ * @returns {Promise}
  */
-function challengeRemove(challenge, domain, callback) {
-    var fileName = '/var/www/html/.well-known/acme-challenge/' + challenge.token;
 
-    /* Remove the challenge response */
-    fs.unlink(fileName, callback);
+function challengeRemoveFn(challenge, domain) {
+    const fileName = `/var/www/html/.well-known/acme-challenge/${challenge.token}`;
+
+    stdout(`Removing challenge for ${domain} from path: ${fileName}`);
+    return fs.unlinkAsync(fileName);
 }
 
 
@@ -70,16 +71,16 @@ function challengeRemove(challenge, domain, callback) {
  * Config
  */
 
-var accountPrivateKey = '<PEM encoded private key>';
-var accountEmail = 'test@example.com';
+const privateKey = '<PEM encoded private key>';
+const email = 'test@example.com';
 
-var client = new acme.Client({
+const client = new acme.Client({
     directoryUri: acme.directory.letsencrypt.staging,
-    accountKey: accountPrivateKey,
+    accountKey: privateKey,
     acceptTermsOfService: true
 });
 
-var csrConfig = {
+const csrConfig = {
     commonName: 'example.com',
     altNames: ['test.example.com', 'something.example.com'],
     country: 'GB'
@@ -88,50 +89,48 @@ var csrConfig = {
 
 
 /*
- * Create Certificate Signing Request
+ * Create certificate
  */
 
-acme.openssl.createCsr(csrConfig, function(csrErr, csrResult) {
-    if (csrErr) return stderr(csrErr);
-
-    var csr = csrResult.csr;                    // Certificate Signing Request
-    var key = csrResult.key;                    // Certificate private key
+async function createCertificate() {
+    const { csr, key } = await acme.openssl.createCsr(csrConfig);
 
     /* Easy config */
-    var easyConfig = {
-        csr: csr,                               // PEM encoded CSR
-        email: accountEmail,                    // Account email address
-        challengeCreateFn: challengeCreate,     // Function to call before validation
-        challengeRemoveFn: challengeRemove,     // Function to call after validation
-        challengeType: 'http-01'                // Wanted challenge type (default: http-01)
+    const easyConfig = {
+        csr,
+        email,
+        challengeCreateFn,
+        challengeRemoveFn,
+        challengeType: 'http-01'
     };
 
     /* Get certificates */
-    client.easy(easyConfig, function(certErr, result) {
-        if (certErr) return stderr(certErr);
+    const { certificate, intermediate, chain } = await client.easy(easyConfig);
 
-        var certificate = result.certificate;
-        var intermediate = result.intermediate;
-        var chain = result.chain;
+    stdout('=== CSR ===');
+    stdout(csr.toString());
+    stdout();
 
-        stdout('=== CSR ===');
-        stdout(csr.toString());
-        stdout();
+    stdout('=== PRIVATE KEY ===');
+    stdout(key.toString());
+    stdout();
 
-        stdout('=== PRIVATE KEY ===');
-        stdout(key.toString());
-        stdout();
+    stdout('=== CERTIFICATE ===');
+    stdout(certificate.toString());
+    stdout();
 
-        stdout('=== CERTIFICATE ===');
-        stdout(certificate.toString());
-        stdout();
+    stdout('=== INTERMEDIATE CERTIFICATE ===');
+    stdout(intermediate.toString());
+    stdout();
 
-        stdout('=== INTERMEDIATE CERTIFICATE ===');
-        stdout(intermediate.toString());
-        stdout();
+    stdout('=== CHAIN CERTIFICATE ===');
+    stdout(chain.toString());
+    stdout();
+}
 
-        stdout('=== CHAIN CERTIFICATE ===');
-        stdout(chain.toString());
-        stdout();
-    });
-});
+try {
+    createCertificate();
+}
+catch (e) {
+    stderr(`Error: ${e.message}`);
+}

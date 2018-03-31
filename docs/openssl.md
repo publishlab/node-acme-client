@@ -1,139 +1,140 @@
 ## Functions
 
 <dl>
-<dt><a href="#createPrivateKey">createPrivateKey([size], callback)</a></dt>
+<dt><a href="#createPrivateKey">createPrivateKey([size])</a> ⇒ <code>Promise</code></dt>
 <dd><p>Generate a private RSA key</p>
 </dd>
-<dt><a href="#createPublicKey">createPublicKey(key, callback)</a></dt>
+<dt><a href="#createPublicKey">createPublicKey(key)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Generate a public RSA key</p>
 </dd>
-<dt><a href="#getModulus">getModulus(key, callback)</a></dt>
+<dt><a href="#getModulus">getModulus(key)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Get modulus</p>
 </dd>
-<dt><a href="#getPublicExponent">getPublicExponent(key, callback)</a></dt>
+<dt><a href="#getPublicExponent">getPublicExponent(key)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Get public exponent</p>
 </dd>
-<dt><a href="#pem2der">pem2der(key, callback)</a></dt>
+<dt><a href="#pem2der">pem2der(key)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Convert PEM to DER encoding</p>
 </dd>
-<dt><a href="#der2pem">der2pem(action, key, [pubIn], callback)</a></dt>
+<dt><a href="#der2pem">der2pem(action, key, [pubIn])</a> ⇒ <code>Promise</code></dt>
 <dd><p>Convert DER to PEM encoding</p>
 </dd>
-<dt><a href="#readCsrDomains">readCsrDomains(csr, callback)</a></dt>
+<dt><a href="#readCsrDomains">readCsrDomains(csr)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Read domains from a Certificate Signing Request</p>
 </dd>
-<dt><a href="#readCertificateInfo">readCertificateInfo(cert, callback)</a></dt>
+<dt><a href="#readCertificateInfo">readCertificateInfo(cert)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Read information from a certificate</p>
 </dd>
-<dt><a href="#createCsr">createCsr(data, [key], callback)</a></dt>
+<dt><a href="#createCsr">createCsr(data, [key])</a> ⇒ <code>Promise</code></dt>
 <dd><p>Create a Certificate Signing Request</p>
 </dd>
 </dl>
 
 <a name="createPrivateKey"></a>
 
-## createPrivateKey([size], callback)
+## createPrivateKey([size]) ⇒ <code>Promise</code>
 Generate a private RSA key
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - key  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| [size] | <code>number</code> | Size of the key, default: `2048` |
-| callback | <code>function</code> | `{string}` err, `{buffer}` key |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [size] | <code>number</code> | <code>2048</code> | Size of the key, default: `2048` |
 
 <a name="createPublicKey"></a>
 
-## createPublicKey(key, callback)
+## createPublicKey(key) ⇒ <code>Promise</code>
 Generate a public RSA key
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - key  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | key | <code>buffer</code> \| <code>string</code> | PEM encoded private key |
-| callback | <code>function</code> | `{string}` err, `{buffer}` key |
 
 <a name="getModulus"></a>
 
-## getModulus(key, callback)
+## getModulus(key) ⇒ <code>Promise</code>
 Get modulus
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - modulus  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | key | <code>buffer</code> \| <code>string</code> | Private key, certificate or CSR |
-| callback | <code>function</code> | `{string}` err, `{buffer}` modulus |
 
 <a name="getPublicExponent"></a>
 
-## getPublicExponent(key, callback)
+## getPublicExponent(key) ⇒ <code>Promise</code>
 Get public exponent
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - exponent  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | key | <code>buffer</code> \| <code>string</code> | Private key, certificate or CSR |
-| callback | <code>function</code> | `{string}` err, `{buffer}` exponent |
 
 <a name="pem2der"></a>
 
-## pem2der(key, callback)
+## pem2der(key) ⇒ <code>Promise</code>
 Convert PEM to DER encoding
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - der  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | key | <code>buffer</code> \| <code>string</code> | PEM encoded private key, certificate or CSR |
-| callback | <code>function</code> | `{string}` err, `{buffer}` der |
 
 <a name="der2pem"></a>
 
-## der2pem(action, key, [pubIn], callback)
+## der2pem(action, key, [pubIn]) ⇒ <code>Promise</code>
 Convert DER to PEM encoding
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - pem  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | action | <code>string</code> | Output action (x509, rsa, req) |
 | key | <code>buffer</code> \| <code>string</code> | DER encoded private key, certificate or CSR |
 | [pubIn] | <code>boolean</code> | Result should be a public key, default: `false` |
-| callback | <code>function</code> | `{string}` err, `{buffer}` pem |
 
 <a name="readCsrDomains"></a>
 
-## readCsrDomains(csr, callback)
+## readCsrDomains(csr) ⇒ <code>Promise</code>
 Read domains from a Certificate Signing Request
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - {commonName, altNames}  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | csr | <code>buffer</code> \| <code>string</code> | PEM encoded Certificate Signing Request |
-| callback | <code>function</code> | `{string}` err, `{object}` {commonName, altNames} |
 
 <a name="readCertificateInfo"></a>
 
-## readCertificateInfo(cert, callback)
+## readCertificateInfo(cert) ⇒ <code>Promise</code>
 Read information from a certificate
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - info  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | cert | <code>buffer</code> \| <code>string</code> | PEM encoded certificate |
-| callback | <code>function</code> | `{string}` err, `{object}` info |
 
 <a name="createCsr"></a>
 
-## createCsr(data, [key], callback)
+## createCsr(data, [key]) ⇒ <code>Promise</code>
 Create a Certificate Signing Request
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - {key, csr}  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -148,5 +149,4 @@ Create a Certificate Signing Request
 | [data.organizationUnit] | <code>string</code> |  |
 | [data.emailAddress] | <code>string</code> |  |
 | [key] | <code>buffer</code> \| <code>string</code> | CSR private key |
-| callback | <code>function</code> | `{string}` err, `{object}` {key, csr} |
 

@@ -71,11 +71,7 @@ var easyConfig = {
     challengeRemoveFn: function(challenge, domain, callback) { }
 };
 
-client.easy(easyConfig, function(err, data) {
-    var certificate = data.certificate;
-    var intermediate = data.intermediate;
-    var chain = data.chain;
-});
+const { certificate, intermediate, chain } = await client.easy(easyConfig);
 ```
 
 
@@ -100,17 +96,14 @@ var csrConfig = {
     emailAddress: 'test@email.address'
 };
 
-acme.openssl.createCsr(csrConfig, function(err, result) {
-    var csr = result.csr;
-    var key = result.key;
-});
+const { csr, key } = await acme.openssl.createCsr(csrConfig);
 ```
 
 
 #### Creating a 4096 bit private key
 
 ```js
-acme.openssl.createPrivateKey(4096, function(err, key) { });
+const key = await acme.openssl.createPrivateKey(4096);
 ```
 
 
@@ -129,7 +122,7 @@ var data = {
     contact: ['mailto: test@email.address']
 };
 
-client.registerAccount(data, function(err, account) { });
+const account = await client.registerAccount(data);
 ```
 
 
@@ -143,9 +136,8 @@ var data = {
     }
 };
 
-client.registerDomain(data, function(err, domain) {
-    var challenges = domain.challenges;
-});
+const domain = await client.registerDomain(data);
+const challenges = domain.challenges;
 ```
 
 
