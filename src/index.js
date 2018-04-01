@@ -2,7 +2,7 @@
  * acme-client
  */
 
-exports.Client = require('./lib/client');
+exports.Client = require('./client');
 
 
 /*
@@ -21,4 +21,4 @@ exports.directory = {
  * OpenSSL helper
  */
 
-exports.openssl = require('./lib/openssl');
+exports.openssl = require('./openssl');

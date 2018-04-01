@@ -3,7 +3,7 @@
  */
 
 const assert = require('chai').assert;
-const acme = require('./../');
+const acme = require('./../src');
 
 
 describe('client', () => {
