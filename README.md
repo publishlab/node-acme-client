@@ -4,25 +4,29 @@
 *A simple and unopinionated ACME client.*
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
-If you are looking for an all-in-one solution with features like
 
-* Storage of keys, certificates and metadata
-* Automatic renewal of certificates
-* Built-in challenge response and web-server configuration
+ACME specification: [https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md](https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md)
 
-...this library is not for you.
-
-For more information on how the Boulder/Let's Encrypt API diverges from the ACME specification see:
+Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
 [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
+
+
+### ACME compatibility
+
+| acme-client   | API       | Style     |
+| ------------- | --------- | --------- |
+| v2.x          | ACMEv2    | Promise   |
+| v1.x          | ACMEv1    | callback  |
 
 
 
 ## Installation
 
-`acme-client` requires OpenSSL to be installed.
+`acme-client` requires OpenSSL to be installed and available in `$PATH`.
 
 ```bash
 $ npm install acme-client
+$ openssl version
 ```
 
 
@@ -30,19 +34,18 @@ $ npm install acme-client
 ## Usage
 
 ```js
-var acme = require('acme-client');
+const acme = require('acme-client');
 
-var accountPrivateKey = '<PEM encoded private key>';
+const accountPrivateKey = '<PEM encoded private key>';
 
-var client = new acme.Client({
-    directoryUri: acme.directory.letsencrypt.staging,
-    accountKey: accountPrivateKey,
-    acceptTermsOfService: true
+const client = new acme.Client({
+    directoryUrl: acme.directory.letsencrypt.staging,
+    accountKey: accountPrivateKey
 });
 ```
 
 
-#### Directory URIs
+### Directory URLs
 
 ```js
 acme.directory.letsencrypt.staging;
@@ -51,27 +54,28 @@ acme.directory.letsencrypt.production;
 
 
 
-## Easy mode
+## Auto mode
 
-For convenience an `easy` method is included in the client that takes a single config object.
+For convenience an `auto()` method is included in the client that takes a single config object.
 This method will handle the entire process of getting a certificate for one or multiple domains.
 
-Documentation at [docs/client.md#AcmeClient+easy](docs/client.md#AcmeClient+easy).
+A full example can be found at [examples/auto.js](examples/auto.js).
 
-A full example can be found at [examples/easy.js](examples/easy.js).
+__Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)__
 
 
-#### Example
+### Example
 
 ```js
-var easyConfig = {
+const autoOpts = {
     csr: '<PEM encoded CSR>',
     email: 'test@example.com',
-    challengeCreateFn: function(keyAuthorization, challenge, domain, callback) { },
-    challengeRemoveFn: function(challenge, domain, callback) { }
-};
+    termsOfServiceAgreed: true,
+    challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
+    challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
+}
 
-const { certificate, intermediate, chain } = await client.easy(easyConfig);
+const certificate = await client.auto(autoOpts);
 ```
 
 
@@ -80,30 +84,18 @@ const { certificate, intermediate, chain } = await client.easy(easyConfig);
 
 Some OpenSSL utility methods are included for creating keys and Certificate Signing Requests, exposed through `acme.openssl`.
 
-Documentation at [docs/openssl.md](docs/openssl.md).
+__Documentation: [docs/openssl.md](docs/openssl.md)__
 
 
-#### Creating a Certificate Signing Request.
-
-```js
-var csrConfig = {
-    commonName: 'localhost',
-    country: 'GB',
-    state: 'Test State or Province',
-    locality: 'Test Locality',
-    organization: 'Organization Name',
-    organizationUnit: 'Organizational Unit Name',
-    emailAddress: 'test@email.address'
-};
-
-const { csr, key } = await acme.openssl.createCsr(csrConfig);
-```
-
-
-#### Creating a 4096 bit private key
+### Example
 
 ```js
-const key = await acme.openssl.createPrivateKey(4096);
+const privateKey = await acme.openssl.createPrivateKey();
+
+const [certificateKey, certificateCsr] = await acme.openssl.createCsr({
+    commonName: '*.example.com',
+    altNames: ['example.com']
+})
 ```
 
 
@@ -112,32 +104,25 @@ const key = await acme.openssl.createPrivateKey(4096);
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
 
-Documentation at [docs/client.md](docs/client.md).
+A full example can be found at [examples/api.js](examples/api.js).
+
+__Documentation: [docs/client.md](docs/client.md)__
 
 
-#### Registering an account
-
-```js
-var data = {
-    contact: ['mailto: test@email.address']
-};
-
-const account = await client.registerAccount(data);
-```
-
-
-#### Registering a domain for authorization
+### Example
 
 ```js
-var data = {
-    identifier: {
-        type: 'dns',
-        value: 'example.net'
-    }
-};
+const account = await client.createAccount({
+    termsOfServiceAgreed: true,
+    contact: ['mailto:test@example.com']
+});
 
-const domain = await client.registerDomain(data);
-const challenges = domain.challenges;
+const order = await client.createOrder({
+    identifiers: [
+        { type: 'dns', value: 'example.com' },
+        { type: 'dns', value: '*.example.com' }
+    ]
+});
 ```
 
 
@@ -147,7 +132,7 @@ const challenges = domain.challenges;
 `acme-client` uses [debug](https://www.npmjs.com/package/debug) for debugging which can be enabled by running
 
 ```bash
-DEBUG=acme-client node file.js
+DEBUG=acme-client node index.js
 ```
 
 

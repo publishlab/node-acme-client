@@ -1,3 +1,12 @@
+## v2.0.0
+
+* `breaking` ACMEv2
+* `breaking` API changes
+* `breaking` Rewrite to ES6
+* `breaking` Promises instead of callbacks
+
+
+
 ## v1.0.0 (2017-10-20)
 
 * API stable
