@@ -1,4 +1,4 @@
-## v2.0.0
+## v2.0.0 (2018-04-02)
 
 * `breaking` ACMEv2
 * `breaking` API changes
