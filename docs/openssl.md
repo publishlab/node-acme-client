@@ -1,42 +1,42 @@
 ## Functions
 
 <dl>
-<dt><a href="#createPrivateKey">createPrivateKey([size])</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#createPrivateKey">createPrivateKey([size])</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Generate a private RSA key</p>
 </dd>
-<dt><a href="#createPublicKey">createPublicKey(key)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#createPublicKey">createPublicKey(key)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Generate a public RSA key</p>
 </dd>
-<dt><a href="#getModulus">getModulus(key)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#getModulus">getModulus(key)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Get modulus</p>
 </dd>
-<dt><a href="#getPublicExponent">getPublicExponent(key)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#getPublicExponent">getPublicExponent(key)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Get public exponent</p>
 </dd>
-<dt><a href="#pem2der">pem2der(key)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#pem2der">pem2der(key)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Convert PEM to DER encoding</p>
 </dd>
-<dt><a href="#der2pem">der2pem(action, key, [pubIn])</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#der2pem">der2pem(action, key, [pubIn])</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Convert DER to PEM encoding</p>
 </dd>
-<dt><a href="#readCsrDomains">readCsrDomains(csr)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#readCsrDomains">readCsrDomains(csr)</a> ⇒ <code>Promise.&lt;object&gt;</code></dt>
 <dd><p>Read domains from a Certificate Signing Request</p>
 </dd>
-<dt><a href="#readCertificateInfo">readCertificateInfo(cert)</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#readCertificateInfo">readCertificateInfo(cert)</a> ⇒ <code>Promise.&lt;object&gt;</code></dt>
 <dd><p>Read information from a certificate</p>
 </dd>
-<dt><a href="#createCsr">createCsr(data, [key])</a> ⇒ <code>Promise</code></dt>
+<dt><a href="#createCsr">createCsr(data, [key])</a> ⇒ <code>Promise.&lt;Array.&lt;buffer&gt;&gt;</code></dt>
 <dd><p>Create a Certificate Signing Request</p>
 </dd>
 </dl>
 
 <a name="createPrivateKey"></a>
 
-## createPrivateKey([size]) ⇒ <code>Promise</code>
+## createPrivateKey([size]) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Generate a private RSA key
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - key  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - Private RSA key  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -44,11 +44,11 @@ Generate a private RSA key
 
 <a name="createPublicKey"></a>
 
-## createPublicKey(key) ⇒ <code>Promise</code>
+## createPublicKey(key) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Generate a public RSA key
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - key  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - Public RSA key  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -56,11 +56,11 @@ Generate a public RSA key
 
 <a name="getModulus"></a>
 
-## getModulus(key) ⇒ <code>Promise</code>
+## getModulus(key) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Get modulus
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - modulus  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - Modulus  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -68,11 +68,11 @@ Get modulus
 
 <a name="getPublicExponent"></a>
 
-## getPublicExponent(key) ⇒ <code>Promise</code>
+## getPublicExponent(key) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Get public exponent
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - exponent  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - Exponent  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -80,11 +80,11 @@ Get public exponent
 
 <a name="pem2der"></a>
 
-## pem2der(key) ⇒ <code>Promise</code>
+## pem2der(key) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Convert PEM to DER encoding
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - der  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - DER  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -92,11 +92,11 @@ Convert PEM to DER encoding
 
 <a name="der2pem"></a>
 
-## der2pem(action, key, [pubIn]) ⇒ <code>Promise</code>
+## der2pem(action, key, [pubIn]) ⇒ <code>Promise.&lt;buffer&gt;</code>
 Convert DER to PEM encoding
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - pem  
+**Returns**: <code>Promise.&lt;buffer&gt;</code> - PEM  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -106,11 +106,11 @@ Convert DER to PEM encoding
 
 <a name="readCsrDomains"></a>
 
-## readCsrDomains(csr) ⇒ <code>Promise</code>
+## readCsrDomains(csr) ⇒ <code>Promise.&lt;object&gt;</code>
 Read domains from a Certificate Signing Request
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - {commonName, altNames}  
+**Returns**: <code>Promise.&lt;object&gt;</code> - {commonName, altNames}  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -118,11 +118,11 @@ Read domains from a Certificate Signing Request
 
 <a name="readCertificateInfo"></a>
 
-## readCertificateInfo(cert) ⇒ <code>Promise</code>
+## readCertificateInfo(cert) ⇒ <code>Promise.&lt;object&gt;</code>
 Read information from a certificate
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - info  
+**Returns**: <code>Promise.&lt;object&gt;</code> - Certificate info  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -130,11 +130,11 @@ Read information from a certificate
 
 <a name="createCsr"></a>
 
-## createCsr(data, [key]) ⇒ <code>Promise</code>
+## createCsr(data, [key]) ⇒ <code>Promise.&lt;Array.&lt;buffer&gt;&gt;</code>
 Create a Certificate Signing Request
 
 **Kind**: global function  
-**Returns**: <code>Promise</code> - {key, csr}  
+**Returns**: <code>Promise.&lt;Array.&lt;buffer&gt;&gt;</code> - [privateKey, certificateSigningRequest]  
 
 | Param | Type | Description |
 | --- | --- | --- |
