@@ -89,7 +89,7 @@ function isPublic(key) {
  *
  * @function
  * @param {number} [size] Size of the key, default: `2048`
- * @returns {Promise} key
+ * @returns {Promise<buffer>} Private RSA key
  */
 
 function createPrivateKey(size = 2048) {
@@ -106,7 +106,7 @@ exports.createPrivateKey = createPrivateKey;
  * Generate a public RSA key
  *
  * @param {buffer|string} key PEM encoded private key
- * @returns {Promise} key
+ * @returns {Promise<buffer>} Public RSA key
  */
 
 exports.createPublicKey = function(key) {
@@ -125,7 +125,7 @@ exports.createPublicKey = function(key) {
  * Get modulus
  *
  * @param {buffer|string} key Private key, certificate or CSR
- * @returns {Promise} modulus
+ * @returns {Promise<buffer>} Modulus
  */
 
 exports.getModulus = async function(key) {
@@ -155,7 +155,7 @@ exports.getModulus = async function(key) {
  * Get public exponent
  *
  * @param {buffer|string} key Private key, certificate or CSR
- * @returns {Promise} exponent
+ * @returns {Promise<buffer>} Exponent
  */
 
 exports.getPublicExponent = async function(key) {
@@ -186,7 +186,7 @@ exports.getPublicExponent = async function(key) {
  * Convert PEM to DER encoding
  *
  * @param {buffer|string} key PEM encoded private key, certificate or CSR
- * @returns {Promise} der
+ * @returns {Promise<buffer>} DER
  */
 
 exports.pem2der = function(key) {
@@ -211,7 +211,7 @@ exports.pem2der = function(key) {
  * @param {string} action Output action (x509, rsa, req)
  * @param {buffer|string} key DER encoded private key, certificate or CSR
  * @param {boolean} [pubIn] Result should be a public key, default: `false`
- * @returns {Promise} pem
+ * @returns {Promise<buffer>} PEM
  */
 
 exports.der2pem = function(action, key, pubIn = false) {
@@ -233,7 +233,7 @@ exports.der2pem = function(action, key, pubIn = false) {
  * Read domains from a Certificate Signing Request
  *
  * @param {buffer|string} csr PEM encoded Certificate Signing Request
- * @returns {Promise} {commonName, altNames}
+ * @returns {Promise<object>} {commonName, altNames}
  */
 
 exports.readCsrDomains = async function(csr) {
@@ -252,7 +252,7 @@ exports.readCsrDomains = async function(csr) {
  * Read information from a certificate
  *
  * @param {buffer|string} cert PEM encoded certificate
- * @returns {Promise} info
+ * @returns {Promise<object>} Certificate info
  */
 
 exports.readCertificateInfo = async function(cert) {
@@ -292,7 +292,7 @@ exports.readCertificateInfo = async function(cert) {
  * @param {object} opts CSR options
  * @param {string} csrConfig CSR configuration file
  * @param {buffer} key CSR private key
- * @returns {Promise} csr
+ * @returns {Promise<buffer>} CSR
  */
 
 async function generateCsr(opts, csrConfig, key) {
@@ -364,7 +364,7 @@ function createCsrSubject(opts) {
  * @param {string} [data.organizationUnit]
  * @param {string} [data.emailAddress]
  * @param {buffer|string} [key] CSR private key
- * @returns {Promise} {key, csr}
+ * @returns {Promise<buffer[]>} [privateKey, certificateSigningRequest]
  */
 
 exports.createCsr = async function(data, key = null) {
@@ -411,8 +411,5 @@ exports.createCsr = async function(data, key = null) {
     /* Create CSR */
     const csr = await generateCsr(opts, csrConfig, key);
 
-    return {
-        key,
-        csr
-    };
+    return [key, csr];
 };

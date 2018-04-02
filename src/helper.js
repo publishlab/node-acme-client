@@ -41,10 +41,10 @@ async function retryPromise(fn, attempts, backoff) {
  * Retry promise
  *
  * @param {function} fn Function returning promise that should be retried
- * @param {object} backoffOpts Backoff options
- * @param {number} backoffOpts.attempts Maximum number of attempts
- * @param {number} backoffOpts.min Minimum attempt delay in milliseconds
- * @param {number} backoffOpts.max Maximum attempt delay in milliseconds
+ * @param {object} [backoffOpts] Backoff options
+ * @param {number} [backoffOpts.attempts] Maximum number of attempts, default: `5`
+ * @param {number} [backoffOpts.min] Minimum attempt delay in milliseconds, default: `5000`
+ * @param {number} [backoffOpts.max] Maximum attempt delay in milliseconds, default: `30000`
  * @returns {Promise}
  */
 
@@ -109,20 +109,23 @@ function linkParser(headers) {
 
 
 /**
- * Check if ACME Terms of Service needs to be accepted
+ * Find and format error in response object
  *
- * @param {object} payload HTTP request payload
- * @param {object} resp HTTP response object
- * @return {boolean} True if ToS needs to be accepted
+ * @param {object} resp HTTP response
+ * @returns {string} Error message
  */
 
-function tosRequired(payload, resp) {
-    const links = linkParser(resp.headers);
-    const hasTosLink = (links && links['terms-of-service']);
-    const hasPayloadAgreement = (Object.keys(payload).indexOf('agreement') !== -1);
-    const hasBodyAgreement = (typeof resp.body.agreement !== 'undefined');
+function formatResponseError(resp) {
+    let result;
 
-    return hasTosLink && !hasPayloadAgreement && !hasBodyAgreement;
+    if (resp.body.error) {
+        result = resp.body.error.detail || resp.body.error;
+    }
+    else {
+        result = resp.body.detail || JSON.stringify(resp.body);
+    }
+
+    return result.replace(/\n/g, '');
 }
 
 
@@ -132,5 +135,5 @@ module.exports = {
     b64escape,
     b64encode,
     linkParser,
-    tosRequired
+    formatResponseError
 };

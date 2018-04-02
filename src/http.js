@@ -15,13 +15,13 @@ const pkg = require('./../package.json');
  * ACME HTTP client
  *
  * @class
- * @param {string} directoryUri Directory URL to the ACME provider
+ * @param {string} directoryUrl Directory URL to the ACME provider
  * @param {buffer} accountKey PEM encoded private account key
  */
 
 class HttpClient {
-    constructor(directoryUri, accountKey) {
-        this.directoryUri = directoryUri;
+    constructor(directoryUrl, accountKey) {
+        this.directoryUrl = directoryUrl;
         this.accountKey = accountKey;
 
         this.directory = null;
@@ -32,14 +32,14 @@ class HttpClient {
     /**
      * HTTP request
      *
-     * @param {string} uri HTTP URI
+     * @param {string} url HTTP URL
      * @param {string} method HTTP method
      * @param {object} [opts] Request options
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
-    async request(uri, method, opts = {}) {
-        opts.uri = uri;
+    async request(url, method, opts = {}) {
+        opts.url = url;
         opts.method = method;
 
         opts.simple = false;
@@ -53,12 +53,13 @@ class HttpClient {
             opts.headers = {};
         }
 
-        opts.headers['User-Agent'] = `${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
+        opts.headers['Content-Type'] = 'application/jose+json';
+        opts.headers['User-Agent'] = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
 
-        debug(`HTTP request: ${method} ${uri}`);
+        debug(`HTTP request: ${method} ${url}`);
         const resp = await request(opts);
 
-        debug(`RESP ${resp.statusCode} ${method} ${uri}`);
+        debug(`RESP ${resp.statusCode} ${method} ${url}`);
         return resp;
     }
 
@@ -73,7 +74,7 @@ class HttpClient {
 
     async getDirectory() {
         if (!this.directory) {
-            const resp = await this.request(this.directoryUri, 'GET');
+            const resp = await this.request(this.directoryUrl, 'GET');
             this.directory = resp.body;
         }
     }
@@ -82,7 +83,7 @@ class HttpClient {
     /**
      * Get JSON Web Key
      *
-     * @returns {Promise} {e, kty, n}
+     * @returns {Promise<object>} {e, kty, n}
      */
 
     async getJwk() {
@@ -108,11 +109,12 @@ class HttpClient {
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#getting-a-nonce
      *
-     * @returns {Promise} nonce
+     * @returns {Promise<string>} nonce
      */
 
     async getNonce() {
-        const resp = await this.request(this.directoryUri, 'HEAD');
+        const url = await this.getResourceUrl('newNonce');
+        const resp = await this.request(url, 'HEAD');
 
         if (!resp.headers['replay-nonce']) {
             throw new Error('Failed to get nonce from ACME provider');
@@ -123,17 +125,17 @@ class HttpClient {
 
 
     /**
-     * Get URI for a directory resource
+     * Get URL for a directory resource
      *
      * @param {string} resource API resource name
-     * @returns {Promise} uri
+     * @returns {Promise<string>} URL
      */
 
-    async getResourceUri(resource) {
+    async getResourceUrl(resource) {
         await this.getDirectory();
 
         if (!this.directory[resource]) {
-            throw new Error(`Could not resolve URI for API resource: "${resource}"`);
+            throw new Error(`Could not resolve URL for API resource: "${resource}"`);
         }
 
         return this.directory[resource];
@@ -143,31 +145,37 @@ class HttpClient {
     /**
      * Create signed HTTP request body
      *
+     * @param {string} url Request URL
      * @param {object} payload Request payload
      * @param {string} [nonce] Request nonce
-     * @returns {Promise} body
+     * @returns {Promise<object>} Signed HTTP request body
      */
 
-    async createSignedBody(payload, nonce = null) {
-        const protectedOpts = {};
-
-        /* Request header */
-        const result = {
-            header: {
-                alg: 'RS256',
-                jwk: await this.getJwk()
-            }
+    async createSignedBody(url, payload, nonce = null, kid = null) {
+        /* JWS header */
+        const header = {
+            url,
+            alg: 'RS256'
         };
 
         if (nonce) {
             debug(`Using nonce: ${nonce}`);
-            protectedOpts.nonce = nonce;
+            header.nonce = nonce;
+        }
+
+        /* KID or JWK */
+        if (kid) {
+            header.kid = kid;
+        }
+        else {
+            header.jwk = await this.getJwk();
         }
 
         /* Request payload */
-        const protectedObj = Object.assign({}, result.header, protectedOpts);
-        result.payload = helper.b64encode(JSON.stringify(payload));
-        result.protected = helper.b64encode(JSON.stringify(protectedObj));
+        const result = {
+            payload: helper.b64encode(JSON.stringify(payload)),
+            protected: helper.b64encode(JSON.stringify(header))
+        };
 
         /* Signature */
         const signer = crypto.createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
@@ -182,16 +190,17 @@ class HttpClient {
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#request-authentication
      *
-     * @param {string} uri HTTP URI
+     * @param {string} url Request URL
      * @param {string} method HTTP method
      * @param {object} payload Request payload
-     * @returns {Promise} Response
+     * @param {string} [kid] KID
+     * @returns {Promise<object>} HTTP response
      */
 
-    async signedRequest(uri, method, payload) {
+    async signedRequest(url, method, payload, kid = null) {
         const nonce = await this.getNonce();
-        const body = await this.createSignedBody(payload, nonce);
-        return this.request(uri, method, { body });
+        const body = await this.createSignedBody(url, payload, nonce, kid);
+        return this.request(url, method, { body });
     }
 }
 

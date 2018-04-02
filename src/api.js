@@ -1,3 +1,10 @@
+/*
+ * ACME API client
+ */
+
+const helper = require('./helper');
+
+
 /**
  * AcmeApi
  *
@@ -6,8 +13,25 @@
  */
 
 class AcmeApi {
-    constructor(httpClient) {
+    constructor(httpClient, accountUrl = null) {
         this.http = httpClient;
+        this.accountUrl = accountUrl;
+    }
+
+
+    /**
+     * Get account URL
+     *
+     * @private
+     * @returns {string} Account URL
+     */
+
+    getAccountUrl() {
+        if (!this.accountUrl) {
+            throw new Error('No account URL found, register account first');
+        }
+
+        return this.accountUrl;
     }
 
 
@@ -15,22 +39,32 @@ class AcmeApi {
      * ACME API HTTP request
      *
      * @private
-     * @param {object} data Request payload
+     * @param {object} payload Request payload
+     * @param {string} resource Request resource
      * @param {string} method HTTP method
-     * @param {array} [validStatusCodes] Array of valid HTTP response status codes
-     * @param {string} [uri] HTTP request URI
-     * @returns {Promise} Response
+     * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
+     * @param {boolean} [jwsKid] Use KID in JWS header, default: `true`
+     * @param {string} [url] HTTP request url
+     * @returns {Promise<object>} HTTP response
      */
 
-    async apiRequest(data, method, validStatusCodes = [], uri = null) {
-        if (!uri) {
-            uri = await this.http.getResourceUri(data.resource);
+    async apiRequest(payload, resource, method, validStatusCodes = [], jwsKid = true, url = null) {
+        if (!url) {
+            url = await this.http.getResourceUrl(resource);
         }
 
-        const resp = await this.http.signedRequest(uri, method, data);
+        let resp;
+        const kid = jwsKid ? this.getAccountUrl() : null;
+
+        if (method.toLowerCase() === 'get') {
+            resp = await this.http.request(url, method);
+        }
+        else {
+            resp = await this.http.signedRequest(url, method, payload, kid);
+        }
 
         if (validStatusCodes.length && (validStatusCodes.indexOf(resp.statusCode) === -1)) {
-            throw new Error(resp.body.error || resp.body.detail || resp.body);
+            throw new Error(helper.formatResponseError(resp));
         }
 
         return resp;
@@ -38,124 +72,168 @@ class AcmeApi {
 
 
     /**
-     * new-reg
+     * HTTP GET helper
+     *
+     * @param {string} url HTTP request URL
+     * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
+     * @returns {Promise<object>} HTTP response
+     */
+
+    get(url, validStatusCodes = []) {
+        return this.apiRequest(null, null, 'GET', validStatusCodes, false, url);
+    }
+
+
+    /**
+     * Get Terms of Service URL
+     *
+     * @returns {Promise<string>} ToS URL
+     */
+
+    async getTermsOfServiceUrl() {
+        const meta = await this.http.getResourceUrl('meta');
+
+        if (!meta.termsOfService) {
+            throw new Error('Unable to locate Terms of Service URL');
+        }
+
+        return meta.termsOfService;
+    }
+
+
+    /**
+     * Create new account
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
      *
      * @param {object} data Request payload
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
-    newReg(data) {
-        data.resource = 'new-reg';
-        return this.apiRequest(data, 'POST', [201, 409]);
+    async createAccount(data) {
+        const resp = await this.apiRequest(data, 'newAccount', 'POST', [200, 201], false);
+
+        /* Set account URL */
+        if (resp.headers.location) {
+            this.accountUrl = resp.headers.location;
+        }
+
+        return resp;
     }
 
 
     /**
-     * reg
+     * Update account
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-update
      *
-     * @param {string} uri Registration URI
      * @param {object} data Request payload
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
-    reg(uri, data) {
-        data.resource = 'reg';
-        return this.apiRequest(data, 'POST', [200, 202], uri);
+    updateAccount(data) {
+        return this.apiRequest(data, null, 'POST', [200, 202], true, this.getAccountUrl());
     }
 
 
     /**
-     * key-change
+     * Update account key
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-key-roll-over
      *
      * @param {object} data Request payload
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
-    keyChange(data) {
-        data.resource = 'key-change';
-        return this.apiRequest(data, 'POST', [200]);
+    updateAccountKey(data) {
+        return this.apiRequest(data, 'keyChange', 'POST', [200]);
     }
 
 
     /**
-     * new-authz
-     *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#pre-authorization
-     *
-     * @param {object} data Request payload
-     * @returns {Promise} Response
-     */
-
-    newAuthz(data) {
-        data.resource = 'new-authz';
-        return this.apiRequest(data, 'POST', [201]);
-    }
-
-
-    /**
-     * authz
-     *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
-     *
-     * @param {object} data Request payload
-     * @returns {Promise} Response
-     */
-
-    authz(data) {
-        data.resource = 'authz';
-        return this.apiRequest(data, 'POST', [200]);
-    }
-
-
-    /**
-     * new-cert
+     * Create new order
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
      *
      * @param {object} data Request payload
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
-    newCert(data) {
-        data.resource = 'new-cert';
-        return this.apiRequest(data, 'POST', [201]);
+    createOrder(data) {
+        return this.apiRequest(data, 'newOrder', 'POST', [201]);
     }
 
 
     /**
-     * revoke-cert
+     * Finalize order
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     *
+     * @param {string} url Finalization URL
+     * @param {object} data Request payload
+     * @returns {Promise<object>} HTTP response
+     */
+
+    finalizeOrder(url, data) {
+        return this.apiRequest(data, null, 'POST', [200], true, url);
+    }
+
+
+    /**
+     * Get identifier authorization
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
+     *
+     * @param {string} url Authorization URL
+     * @returns {Promise<object>} HTTP response
+     */
+
+    getAuthorization(url) {
+        return this.get(url, [200]);
+    }
+
+
+    /**
+     * Update identifier authorization
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactivating-an-authorization
+     *
+     * @param {string} url Authorization URL
+     * @param {object} data Request payload
+     * @returns {Promise<object>} HTTP response
+     */
+
+    updateAuthorization(url, data) {
+        return this.apiRequest(data, null, 'POST', [200], true, url);
+    }
+
+
+    /**
+     * Complete challenge
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+     *
+     * @param {string} url Challenge URL
+     * @param {object} data Request payload
+     * @returns {Promise<object>} HTTP response
+     */
+
+    completeChallenge(url, data) {
+        return this.apiRequest(data, null, 'POST', [200], true, url);
+    }
+
+
+    /**
+     * Revoke certificate
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#certificate-revocation
      *
      * @param {object} data Request payload
-     * @returns {Promise} Response
+     * @returns {Promise<object>} HTTP response
      */
 
     revokeCert(data) {
-        data.resource = 'revoke-cert';
-        return this.apiRequest(data, 'POST', [200]);
-    }
-
-
-    /**
-     * challenge
-     *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
-     *
-     * @param {string} uri Challenge URI
-     * @param {object} data Request payload
-     * @returns {Promise} Response
-     */
-
-    challenge(uri, data) {
-        data.resource = 'challenge';
-        return this.apiRequest(data, 'POST', [202], uri);
+        return this.apiRequest(data, 'revokeCert', 'POST', [200]);
     }
 }
 

@@ -6,13 +6,13 @@ exports.Client = require('./client');
 
 
 /*
- * Directory URIs
+ * Directory URLs
  */
 
 exports.directory = {
     letsencrypt: {
-        staging: 'https://acme-staging.api.letsencrypt.org/directory',
-        production: 'https://acme-v01.api.letsencrypt.org/directory'
+        staging: 'https://acme-staging-v02.api.letsencrypt.org/directory',
+        production: 'https://acme-v02.api.letsencrypt.org/directory'
     }
 };
 

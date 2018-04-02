@@ -1,5 +1,5 @@
 /*
- * OpenSSL helper tests
+ * OpenSSL tests
  */
 
 const Promise = require('bluebird');
@@ -87,26 +87,26 @@ describe('openssl', () => {
      */
 
     it('should generate a CSR', async () => {
-        const result = await openssl.createCsr({
+        const [key, csr] = await openssl.createCsr({
             commonName: testCsrDomain
         });
 
-        assert.strictEqual(Buffer.isBuffer(result.key), true);
-        assert.strictEqual(Buffer.isBuffer(result.csr), true);
+        assert.strictEqual(Buffer.isBuffer(key), true);
+        assert.strictEqual(Buffer.isBuffer(csr), true);
 
-        testCsr = result.csr;
+        testCsr = csr;
     });
 
     it('should generate a SAN CSR', async () => {
-        const result = await openssl.createCsr({
+        const [key, csr] = await openssl.createCsr({
             commonName: testSanCsrDomains[0],
             altNames: testSanCsrDomains.slice(1, testSanCsrDomains.length)
         });
 
-        assert.strictEqual(Buffer.isBuffer(result.key), true);
-        assert.strictEqual(Buffer.isBuffer(result.csr), true);
+        assert.strictEqual(Buffer.isBuffer(key), true);
+        assert.strictEqual(Buffer.isBuffer(csr), true);
 
-        testSanCsr = result.csr;
+        testSanCsr = csr;
     });
 
     it('should resolve domains from CSR', async () => {

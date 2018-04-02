@@ -4,11 +4,13 @@
 
 const crypto = require('crypto');
 const debug = require('debug')('acme-client');
+const Promise = require('bluebird');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
 const openssl = require('./openssl');
+const verify = require('./verify');
 const helper = require('./helper');
-const easy = require('./easy');
+const auto = require('./auto');
 
 
 /*
@@ -16,9 +18,8 @@ const easy = require('./easy');
  */
 
 const defaultOpts = {
-    directoryUri: undefined,
+    directoryUrl: undefined,
     accountKey: undefined,
-    acceptTermsOfService: false,
     backoffAttempts: 5,
     backoffMin: 5000,
     backoffMax: 30000
@@ -30,9 +31,8 @@ const defaultOpts = {
  *
  * @class
  * @param {object} opts ACME client options
- * @param {string} opts.directoryUri
+ * @param {string} opts.directoryUrl
  * @param {buffer|string} opts.accountKey
- * @param {boolean} [opts.acceptTermsOfService] default: `false`
  * @param {number} [opts.backoffMin] default: `5000`
  * @param {number} [opts.backoffMax] default: `30000`
  * @param {number} [opts.backoffAttempts] default: `5`
@@ -44,7 +44,6 @@ class AcmeClient {
             opts.accountKey = Buffer.from(opts.accountKey);
         }
 
-        this.accountUri = null;
         this.opts = Object.assign({}, defaultOpts, opts);
 
         this.backoffOpts = {
@@ -53,65 +52,38 @@ class AcmeClient {
             max: this.opts.backoffMax
         };
 
-        this.http = new HttpClient(this.opts.directoryUri, this.opts.accountKey);
+        this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey);
         this.api = new AcmeApi(this.http);
     }
 
 
     /**
-     * Terms of Service handler
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#changes-of-terms-of-service
+     * Get Terms of Service URL
      *
-     * @private
-     * @param {object} resp HTTP response
-     * @param {object} body HTTP body
-     * @returns {Promise}
+     * @returns {Promise<string>} ToS URL
      */
 
-    async tosHandler(resp) {
-        debug('Account needs to accept Terms of Service');
-
-        if (this.opts.acceptTermsOfService !== true) {
-            debug('this.opts.acceptTermsOfService is not true, returning');
-            return null;
-        }
-
-        const links = helper.linkParser(resp.headers);
-        const tosLink = links['terms-of-service'];
-
-        return this.updateAccount({
-            agreement: tosLink
-        });
+    getTermsOfServiceUrl() {
+        return this.api.getTermsOfServiceUrl();
     }
 
 
     /**
-     * Register new account
+     * Create a new account
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
      *
      * @param {object} [data] Request data
-     * @returns {Promise} account
+     * @returns {Promise<object>} Account
      */
 
-    async registerAccount(data = {}) {
-        const resp = await this.api.newReg(data);
+    async createAccount(data = {}) {
+        const resp = await this.api.createAccount(data);
 
-        /* Set registration URI */
-        if (resp.headers.location) {
-            debug('Found account URI from headers');
-            this.accountUri = resp.headers.location;
-        }
-
-        /* HTTP 409: Account exists */
-        if (resp.statusCode === 409) {
-            debug('Account already exists (HTTP 409), returning updateAccount()');
+        /* HTTP 200: Account exists */
+        if (resp.statusCode === 200) {
+            debug('Account already exists (HTTP 200), returning updateAccount()');
             return this.updateAccount(data);
-        }
-
-        /* Trigger ToS handler */
-        if (helper.tosRequired(data, resp)) {
-            return this.tosHandler(resp);
         }
 
         return resp.body;
@@ -124,55 +96,54 @@ class AcmeClient {
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-update
      *
      * @param {object} [data] Request data
-     * @returns {Promise} account
+     * @returns {Promise<object>} Account
      */
 
     async updateAccount(data = {}) {
-        if (!this.accountUri) {
-            debug('No account URI found, returning registerAccount()');
-            return this.registerAccount(data);
+        try {
+            this.api.getAccountUrl();
+        }
+        catch (e) {
+            debug('No account URL found, returning createAccount()');
+            return this.createAccount(data);
         }
 
-        /* Make request */
-        const resp = await this.api.reg(this.accountUri, data);
-
-        /* Trigger ToS handler */
-        if (helper.tosRequired(data, resp)) {
-            return this.tosHandler(resp);
-        }
-
+        const resp = await this.api.updateAccount(data);
         return resp.body;
     }
 
 
     /**
-     * Change account private key
+     * Update account private key
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-key-roll-over
      *
      * @param {buffer|string} newAccountKey New PEM encoded private key
      * @param {object} [data] Additional request data
-     * @returns {Promise} account
+     * @returns {Promise<object>} Account
      */
 
-    async changeAccountKey(newAccountKey, data = {}) {
+    async updateAccountKey(newAccountKey, data = {}) {
         if (!Buffer.isBuffer(newAccountKey)) {
             newAccountKey = Buffer.from(newAccountKey);
         }
 
+        const accountUrl = this.api.getAccountUrl();
+
         /* Create new HTTP and API clients using new key */
-        const newHttpClient = new HttpClient(this.opts.directoryUri, newAccountKey);
-        const newApiClient = new AcmeApi(newHttpClient);
+        const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey);
+        const newApiClient = new AcmeApi(newHttpClient, accountUrl);
 
         /* Get new JWK */
-        data.account = this.accountUri;
+        data.account = accountUrl;
         data.newKey = await newHttpClient.getJwk();
 
         /* Get signed request body from new client */
-        const body = await newHttpClient.createSignedBody(data);
+        const url = await newHttpClient.getResourceUrl('keyChange');
+        const body = await newHttpClient.createSignedBody(url, data);
 
         /* Change key using old client */
-        const resp = await this.api.keyChange(body);
+        const resp = await this.api.updateAccountKey(body);
 
         /* Replace existing HTTP and API client */
         this.http = newHttpClient;
@@ -183,16 +154,93 @@ class AcmeClient {
 
 
     /**
-     * Register a new domain
+     * Create a new order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#pre-authorization
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
      *
      * @param {object} data Request data
-     * @returns {Promise} domain
+     * @returns {Promise<object>} Order
      */
 
-    async registerDomain(data) {
-        const resp = await this.api.newAuthz(data);
+    async createOrder(data) {
+        const resp = await this.api.createOrder(data);
+
+        if (!resp.headers.location) {
+            throw new Error('Creating a new order did not return an order link');
+        }
+
+        /* Add URL to response */
+        resp.body.url = resp.headers.location;
+        return resp.body;
+    }
+
+
+    /**
+     * Finalize order
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     *
+     * @param {object} order Order object
+     * @param {buffer|string} csr PEM encoded Certificate Signing Request
+     * @returns {Promise<object>} Order
+     */
+
+    async finalizeOrder(order, csr) {
+        if (!order.finalize) {
+            throw new Error('Unable to finalize order, URL not found');
+        }
+
+        if (!Buffer.isBuffer(csr)) {
+            csr = Buffer.from(csr);
+        }
+
+        const der = await openssl.pem2der(csr);
+        const data = { csr: helper.b64encode(der) };
+
+        const resp = await this.api.finalizeOrder(order.finalize, data);
+        return resp.body;
+    }
+
+
+    /**
+     * Get identifier authorizations from order
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
+     *
+     * @param {object} order Order
+     * @returns {Promise<object[]>} Authorizations
+     */
+
+    getAuthorizations(order) {
+        return Promise.map((order.authorizations || []), async (url) => {
+            const resp = await this.api.getAuthorization(url);
+
+            /* Add URL to response */
+            resp.body.url = url;
+            return resp.body;
+        });
+    }
+
+
+    /**
+     * Deactivate identifier authorization
+     *
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactivating-an-authorization
+     *
+     * @param {object} authz Identifier authorization
+     * @returns {Promise<object>} Authorization
+     */
+
+    async deactivateAuthorization(authz) {
+        if (!authz.url) {
+            throw new Error('Unable to deactivate identifier authorization, URL not found');
+        }
+
+        const data = {
+            status: 'deactivated'
+        };
+
+        const resp = await this.api.updateAuthorization(authz.url, data);
         return resp.body;
     }
 
@@ -203,15 +251,54 @@ class AcmeClient {
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#key-authorizations
      *
      * @param {object} challenge Challenge object returned by API
-     * @returns {Promise} keyAuthorization
+     * @returns {Promise<string>} Key authorization
      */
 
     async getChallengeKeyAuthorization(challenge) {
         const jwk = await this.http.getJwk();
-        const shasum = crypto.createHash('sha256').update(JSON.stringify(jwk));
-        const thumbprint = helper.b64escape(shasum.digest('base64'));
+        const keysum = crypto.createHash('sha256').update(JSON.stringify(jwk));
+        const thumbprint = helper.b64escape(keysum.digest('base64'));
+        const result = `${challenge.token}.${thumbprint}`;
 
-        return `${challenge.token}.${thumbprint}`;
+        if (challenge.type === 'http-01') {
+            /* https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#http-challenge */
+            return result;
+        }
+        else if (challenge.type === 'dns-01') {
+            /* https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge */
+            const shasum = crypto.createHash('sha256').update(result);
+            return helper.b64escape(shasum.digest('base64'));
+        }
+
+        throw new Error(`Unable to produce key authorization, unknown challenge type: ${challenge.type}`);
+    }
+
+
+    /**
+     * Verify that ACME challenge is satisfied
+     *
+     * @param {object} authz Identifier authorization
+     * @param {object} challenge Authorization challenge
+     * @returns {Promise}
+     */
+
+    async verifyChallenge(authz, challenge) {
+        if (!authz.url || !challenge.url) {
+            throw new Error('Unable to verify ACME challenge, URL not found');
+        }
+
+        if (typeof verify[challenge.type] === 'undefined') {
+            throw new Error(`Unable to verify ACME challenge, unknown type: ${challenge.type}`);
+        }
+
+        const keyAuthorization = await this.getChallengeKeyAuthorization(challenge);
+
+        const verifyFn = async () => {
+            await verify[challenge.type](authz, challenge, keyAuthorization);
+        };
+
+        debug('Waiting for ACME challenge verification', this.backoffOpts);
+        return helper.retry(verifyFn, this.backoffOpts);
     }
 
 
@@ -221,7 +308,7 @@ class AcmeClient {
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
      *
      * @param {object} challenge Challenge object returned by API
-     * @returns {Promise} challenge
+     * @returns {Promise<object>} Challenge
      */
 
     async completeChallenge(challenge) {
@@ -229,152 +316,70 @@ class AcmeClient {
             keyAuthorization: await this.getChallengeKeyAuthorization(challenge)
         };
 
-        const resp = await this.api.challenge(challenge.uri, data);
+        const resp = await this.api.completeChallenge(challenge.url, data);
         return resp.body;
     }
 
 
     /**
-     * Verify that ACME challenge is satisfied on base URI
+     * Wait for ACME provider to verify status on a order, authorization or challenge
      *
-     * @param {string} baseUri Base URI
-     * @param {object} challenge Challenge object returned by API
-     * @returns {Promise}
+     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+     *
+     * @param {object} item An order, authorization or challenge object
+     * @returns {Promise<object>} Valid order, authorization or challenge
      */
 
-    async verifyChallengeBaseUri(baseUri, challenge) {
-        const challengeUri = `${baseUri}/.well-known/acme-challenge/${challenge.token}`;
-        const keyAuthorization = await this.getChallengeKeyAuthorization(challenge);
+    async waitForValidStatus(item) {
+        if (!item.url) {
+            throw new Error('Unable to verify status of item, URL not found');
+        }
 
-        const verifyFn = async () => {
-            const resp = await this.http.request(challengeUri, 'GET');
-
-            /* Validate response */
-            if (!resp.body || (resp.body !== keyAuthorization)) {
-                throw new Error(`Response on URI ${challengeUri} was invalid`);
-            }
-        };
-
-        debug('Verifying that challenge response is valid', this.backoffOpts);
-        return helper.retry(verifyFn, this.backoffOpts);
-    }
-
-
-    /**
-     * Wait for ACME provider to verify challenge status
-     *
-     * @param {object} challenge Challenge object returned by API
-     * @returns {Promise} challenge
-     */
-
-    async waitForChallengeValidStatus(challenge) {
         const verifyFn = async (abort) => {
-            const resp = await this.http.request(challenge.uri, 'GET');
-
-            /* Require HTTP 202 */
-            if (resp.statusCode !== 202) {
-                throw new Error(resp.body.error || resp.body.detail || resp.body);
-            }
+            const resp = await this.api.get(item.url, [200]);
 
             /* Verify status */
-            debug(`Challenge returned status: ${resp.body.status}`);
+            debug(`Item has status: ${resp.body.status}`);
 
-            if (resp.body.status === 'pending') {
-                throw new Error('Operation not completed');
-            }
-            else if (resp.body.status === 'invalid') {
+            if (resp.body.status === 'invalid') {
                 abort();
-                throw new Error(resp.body);
+                throw new Error(helper.formatResponseError(resp));
+            }
+            else if (resp.body.status === 'pending') {
+                throw new Error('Operation is pending');
             }
             else if (resp.body.status === 'valid') {
                 return resp.body;
             }
 
-            throw new Error('Unexpected challenge status');
+            throw new Error(`Unexpected item status: ${resp.body.status}`);
         };
 
-        debug('Waiting for challenge status to become valid', this.backoffOpts);
+        debug(`Waiting for valid status from: ${item.url}`, this.backoffOpts);
         return helper.retry(verifyFn, this.backoffOpts);
     }
 
 
     /**
-     * Download single certificate
+     * Get certificate from ACME order
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
      *
-     * @private
-     * @param {string} uri Certificate URI
-     * @returns {Promise} certificate
+     * @param {object} order Order object
+     * @returns {Promise<buffer>} Certificate
      */
 
-    async downloadCertificate(uri) {
-        const resp = await this.http.request(uri, 'GET', { encoding: null });
-
-        /* Require HTTP 200 */
-        if (resp.statusCode !== 200) {
-            throw new Error(resp.body.error || resp.body.detail || resp.body);
+    async getCertificate(order) {
+        if (order.status !== 'valid') {
+            order = await this.waitForValidStatus(order);
         }
 
-        return openssl.der2pem('x509', resp.body);
-    }
-
-
-    /**
-     * Download certificate chain
-     *
-     * @private
-     * @param {object} resp HTTP response
-     * @returns {Promise} {certificate, intermediate, chain}
-     */
-
-    async downloadCertificateChain(resp) {
-        /* Require location header */
-        if (!resp.headers.location) {
-            throw new Error('Signing the certificate did not return a certificate link');
+        if (!order.certificate) {
+            throw new Error('Unable to download certificate, URL not found');
         }
 
-        /* Download certificate */
-        const result = {
-            certificate: await this.downloadCertificate(resp.headers.location)
-        };
-
-        /* Intermediate certificate */
-        const links = helper.linkParser(resp.headers);
-
-        if (links.up) {
-            result.intermediate = await this.downloadCertificate(links.up);
-        }
-
-        /* Create chain */
-        if (result.intermediate && result.certificate) {
-            result.chain = Buffer.from(`${result.certificate}${result.intermediate}`);
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Get chain of certificates
-     *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
-     *
-     * @param {buffer|string} csr PEM encoded Certificate Signing Request
-     * @param {object} [data] Additional request data
-     * @returns {Promise} {certificate, intermediate, chain}
-     */
-
-    async getCertificateChain(csr, data = {}) {
-        if (!Buffer.isBuffer(csr)) {
-            csr = Buffer.from(csr);
-        }
-
-        const der = await openssl.pem2der(csr);
-        data.csr = helper.b64encode(der);
-
-        const resp = await this.api.newCert(data);
-        return this.downloadCertificateChain(resp);
+        const resp = await this.http.request(order.certificate, 'GET', { encoding: null });
+        return resp.body;
     }
 
 
@@ -385,7 +390,7 @@ class AcmeClient {
      *
      * @param {buffer|string} cert PEM encoded certificate
      * @param {object} [data] Additional request data
-     * @returns {Promise} certificate
+     * @returns {Promise}
      */
 
     async revokeCertificate(cert, data = {}) {
@@ -398,19 +403,20 @@ class AcmeClient {
 
 
     /**
-     * Easy mode
+     * Auto mode
      *
      * @param {object} opts Options
      * @param {buffer|string} opts.csr Certificate Signing Request
-     * @param {function} opts.challengeCreateFn Function to trigger before completing ACME challenge
-     * @param {function} opts.challengeRemoveFn Function to trigger after completing ACME challenge
+     * @param {function} opts.challengeCreateFn Function returning Promise triggered before completing ACME challenge
+     * @param {function} opts.challengeRemoveFn Function returning Promise triggered after completing ACME challenge
      * @param {string} [opts.email] Account email address
-     * @param {string} [opts.challengeType] Wanted ACME challenge type, default: `http-01`
-     * @returns {Promise} {certificate, intermediate, chain}
+     * @param {boolean} [opts.termsOfServiceAgreed] Agree to Terms of Service, default: `false`
+     * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
+     * @returns {Promise<buffer>} Certificate
      */
 
-    easy(opts) {
-        return easy(this, opts);
+    auto(opts) {
+        return auto(this, opts);
     }
 }
 
