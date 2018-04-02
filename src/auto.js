@@ -107,9 +107,15 @@ module.exports = async function(client, userOpts) {
             await client.waitForValidStatus(challenge);
         }
         finally {
-            /* Trigger challengeRemoveFn() */
+            /* Trigger challengeRemoveFn(), suppress errors */
             debug(`[auto] [${d}] Trigger challengeRemoveFn()`);
-            opts.challengeRemoveFn(authz, challenge, keyAuthorization);
+
+            try {
+                await opts.challengeRemoveFn(authz, challenge, keyAuthorization);
+            }
+            catch (e) {
+                debug(`[auto] [${d}] challengeRemoveFn threw error: ${e.message}`);
+            }
         }
     });
 
