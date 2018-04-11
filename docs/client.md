@@ -29,12 +29,12 @@ AcmeClient
 
 | Param | Type | Description |
 | --- | --- | --- |
-| opts | <code>object</code> | ACME client options |
-| opts.directoryUrl | <code>string</code> |  |
-| opts.accountKey | <code>buffer</code> \| <code>string</code> |  |
-| [opts.backoffMin] | <code>number</code> | default: `5000` |
-| [opts.backoffMax] | <code>number</code> | default: `30000` |
-| [opts.backoffAttempts] | <code>number</code> | default: `5` |
+| opts | <code>object</code> |  |
+| opts.directoryUrl | <code>string</code> | ACME directory URL |
+| opts.accountKey | <code>buffer</code> \| <code>string</code> | PEM encoded account private key |
+| [opts.backoffAttempts] | <code>number</code> | Maximum number of backoff attempts, default: `5` |
+| [opts.backoffMin] | <code>number</code> | Minimum backoff attempt delay in milliseconds, default: `5000` |
+| [opts.backoffMax] | <code>number</code> | Maximum backoff attempt delay in milliseconds, default: `30000` |
 
 <a name="AcmeClient+getTermsOfServiceUrl"></a>
 
@@ -235,7 +235,7 @@ Auto mode
 
 | Param | Type | Description |
 | --- | --- | --- |
-| opts | <code>object</code> | Options |
+| opts | <code>object</code> |  |
 | opts.csr | <code>buffer</code> \| <code>string</code> | Certificate Signing Request |
 | opts.challengeCreateFn | <code>function</code> | Function returning Promise triggered before completing ACME challenge |
 | opts.challengeRemoveFn | <code>function</code> | Function returning Promise triggered after completing ACME challenge |

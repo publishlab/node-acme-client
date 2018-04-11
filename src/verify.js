@@ -16,6 +16,7 @@ const debug = require('debug')('acme-client');
  * @param {object} authz Identifier authorization
  * @param {object} challenge Authorization challenge
  * @param {string} keyAuthorization Challenge key authorization
+ * @param {string} [suffix] URL suffix
  * @returns {Promise<boolean>}
  */
 

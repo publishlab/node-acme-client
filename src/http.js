@@ -15,8 +15,8 @@ const pkg = require('./../package.json');
  * ACME HTTP client
  *
  * @class
- * @param {string} directoryUrl Directory URL to the ACME provider
- * @param {buffer} accountKey PEM encoded private account key
+ * @param {string} directoryUrl ACME directory URL
+ * @param {buffer} accountKey PEM encoded account private key
  */
 
 class HttpClient {

@@ -30,12 +30,12 @@ const defaultOpts = {
  * AcmeClient
  *
  * @class
- * @param {object} opts ACME client options
- * @param {string} opts.directoryUrl
- * @param {buffer|string} opts.accountKey
- * @param {number} [opts.backoffMin] default: `5000`
- * @param {number} [opts.backoffMax] default: `30000`
- * @param {number} [opts.backoffAttempts] default: `5`
+ * @param {object} opts
+ * @param {string} opts.directoryUrl ACME directory URL
+ * @param {buffer|string} opts.accountKey PEM encoded account private key
+ * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
+ * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
+ * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
  */
 
 class AcmeClient {
@@ -405,7 +405,7 @@ class AcmeClient {
     /**
      * Auto mode
      *
-     * @param {object} opts Options
+     * @param {object} opts
      * @param {buffer|string} opts.csr Certificate Signing Request
      * @param {function} opts.challengeCreateFn Function returning Promise triggered before completing ACME challenge
      * @param {function} opts.challengeRemoveFn Function returning Promise triggered after completing ACME challenge
