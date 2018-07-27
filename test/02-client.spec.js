@@ -20,7 +20,6 @@ describe('client', () => {
     let testChallenge;
     let testChallengeWildcard;
 
-    const testContact = 'mailto:test@example.com';
     const testDomain = 'example.com';
     const testDomainWildcard = `*.${testDomain}`;
     const testChallengeType = 'http-01';
@@ -126,11 +125,11 @@ describe('client', () => {
      */
 
     it('should update account contact info', async () => {
-        const data = { contact: [testContact] };
-        const account = await testClient.updateAccount(data);
+        const account = await testClient.updateAccount({});
 
         assert.isObject(account);
-        assert.include(account.contact, testContact);
+        assert.strictEqual(account.status, 'valid');
+        assert.strictEqual(testAccount.id, account.id);
     });
 
 
