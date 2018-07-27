@@ -10,6 +10,8 @@ const openssl = require('./openssl');
 const helper = require('./helper');
 const pkg = require('./../package.json');
 
+const userAgentString = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
+
 
 /**
  * ACME HTTP client
@@ -54,7 +56,7 @@ class HttpClient {
         }
 
         opts.headers['Content-Type'] = 'application/jose+json';
-        opts.headers['User-Agent'] = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
+        opts.headers['User-Agent'] = userAgentString;
 
         debug(`HTTP request: ${method} ${url}`);
         const resp = await request(opts);
