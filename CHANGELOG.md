@@ -1,4 +1,4 @@
-## v2.0.1
+## v2.0.1 (2018-08-17)
 
 * `fixed` Key rollover in compliance with [draft-ietf-acme-13](https://tools.ietf.org/html/draft-ietf-acme-acme-13)
 
