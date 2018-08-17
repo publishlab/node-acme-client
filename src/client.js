@@ -136,6 +136,9 @@ class AcmeClient {
 
         /* Get new JWK */
         data.account = accountUrl;
+        data.oldKey = await this.http.getJwk();
+
+        /* TODO: Backward-compatibility with draft-ietf-acme-12, remove this in a later release */
         data.newKey = await newHttpClient.getJwk();
 
         /* Get signed request body from new client */
