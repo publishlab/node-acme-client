@@ -81,12 +81,12 @@ class AcmeClient {
         const resp = await this.api.createAccount(data);
 
         /* HTTP 200: Account exists */
-        if (resp.statusCode === 200) {
+        if (resp.status === 200) {
             debug('Account already exists (HTTP 200), returning updateAccount()');
             return this.updateAccount(data);
         }
 
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -109,7 +109,7 @@ class AcmeClient {
         }
 
         const resp = await this.api.updateAccount(data);
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -152,7 +152,7 @@ class AcmeClient {
         this.http = newHttpClient;
         this.api = newApiClient;
 
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -173,8 +173,8 @@ class AcmeClient {
         }
 
         /* Add URL to response */
-        resp.body.url = resp.headers.location;
-        return resp.body;
+        resp.data.url = resp.headers.location;
+        return resp.data;
     }
 
 
@@ -201,7 +201,7 @@ class AcmeClient {
         const data = { csr: helper.b64encode(der) };
 
         const resp = await this.api.finalizeOrder(order.finalize, data);
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -219,8 +219,8 @@ class AcmeClient {
             const resp = await this.api.getAuthorization(url);
 
             /* Add URL to response */
-            resp.body.url = url;
-            return resp.body;
+            resp.data.url = url;
+            return resp.data;
         });
     }
 
@@ -244,7 +244,7 @@ class AcmeClient {
         };
 
         const resp = await this.api.updateAuthorization(authz.url, data);
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -320,7 +320,7 @@ class AcmeClient {
         };
 
         const resp = await this.api.completeChallenge(challenge.url, data);
-        return resp.body;
+        return resp.data;
     }
 
 
@@ -342,20 +342,20 @@ class AcmeClient {
             const resp = await this.api.get(item.url, [200]);
 
             /* Verify status */
-            debug(`Item has status: ${resp.body.status}`);
+            debug(`Item has status: ${resp.data.status}`);
 
-            if (resp.body.status === 'invalid') {
+            if (resp.data.status === 'invalid') {
                 abort();
                 throw new Error(helper.formatResponseError(resp));
             }
-            else if (resp.body.status === 'pending') {
+            else if (resp.data.status === 'pending') {
                 throw new Error('Operation is pending');
             }
-            else if (resp.body.status === 'valid') {
-                return resp.body;
+            else if (resp.data.status === 'valid') {
+                return resp.data;
             }
 
-            throw new Error(`Unexpected item status: ${resp.body.status}`);
+            throw new Error(`Unexpected item status: ${resp.data.status}`);
         };
 
         debug(`Waiting for valid status from: ${item.url}`, this.backoffOpts);
@@ -381,8 +381,8 @@ class AcmeClient {
             throw new Error('Unable to download certificate, URL not found');
         }
 
-        const resp = await this.http.request(order.certificate, 'GET', { encoding: null });
-        return resp.body;
+        const resp = await this.http.request(order.certificate, 'get', { responseType: 'text' });
+        return resp.data;
     }
 
 
@@ -401,7 +401,7 @@ class AcmeClient {
         data.certificate = helper.b64encode(der);
 
         const resp = await this.api.revokeCert(data);
-        return resp.body;
+        return resp.data;
     }
 
 

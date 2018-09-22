@@ -7,13 +7,12 @@
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
     "dependencies": {
+        "axios": "^0.18.0",
         "babel-runtime": "^6.26.0",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^3.0.0",
         "openssl-wrapper": "^0.3.0",
-        "request": "^2.85.0",
-        "request-promise-native": "^1.0.0",
         "tempfile": "^2.0.0"
     },
     "devDependencies": {

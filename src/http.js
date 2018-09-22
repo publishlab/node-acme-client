@@ -4,7 +4,7 @@
 
 const crypto = require('crypto');
 const os = require('os');
-const request = require('request-promise-native');
+const axios = require('axios');
 const debug = require('debug')('acme-client');
 const openssl = require('./openssl');
 const helper = require('./helper');
@@ -43,13 +43,7 @@ class HttpClient {
     async request(url, method, opts = {}) {
         opts.url = url;
         opts.method = method;
-
-        opts.simple = false;
-        opts.resolveWithFullResponse = true;
-
-        if (typeof opts.json === 'undefined') {
-            opts.json = true;
-        }
+        opts.validateStatus = null;
 
         if (typeof opts.headers === 'undefined') {
             opts.headers = {};
@@ -59,9 +53,9 @@ class HttpClient {
         opts.headers['User-Agent'] = userAgentString;
 
         debug(`HTTP request: ${method} ${url}`);
-        const resp = await request(opts);
+        const resp = await axios.request(opts);
 
-        debug(`RESP ${resp.statusCode} ${method} ${url}`);
+        debug(`RESP ${resp.status} ${method} ${url}`);
         return resp;
     }
 
@@ -76,8 +70,8 @@ class HttpClient {
 
     async getDirectory() {
         if (!this.directory) {
-            const resp = await this.request(this.directoryUrl, 'GET');
-            this.directory = resp.body;
+            const resp = await this.request(this.directoryUrl, 'get');
+            this.directory = resp.data;
         }
     }
 
@@ -116,7 +110,7 @@ class HttpClient {
 
     async getNonce() {
         const url = await this.getResourceUrl('newNonce');
-        const resp = await this.request(url, 'HEAD');
+        const resp = await this.request(url, 'head');
 
         if (!resp.headers['replay-nonce']) {
             throw new Error('Failed to get nonce from ACME provider');
@@ -201,8 +195,8 @@ class HttpClient {
 
     async signedRequest(url, method, payload, kid = null) {
         const nonce = await this.getNonce();
-        const body = await this.createSignedBody(url, payload, nonce, kid);
-        return this.request(url, method, { body });
+        const data = await this.createSignedBody(url, payload, nonce, kid);
+        return this.request(url, method, { data });
     }
 }
 

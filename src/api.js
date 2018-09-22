@@ -63,7 +63,7 @@ class AcmeApi {
             resp = await this.http.signedRequest(url, method, payload, kid);
         }
 
-        if (validStatusCodes.length && (validStatusCodes.indexOf(resp.statusCode) === -1)) {
+        if (validStatusCodes.length && (validStatusCodes.indexOf(resp.status) === -1)) {
             throw new Error(helper.formatResponseError(resp));
         }
 
@@ -80,7 +80,7 @@ class AcmeApi {
      */
 
     get(url, validStatusCodes = []) {
-        return this.apiRequest(null, null, 'GET', validStatusCodes, false, url);
+        return this.apiRequest(null, null, 'get', validStatusCodes, false, url);
     }
 
 
@@ -111,7 +111,7 @@ class AcmeApi {
      */
 
     async createAccount(data) {
-        const resp = await this.apiRequest(data, 'newAccount', 'POST', [200, 201], false);
+        const resp = await this.apiRequest(data, 'newAccount', 'post', [200, 201], false);
 
         /* Set account URL */
         if (resp.headers.location) {
@@ -132,7 +132,7 @@ class AcmeApi {
      */
 
     updateAccount(data) {
-        return this.apiRequest(data, null, 'POST', [200, 202], true, this.getAccountUrl());
+        return this.apiRequest(data, null, 'post', [200, 202], true, this.getAccountUrl());
     }
 
 
@@ -146,7 +146,7 @@ class AcmeApi {
      */
 
     updateAccountKey(data) {
-        return this.apiRequest(data, 'keyChange', 'POST', [200]);
+        return this.apiRequest(data, 'keyChange', 'post', [200]);
     }
 
 
@@ -160,7 +160,7 @@ class AcmeApi {
      */
 
     createOrder(data) {
-        return this.apiRequest(data, 'newOrder', 'POST', [201]);
+        return this.apiRequest(data, 'newOrder', 'post', [201]);
     }
 
 
@@ -175,7 +175,7 @@ class AcmeApi {
      */
 
     finalizeOrder(url, data) {
-        return this.apiRequest(data, null, 'POST', [200], true, url);
+        return this.apiRequest(data, null, 'post', [200], true, url);
     }
 
 
@@ -204,7 +204,7 @@ class AcmeApi {
      */
 
     updateAuthorization(url, data) {
-        return this.apiRequest(data, null, 'POST', [200], true, url);
+        return this.apiRequest(data, null, 'post', [200], true, url);
     }
 
 
@@ -219,7 +219,7 @@ class AcmeApi {
      */
 
     completeChallenge(url, data) {
-        return this.apiRequest(data, null, 'POST', [200], true, url);
+        return this.apiRequest(data, null, 'post', [200], true, url);
     }
 
 
@@ -233,7 +233,7 @@ class AcmeApi {
      */
 
     revokeCert(data) {
-        return this.apiRequest(data, 'revokeCert', 'POST', [200]);
+        return this.apiRequest(data, 'revokeCert', 'post', [200]);
     }
 }
 

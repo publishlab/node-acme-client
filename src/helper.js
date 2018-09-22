@@ -118,11 +118,11 @@ function linkParser(headers) {
 function formatResponseError(resp) {
     let result;
 
-    if (resp.body.error) {
-        result = resp.body.error.detail || resp.body.error;
+    if (resp.data.error) {
+        result = resp.data.error.detail || resp.data.error;
     }
     else {
-        result = resp.body.detail || JSON.stringify(resp.body);
+        result = resp.data.detail || JSON.stringify(resp.data);
     }
 
     return result.replace(/\n/g, '');
