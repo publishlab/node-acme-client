@@ -20,6 +20,7 @@ const auto = require('./auto');
 const defaultOpts = {
     directoryUrl: undefined,
     accountKey: undefined,
+    accountUrl: null,
     backoffAttempts: 5,
     backoffMin: 5000,
     backoffMax: 30000
@@ -33,6 +34,7 @@ const defaultOpts = {
  * @param {object} opts
  * @param {string} opts.directoryUrl ACME directory URL
  * @param {buffer|string} opts.accountKey PEM encoded account private key
+ * @param {string} [opts.accountUrl] Account URL, default: `null`
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
@@ -53,7 +55,7 @@ class AcmeClient {
         };
 
         this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey);
-        this.api = new AcmeApi(this.http);
+        this.api = new AcmeApi(this.http, this.opts.accountUrl);
     }
 
 
@@ -69,6 +71,17 @@ class AcmeClient {
 
 
     /**
+     * Get current account URL
+     *
+     * @returns {string} Account URL
+     */
+
+    getAccountUrl() {
+        return this.api.getAccountUrl();
+    }
+
+
+    /**
      * Create a new account
      *
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
@@ -78,15 +91,24 @@ class AcmeClient {
      */
 
     async createAccount(data = {}) {
-        const resp = await this.api.createAccount(data);
+        try {
+            this.getAccountUrl();
 
-        /* HTTP 200: Account exists */
-        if (resp.status === 200) {
-            debug('Account already exists (HTTP 200), returning updateAccount()');
+            /* Account URL exists */
+            debug('Account URL exists, returning updateAccount()');
             return this.updateAccount(data);
         }
+        catch (e) {
+            const resp = await this.api.createAccount(data);
 
-        return resp.data;
+            /* HTTP 200: Account exists */
+            if (resp.status === 200) {
+                debug('Account already exists (HTTP 200), returning updateAccount()');
+                return this.updateAccount(data);
+            }
+
+            return resp.data;
+        }
     }
 
 

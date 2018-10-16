@@ -11,8 +11,8 @@ describe('client', () => {
     let testPrivateKey;
     let testSecondaryPrivateKey;
     let testClient;
-    let testSecondaryClient;
     let testAccount;
+    let testAccountUrl;
     let testOrder;
     let testOrderWildcard;
     let testAuthz;
@@ -52,18 +52,6 @@ describe('client', () => {
         });
     });
 
-    it('should initialize secondary account', () => {
-        testSecondaryClient = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
-            accountKey: testPrivateKey
-        });
-    });
-
-
-    /*
-     * Verify JWK
-     */
-
     it('should produce a valid JWK', async () => {
         const jwk = await testClient.http.getJwk();
         assert.isObject(jwk);
@@ -73,7 +61,7 @@ describe('client', () => {
 
 
     /*
-     * Terms of Service
+     * Create account
      */
 
     it('should get Terms of Service URL', async () => {
@@ -81,19 +69,9 @@ describe('client', () => {
         assert.isString(tos);
     });
 
-
-    /*
-     * Account creation without Terms of Service
-     */
-
     it('should refuse account creation without ToS', async () => {
         await assert.isRejected(testClient.createAccount());
     });
-
-
-    /*
-     * Create account
-     */
 
     it('should create an account', async () => {
         testAccount = await testClient.createAccount({
@@ -104,15 +82,54 @@ describe('client', () => {
         assert.strictEqual(testAccount.status, 'valid');
     });
 
+    it('should produce an account URL', () => {
+        testAccountUrl = testClient.getAccountUrl();
+        assert.isString(testAccountUrl);
+    });
+
 
     /*
-     * Find existing account
+     * Find existing account using secondary client
      */
 
-    it('should find existing account', async () => {
-        const account = await testSecondaryClient.createAccount({
+    it('should find existing account using account key', async () => {
+        const client = new acme.Client({
+            directoryUrl: acme.directory.letsencrypt.staging,
+            accountKey: testPrivateKey
+        });
+
+        const account = await client.createAccount({
             termsOfServiceAgreed: true
         });
+
+        assert.isObject(account);
+        assert.strictEqual(account.status, 'valid');
+        assert.strictEqual(testAccount.id, account.id);
+    });
+
+
+    /*
+     * Account URL
+     */
+
+    it('should refuse invalid account URL', async () => {
+        const client = new acme.Client({
+            directoryUrl: acme.directory.letsencrypt.staging,
+            accountKey: testPrivateKey,
+            accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
+        });
+
+        await assert.isRejected(client.updateAccount());
+    });
+
+    it('should find existing account using account URL', async () => {
+        const client = new acme.Client({
+            directoryUrl: acme.directory.letsencrypt.staging,
+            accountKey: testPrivateKey,
+            accountUrl: testAccountUrl
+        });
+
+        const account = await client.createAccount({});
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
