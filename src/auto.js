@@ -41,8 +41,16 @@ module.exports = async function(client, userOpts) {
      * Register account
      */
 
-    debug('[auto] Registering account');
-    await client.createAccount(accountPayload);
+    debug('[auto] Checking account');
+
+    try {
+        client.getAccountUrl();
+        debug('[auto] Account URL already exists, skipping account registration');
+    }
+    catch (e) {
+        debug('[auto] Registering account');
+        await client.createAccount(accountPayload);
+    }
 
 
     /*

@@ -2,6 +2,7 @@
 
 * `added` Ability to set and get current account URL
 * `fixed` Replace HTTP client `request` with `axios`
+* `fixed` Auto-mode no longer tries to create account when account URL exists
 
 
 ## v2.0.1 (2018-08-17)
