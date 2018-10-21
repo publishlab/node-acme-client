@@ -1,4 +1,4 @@
-## v2.1.0 `next`
+## v2.1.0 (2018-10-21)
 
 * `added` Ability to set and get current account URL
 * `fixed` Replace HTTP client `request` with `axios`
