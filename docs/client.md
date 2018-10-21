@@ -8,6 +8,7 @@ AcmeClient
 * [AcmeClient](#AcmeClient)
     * [new AcmeClient(opts)](#new_AcmeClient_new)
     * [.getTermsOfServiceUrl()](#AcmeClient+getTermsOfServiceUrl) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.getAccountUrl()](#AcmeClient+getAccountUrl) ⇒ <code>string</code>
     * [.createAccount([data])](#AcmeClient+createAccount) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.updateAccount([data])](#AcmeClient+updateAccount) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.updateAccountKey(newAccountKey, [data])](#AcmeClient+updateAccountKey) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -32,6 +33,7 @@ AcmeClient
 | opts | <code>object</code> |  |
 | opts.directoryUrl | <code>string</code> | ACME directory URL |
 | opts.accountKey | <code>buffer</code> \| <code>string</code> | PEM encoded account private key |
+| [opts.accountUrl] | <code>string</code> | Account URL, default: `null` |
 | [opts.backoffAttempts] | <code>number</code> | Maximum number of backoff attempts, default: `5` |
 | [opts.backoffMin] | <code>number</code> | Minimum backoff attempt delay in milliseconds, default: `5000` |
 | [opts.backoffMax] | <code>number</code> | Maximum backoff attempt delay in milliseconds, default: `30000` |
@@ -43,6 +45,13 @@ Get Terms of Service URL
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - ToS URL  
+<a name="AcmeClient+getAccountUrl"></a>
+
+### acmeClient.getAccountUrl() ⇒ <code>string</code>
+Get current account URL
+
+**Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
+**Returns**: <code>string</code> - Account URL  
 <a name="AcmeClient+createAccount"></a>
 
 ### acmeClient.createAccount([data]) ⇒ <code>Promise.&lt;object&gt;</code>
