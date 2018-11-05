@@ -1,5 +1,7 @@
-/*
- * OpenSSL utility methods
+/**
+ * OpenSSL crypto engine
+ *
+ * @namespace openssl
  */
 
 const Promise = require('bluebird');
@@ -87,7 +89,6 @@ function isPublic(key) {
 /**
  * Generate a private RSA key
  *
- * @function
  * @param {number} [size] Size of the key, default: `2048`
  * @returns {Promise<buffer>} Private RSA key
  */
@@ -124,23 +125,23 @@ exports.createPublicKey = function(key) {
 /**
  * Get modulus
  *
- * @param {buffer|string} key Private key, certificate or CSR
+ * @param {buffer|string} input PEM encoded private key, certificate or CSR
  * @returns {Promise<buffer>} Modulus
  */
 
-exports.getModulus = async function(key) {
-    if (!Buffer.isBuffer(key)) {
-        key = Buffer.from(key);
+exports.getModulus = async function(input) {
+    if (!Buffer.isBuffer(input)) {
+        input = Buffer.from(input);
     }
 
-    const action = getAction(key);
+    const action = getAction(input);
     const opts = { noout: true, modulus: true };
 
-    if (isPublic(key)) {
+    if (isPublic(input)) {
         opts.pubin = true;
     }
 
-    const buf = await openssl(action, key, opts);
+    const buf = await openssl(action, input, opts);
     const modulusMatch = buf.toString().match(/^Modulus=([A-Fa-f0-9]+)$/m);
 
     if (!modulusMatch) {
@@ -154,23 +155,23 @@ exports.getModulus = async function(key) {
 /**
  * Get public exponent
  *
- * @param {buffer|string} key Private key, certificate or CSR
+ * @param {buffer|string} input PEM encoded private key, certificate or CSR
  * @returns {Promise<buffer>} Exponent
  */
 
-exports.getPublicExponent = async function(key) {
-    if (!Buffer.isBuffer(key)) {
-        key = Buffer.from(key);
+exports.getPublicExponent = async function(input) {
+    if (!Buffer.isBuffer(input)) {
+        input = Buffer.from(input);
     }
 
-    const action = getAction(key);
+    const action = getAction(input);
     const opts = { noout: true, text: true };
 
-    if (isPublic(key)) {
+    if (isPublic(input)) {
         opts.pubin = true;
     }
 
-    const buf = await openssl(action, key, opts);
+    const buf = await openssl(action, input, opts);
     const exponentMatch = buf.toString().match(/xponent:.*\(0x(\d+)\)/);
 
     if (!exponentMatch) {
@@ -179,53 +180,6 @@ exports.getPublicExponent = async function(key) {
 
     /* Pad exponent hex value */
     return Buffer.from(hexpad(exponentMatch[1]), 'hex');
-};
-
-
-/**
- * Convert PEM to DER encoding
- *
- * @param {buffer|string} key PEM encoded private key, certificate or CSR
- * @returns {Promise<buffer>} DER
- */
-
-exports.pem2der = function(key) {
-    if (!Buffer.isBuffer(key)) {
-        key = Buffer.from(key);
-    }
-
-    const action = getAction(key);
-    const opts = { outform: 'der' };
-
-    if (isPublic(key)) {
-        opts.pubin = true;
-    }
-
-    return openssl(action, key, opts);
-};
-
-
-/**
- * Convert DER to PEM encoding
- *
- * @param {string} action Output action (x509, rsa, req)
- * @param {buffer|string} key DER encoded private key, certificate or CSR
- * @param {boolean} [pubIn] Result should be a public key, default: `false`
- * @returns {Promise<buffer>} PEM
- */
-
-exports.der2pem = function(action, key, pubIn = false) {
-    if (!Buffer.isBuffer(key)) {
-        key = Buffer.from(key);
-    }
-
-    const opts = { inform: 'der' };
-
-    if (pubIn) {
-        opts.pubin = true;
-    }
-
-    return openssl(action, key, opts);
 };
 
 
@@ -412,4 +366,53 @@ exports.createCsr = async function(data, key = null) {
     const csr = await generateCsr(opts, csrConfig, key);
 
     return [key, csr];
+};
+
+
+/**
+ * Convert PEM to DER encoding
+ * DEPRECATED - DO NOT USE
+ *
+ * @param {buffer|string} key PEM encoded private key, certificate or CSR
+ * @returns {Promise<buffer>} DER
+ */
+
+exports.pem2der = function(key) {
+    if (!Buffer.isBuffer(key)) {
+        key = Buffer.from(key);
+    }
+
+    const action = getAction(key);
+    const opts = { outform: 'der' };
+
+    if (isPublic(key)) {
+        opts.pubin = true;
+    }
+
+    return openssl(action, key, opts);
+};
+
+
+/**
+ * Convert DER to PEM encoding
+ * DEPRECATED - DO NOT USE
+ *
+ * @param {string} action Output action (x509, rsa, req)
+ * @param {buffer|string} key DER encoded private key, certificate or CSR
+ * @param {boolean} [pubIn] Result should be a public key, default: `false`
+ * @returns {Promise<buffer>} PEM
+ */
+
+exports.der2pem = function(action, key, pubIn = false) {
+    if (!Buffer.isBuffer(key)) {
+        key = Buffer.from(key);
+    }
+
+    const opts = { inform: 'der' };
+
+    if (pubIn) {
+        opts.pubin = true;
+    }
+
+    return openssl(action, key, opts);
 };

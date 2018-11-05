@@ -18,7 +18,7 @@ exports.directory = {
 
 
 /*
- * OpenSSL helper
+ * Crypto
  */
 
-exports.openssl = require('./openssl');
+exports.openssl = require('./crypto/openssl');

@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const os = require('os');
 const axios = require('axios');
 const debug = require('debug')('acme-client');
-const openssl = require('./openssl');
+const openssl = require('./crypto/openssl');
 const helper = require('./helper');
 const pkg = require('./../package.json');
 

@@ -31,7 +31,7 @@
     },
     "scripts": {
         "babel": "babel -d lib/ src/",
-        "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/openssl.js > docs/openssl.md",
+        "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md",
         "lint": "eslint .",
         "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
         "prepublish": "npm run babel",

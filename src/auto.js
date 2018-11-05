@@ -4,7 +4,7 @@
 
 const Promise = require('bluebird');
 const debug = require('debug')('acme-client');
-const openssl = require('./openssl');
+const openssl = require('./crypto/openssl');
 
 const defaultOpts = {
     csr: null,

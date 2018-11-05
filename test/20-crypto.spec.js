@@ -6,8 +6,11 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const path = require('path');
 const assert = require('chai').assert;
+const openssl = require('./../src/crypto/openssl');
 
-const cryptoEngines = {};
+const cryptoEngines = {
+    openssl
+};
 
 
 describe('crypto', () => {
