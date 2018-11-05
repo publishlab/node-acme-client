@@ -21,4 +21,5 @@ exports.directory = {
  * Crypto
  */
 
+exports.forge = require('./crypto/forge');
 exports.openssl = require('./crypto/openssl');

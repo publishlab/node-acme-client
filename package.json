@@ -12,6 +12,7 @@
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^3.0.0",
+        "node-forge": "^0.7.6",
         "openssl-wrapper": "^0.3.0",
         "tempfile": "^2.0.0"
     },
@@ -31,7 +32,7 @@
     },
     "scripts": {
         "babel": "babel -d lib/ src/",
-        "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md",
+        "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md && jsdoc2md src/crypto/forge.js > docs/forge.md",
         "lint": "eslint .",
         "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
         "prepublish": "npm run babel",
