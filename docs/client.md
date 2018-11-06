@@ -20,9 +20,9 @@ AcmeClient
     * [.verifyChallenge(authz, challenge)](#AcmeClient+verifyChallenge) ⇒ <code>Promise</code>
     * [.completeChallenge(challenge)](#AcmeClient+completeChallenge) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.waitForValidStatus(item)](#AcmeClient+waitForValidStatus) ⇒ <code>Promise.&lt;object&gt;</code>
-    * [.getCertificate(order)](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;buffer&gt;</code>
+    * [.getCertificate(order)](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.revokeCertificate(cert, [data])](#AcmeClient+revokeCertificate) ⇒ <code>Promise</code>
-    * [.auto(opts)](#AcmeClient+auto) ⇒ <code>Promise.&lt;buffer&gt;</code>
+    * [.auto(opts)](#AcmeClient+auto) ⇒ <code>Promise.&lt;string&gt;</code>
 
 <a name="new_AcmeClient_new"></a>
 
@@ -208,13 +208,13 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#respond
 
 <a name="AcmeClient+getCertificate"></a>
 
-### acmeClient.getCertificate(order) ⇒ <code>Promise.&lt;buffer&gt;</code>
+### acmeClient.getCertificate(order) ⇒ <code>Promise.&lt;string&gt;</code>
 Get certificate from ACME order
 
 https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
-**Returns**: <code>Promise.&lt;buffer&gt;</code> - Certificate  
+**Returns**: <code>Promise.&lt;string&gt;</code> - Certificate  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -236,11 +236,11 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#certifi
 
 <a name="AcmeClient+auto"></a>
 
-### acmeClient.auto(opts) ⇒ <code>Promise.&lt;buffer&gt;</code>
+### acmeClient.auto(opts) ⇒ <code>Promise.&lt;string&gt;</code>
 Auto mode
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
-**Returns**: <code>Promise.&lt;buffer&gt;</code> - Certificate  
+**Returns**: <code>Promise.&lt;string&gt;</code> - Certificate  
 
 | Param | Type | Description |
 | --- | --- | --- |

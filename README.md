@@ -58,9 +58,9 @@ For key pair generation and Certificate Signing Requests, `acme-client` supports
 
 Uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
 
-This engine has no external dependencies since it is completely implemented in JavaScript, however CPU-intensive tasks (like generating a large size key pair) will be orders of magnitude slower than doing it natively.
+This engine has no external dependencies since it is completely implemented in JavaScript, however CPU-intensive tasks (like generating a large size key pair) has a performance penalty and will be slower than doing it natively.
 
-Node v10.12.0 introduced [crypto.generateKeyPair()](https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypair_type_options_callback), a native Node key pair API which removes this caveat. The forge engine will automatically use this API when available.
+This caveat is removed in Node v10.12.0 with the introduction of [crypto.generateKeyPair()](https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypair_type_options_callback), a native Node API for key pair generation. The forge engine will automatically use this API when available.
 
 
 #### Example
