@@ -52,7 +52,7 @@ module.exports = async function() {
     /* Init client */
     const client = new acme.Client({
         directoryUrl: acme.directory.letsencrypt.staging,
-        accountKey: await acme.openssl.createPrivateKey()
+        accountKey: await acme.forge.createPrivateKey()
     });
 
     /* Register account */
@@ -107,7 +107,7 @@ module.exports = async function() {
     await Promise.all(promises);
 
     /* Finalize order */
-    const [key, csr] = await acme.openssl.createCsr({
+    const [key, csr] = await acme.forge.createCsr({
         commonName: '*.example.com',
         altNames: ['example.com']
     });

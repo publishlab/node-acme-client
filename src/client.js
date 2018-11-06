@@ -7,7 +7,6 @@ const debug = require('debug')('acme-client');
 const Promise = require('bluebird');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
-const openssl = require('./crypto/openssl');
 const verify = require('./verify');
 const helper = require('./helper');
 const auto = require('./auto');
@@ -219,8 +218,8 @@ class AcmeClient {
             csr = Buffer.from(csr);
         }
 
-        const der = await openssl.pem2der(csr);
-        const data = { csr: helper.b64encode(der) };
+        const body = helper.getPemBody(csr);
+        const data = { csr: helper.b64escape(body) };
 
         const resp = await this.api.finalizeOrder(order.finalize, data);
         return resp.data;
@@ -419,8 +418,8 @@ class AcmeClient {
      */
 
     async revokeCertificate(cert, data = {}) {
-        const der = await openssl.pem2der(cert);
-        data.certificate = helper.b64encode(der);
+        const body = helper.getPemBody(cert);
+        data.certificate = helper.b64escape(body);
 
         const resp = await this.api.revokeCert(data);
         return resp.data;

@@ -6,8 +6,8 @@ const crypto = require('crypto');
 const os = require('os');
 const axios = require('axios');
 const debug = require('debug')('acme-client');
-const openssl = require('./crypto/openssl');
 const helper = require('./helper');
+const forge = require('./crypto/forge');
 const pkg = require('./../package.json');
 
 const userAgentString = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
@@ -87,8 +87,8 @@ class HttpClient {
             return this.jwk;
         }
 
-        const exponent = await openssl.getPublicExponent(this.accountKey);
-        const modulus = await openssl.getModulus(this.accountKey);
+        const exponent = await forge.getPublicExponent(this.accountKey);
+        const modulus = await forge.getModulus(this.accountKey);
 
         this.jwk = {
             e: helper.b64encode(exponent),

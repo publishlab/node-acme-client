@@ -82,6 +82,19 @@ function b64encode(str) {
 
 
 /**
+ * Parse PEM body from buffer or string
+ *
+ * @param {buffer|string} str PEM encoded buffer or string
+ * @returns {string} PEM body
+ */
+
+function getPemBody(str) {
+    const pemStr = Buffer.isBuffer(str) ? str.toString() : str;
+    return pemStr.replace(/(\s*-----(BEGIN|END) ([A-Z0-9- ]+)-----|\r|\n)*/g, '');
+}
+
+
+/**
  * Parse links from HTTP response headers
  *
  * @param {object} headers HTTP response headers
@@ -134,6 +147,7 @@ module.exports = {
     retry,
     b64escape,
     b64encode,
+    getPemBody,
     linkParser,
     formatResponseError
 };

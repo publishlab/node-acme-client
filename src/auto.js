@@ -4,7 +4,7 @@
 
 const Promise = require('bluebird');
 const debug = require('debug')('acme-client');
-const openssl = require('./crypto/openssl');
+const forge = require('./crypto/forge');
 
 const defaultOpts = {
     csr: null,
@@ -58,7 +58,7 @@ module.exports = async function(client, userOpts) {
      */
 
     debug('[auto] Parsing domains from Certificate Signing Request');
-    const csrDomains = await openssl.readCsrDomains(opts.csr);
+    const csrDomains = await forge.readCsrDomains(opts.csr);
     const domains = [csrDomains.commonName].concat(csrDomains.altNames);
 
     debug(`[auto] Resolved ${domains.length} domains from parsing the Certificate Signing Request`);
