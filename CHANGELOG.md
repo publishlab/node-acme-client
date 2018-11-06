@@ -1,3 +1,9 @@
+## v2.2.0 `next`
+
+* `added` New [node-forge](https://www.npmjs.com/package/node-forge) crypto engine, removes OpenSSL CLI dependency
+* `added` Support native `crypto.generateKeyPair()` API when generating key pairs
+
+
 ## v2.1.0 (2018-10-21)
 
 * `added` Ability to set and get current account URL

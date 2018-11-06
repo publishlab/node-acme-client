@@ -1,6 +1,5 @@
 # acme-client [![Build Status](https://travis-ci.org/publishlab/node-acme-client.svg?branch=master)](https://travis-ci.org/publishlab/node-acme-client)
 
-
 *A simple and unopinionated ACME client.*
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
@@ -19,16 +18,11 @@ Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
 | v1.x          | ACMEv1    | callback  |
 
 
-
 ## Installation
-
-`acme-client` requires OpenSSL to be installed and available in `$PATH`.
 
 ```bash
 $ npm install acme-client
-$ openssl version
 ```
-
 
 
 ## Usage
@@ -53,6 +47,54 @@ acme.directory.letsencrypt.production;
 ```
 
 
+## Cryptography
+
+For key pair generation and Certificate Signing Requests, `acme-client` supports multiple interchangeable cryptographic engines.
+
+
+### `acme.forge` -- [docs/forge.md](docs/forge.md)
+
+*Recommended when `node >= v10.12.0` or OpenSSL CLI dependency can not be met.*
+
+Uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
+
+This engine has no external dependencies since it is completely implemented in JavaScript, however CPU-intensive tasks (like generating a large size key pair) will be orders of magnitude slower than doing it natively.
+
+Node v10.12.0 introduced [crypto.generateKeyPair()](https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypair_type_options_callback), a native Node key pair API which removes this caveat. The forge engine will automatically use this API when available.
+
+
+#### Example
+
+```js
+const privateKey = await acme.forge.createPrivateKey();
+
+const [certificateKey, certificateCsr] = await acme.forge.createCsr({
+    commonName: '*.example.com',
+    altNames: ['example.com']
+})
+```
+
+
+### `acme.openssl` -- [docs/openssl.md](docs/openssl.md)
+
+*Recommended when `node < v10.12.0` and OpenSSL CLI dependency can be met.*
+
+Uses [openssl-wrapper](https://www.npmjs.com/package/openssl-wrapper) to execute commands using the OpenSSL CLI.
+
+This backend requires OpenSSL to be installed and available in `$PATH`.
+
+
+#### Example
+
+```js
+const privateKey = await acme.openssl.createPrivateKey();
+
+const [certificateKey, certificateCsr] = await acme.openssl.createCsr({
+    commonName: '*.example.com',
+    altNames: ['example.com']
+})
+```
+
 
 ## Auto mode
 
@@ -64,7 +106,7 @@ A full example can be found at [examples/auto.js](examples/auto.js).
 __Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)__
 
 
-### Example
+#### Example
 
 ```js
 const autoOpts = {
@@ -79,27 +121,6 @@ const certificate = await client.auto(autoOpts);
 ```
 
 
-
-## OpenSSL utils
-
-Some OpenSSL utility methods are included for creating keys and Certificate Signing Requests, exposed through `acme.openssl`.
-
-__Documentation: [docs/openssl.md](docs/openssl.md)__
-
-
-### Example
-
-```js
-const privateKey = await acme.openssl.createPrivateKey();
-
-const [certificateKey, certificateCsr] = await acme.openssl.createCsr({
-    commonName: '*.example.com',
-    altNames: ['example.com']
-})
-```
-
-
-
 ## API
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
@@ -109,7 +130,7 @@ A full example can be found at [examples/api.js](examples/api.js).
 __Documentation: [docs/client.md](docs/client.md)__
 
 
-### Example
+#### Example
 
 ```js
 const account = await client.createAccount({
@@ -126,7 +147,6 @@ const order = await client.createOrder({
 ```
 
 
-
 ## Debugging
 
 `acme-client` uses [debug](https://www.npmjs.com/package/debug) for debugging which can be enabled by running
@@ -134,7 +154,6 @@ const order = await client.createOrder({
 ```bash
 DEBUG=acme-client node index.js
 ```
-
 
 
 ## License
