@@ -391,7 +391,7 @@ class AcmeClient {
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
      *
      * @param {object} order Order object
-     * @returns {Promise<buffer>} Certificate
+     * @returns {Promise<string>} Certificate
      */
 
     async getCertificate(order) {
@@ -437,7 +437,7 @@ class AcmeClient {
      * @param {string} [opts.email] Account email address
      * @param {boolean} [opts.termsOfServiceAgreed] Agree to Terms of Service, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
-     * @returns {Promise<buffer>} Certificate
+     * @returns {Promise<string>} Certificate
      */
 
     auto(opts) {
