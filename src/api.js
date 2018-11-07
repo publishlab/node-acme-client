@@ -1,4 +1,4 @@
-/*
+/**
  * ACME API client
  */
 

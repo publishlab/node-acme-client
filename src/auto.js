@@ -1,4 +1,4 @@
-/*
+/**
  * ACME auto helper
  */
 
@@ -37,7 +37,7 @@ module.exports = async function(client, userOpts) {
     }
 
 
-    /*
+    /**
      * Register account
      */
 
@@ -53,7 +53,7 @@ module.exports = async function(client, userOpts) {
     }
 
 
-    /*
+    /**
      * Parse domains from CSR
      */
 
@@ -64,7 +64,7 @@ module.exports = async function(client, userOpts) {
     debug(`[auto] Resolved ${domains.length} domains from parsing the Certificate Signing Request`);
 
 
-    /*
+    /**
      * Place order
      */
 
@@ -76,7 +76,7 @@ module.exports = async function(client, userOpts) {
     debug(`[auto] Placed certificate order successfully, received ${authorizations.length} identity authorizations`);
 
 
-    /*
+    /**
      * Resolve and satisfy challenges
      */
 
@@ -131,7 +131,7 @@ module.exports = async function(client, userOpts) {
     await Promise.all(challengePromises);
 
 
-    /*
+    /**
      * Finalize order and download certificate
      */
 

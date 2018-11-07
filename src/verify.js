@@ -1,4 +1,4 @@
-/*
+/**
  * ACME challenge verification
  */
 
@@ -66,7 +66,7 @@ async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '
 }
 
 
-/*
+/**
  * Export API
  */
 

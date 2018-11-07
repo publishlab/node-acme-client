@@ -1,4 +1,4 @@
-/*
+/**
  * Example of acme.Client API
  */
 
@@ -44,7 +44,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 }
 
 
-/*
+/**
  * Main
  */
 
@@ -95,7 +95,7 @@ module.exports = async function() {
                 await challengeRemoveFn(authz, challenge, keyAuthorization);
             }
             catch (e) {
-                /*
+                /**
                  * Catch errors thrown by challengeRemoveFn() so the order can
                  * be finalized, even though something went wrong during cleanup
                  */

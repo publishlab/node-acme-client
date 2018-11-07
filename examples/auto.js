@@ -1,4 +1,4 @@
-/*
+/**
  * Example of acme.Client.auto()
  */
 
@@ -85,7 +85,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 }
 
 
-/*
+/**
  * Main
  */
 

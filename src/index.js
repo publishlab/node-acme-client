@@ -1,11 +1,11 @@
-/*
+/**
  * acme-client
  */
 
 exports.Client = require('./client');
 
 
-/*
+/**
  * Directory URLs
  */
 
@@ -17,7 +17,7 @@ exports.directory = {
 };
 
 
-/*
+/**
  * Crypto
  */
 

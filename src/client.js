@@ -1,4 +1,4 @@
-/*
+/**
  * ACME client
  */
 
@@ -12,7 +12,7 @@ const helper = require('./helper');
 const auto = require('./auto');
 
 
-/*
+/**
  * Default options
  */
 

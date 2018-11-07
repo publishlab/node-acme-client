@@ -1,4 +1,4 @@
-/*
+/**
  * ACME tests
  */
 
@@ -26,7 +26,7 @@ describe('client', () => {
     const testChallengeTypeWildcard = 'dns-01';
 
 
-    /*
+    /**
      * Fixtures
      */
 
@@ -41,7 +41,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Initialize clients
      */
 
@@ -60,7 +60,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Create account
      */
 
@@ -88,7 +88,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Find existing account using secondary client
      */
 
@@ -108,7 +108,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Account URL
      */
 
@@ -137,7 +137,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Update account contact info
      */
 
@@ -150,7 +150,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Change account private key
      */
 
@@ -161,7 +161,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Create new certificate order
      */
 
@@ -185,7 +185,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Get identifier authorization
      */
 
@@ -220,7 +220,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Generate challenge key authorization
      */
 
@@ -232,7 +232,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Deactivate identifier authorization
      */
 
@@ -244,7 +244,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Deactivate account
      */
 
@@ -257,7 +257,7 @@ describe('client', () => {
     });
 
 
-    /*
+    /**
      * Verify that no new orders can be made
      */
 

@@ -1,4 +1,4 @@
-/*
+/**
  * Challenge verification tests
  */
 
@@ -24,7 +24,7 @@ describe('verify', () => {
     };
 
 
-    /*
+    /**
      * HTTP mocking
      */
 
@@ -35,7 +35,7 @@ describe('verify', () => {
     });
 
 
-    /*
+    /**
      * API
      */
 
@@ -44,7 +44,7 @@ describe('verify', () => {
     });
 
 
-    /*
+    /**
      * http-01
      */
 
@@ -58,7 +58,7 @@ describe('verify', () => {
     });
 
 
-    /*
+    /**
      * dns-01
      */
 
