@@ -8,8 +8,14 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const net = require('net');
 const tempfile = require('tempfile');
-const openssl = Promise.promisify(require('openssl-wrapper').exec);
+const opensslExec = require('openssl-wrapper').exec;
 
+
+function openssl(...args) {
+    return new Promise((resolve, reject) => {
+        opensslExec(...args, (err, result) => (err ? reject(err) : resolve(result))).on('error', reject);
+    });
+}
 
 function hexpad(str) {
     return ((str.length % 2) === 1) ? `0${str}` : str;
