@@ -1,5 +1,7 @@
 /**
  * ACME client
+ *
+ * @namespace Client
  */
 
 const crypto = require('crypto');

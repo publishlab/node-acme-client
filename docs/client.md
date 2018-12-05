@@ -1,3 +1,27 @@
+## Classes
+
+<dl>
+<dt><a href="#AcmeClient">AcmeClient</a></dt>
+<dd><p>AcmeClient</p>
+</dd>
+</dl>
+
+## Objects
+
+<dl>
+<dt><a href="#Client">Client</a> : <code>object</code></dt>
+<dd><p>ACME client</p>
+</dd>
+</dl>
+
+## Constants
+
+<dl>
+<dt><a href="#defaultOpts">defaultOpts</a></dt>
+<dd><p>Default options</p>
+</dd>
+</dl>
+
 <a name="AcmeClient"></a>
 
 ## AcmeClient
@@ -252,3 +276,15 @@ Auto mode
 | [opts.termsOfServiceAgreed] | <code>boolean</code> | Agree to Terms of Service, default: `false` |
 | [opts.challengePriority] | <code>Array.&lt;string&gt;</code> | Array defining challenge type priority, default: `['http-01', 'dns-01']` |
 
+<a name="Client"></a>
+
+## Client : <code>object</code>
+ACME client
+
+**Kind**: global namespace  
+<a name="defaultOpts"></a>
+
+## defaultOpts
+Default options
+
+**Kind**: global constant  
