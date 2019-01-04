@@ -7,10 +7,10 @@ commands:
       - run: node --version
       - run: npm --version
       - run: yarn --version
-      - run: openssl --version
+      - run: openssl version
       - checkout
-      - run: npm install
-      - run: npm test
+      - run: yarn
+      - run: yarn run test
 
 jobs:
   node-v4: { docker: [{ image: circleci/node:4 }], steps: [ test ]}
