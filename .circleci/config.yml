@@ -1,0 +1,15 @@
+---
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:4
+      - image: circleci/node:6
+      - image: circleci/node:8
+      - image: circleci/node:9
+      - image: circleci/node:10
+    working_directory: ~/node-acme-client
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm test
