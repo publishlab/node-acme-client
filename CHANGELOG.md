@@ -1,4 +1,4 @@
-## v2.2.1 `next`
+## v2.2.1 (2019-01-04)
 
 * `fixed` Handle and throw errors from OpenSSL process
 
