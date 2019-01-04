@@ -95,33 +95,6 @@ function getPemBody(str) {
 
 
 /**
- * Parse links from HTTP response headers
- *
- * @param {object} headers HTTP response headers
- * @returns {object} Links found from headers
- */
-
-function linkParser(headers) {
-    if (!headers || !headers.link) {
-        return {};
-    }
-
-    const result = {};
-    const links = headers.link.split(/,/);
-
-    links.forEach((link) => {
-        const matches = link.match(/<([^>]*)>;rel="([^"]*)"/);
-
-        if (matches) {
-            result[matches[2]] = matches[1];
-        }
-    });
-
-    return result;
-}
-
-
-/**
  * Find and format error in response object
  *
  * @param {object} resp HTTP response
@@ -148,6 +121,5 @@ module.exports = {
     b64escape,
     b64encode,
     getPemBody,
-    linkParser,
     formatResponseError
 };
