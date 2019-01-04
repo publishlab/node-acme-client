@@ -1,15 +1,29 @@
 ---
-version: 2
-jobs:
-  build:
-    docker:
-      - image: circleci/node:4
-      - image: circleci/node:6
-      - image: circleci/node:8
-      - image: circleci/node:9
-      - image: circleci/node:10
-    working_directory: ~/node-acme-client
+version: 2.1
+
+commands:
+  test:
     steps:
+      - run: node --version
+      - run: npm --version
+      - run: yarn --version
+      - run: openssl --version
       - checkout
       - run: npm install
       - run: npm test
+
+jobs:
+  node-v4: { docker: [{ image: circleci/node:4 }], steps: [ test ]}
+  node-v6: { docker: [{ image: circleci/node:6 }], steps: [ test ]}
+  node-v8: { docker: [{ image: circleci/node:8 }], steps: [ test ]}
+  node-v9: { docker: [{ image: circleci/node:9 }], steps: [ test ]}
+  node-v10: { docker: [{ image: circleci/node:10 }], steps: [ test ]}
+
+workflows:
+  test-suite:
+    jobs:
+      - node-v4
+      - node-v6
+      - node-v8
+      - node-v9
+      - node-v10
