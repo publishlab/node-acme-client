@@ -1,3 +1,8 @@
+## v2.2.2 `next`
+
+* `added` Support for `tls-alpn-01` challenge key authorization
+
+
 ## v2.2.1 (2019-01-04)
 
 * `fixed` Handle and throw errors from OpenSSL process

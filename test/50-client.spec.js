@@ -17,13 +17,10 @@ describe('client', () => {
     let testOrderWildcard;
     let testAuthz;
     let testAuthzWildcard;
-    let testChallenge;
-    let testChallengeWildcard;
+    let testChallenges;
 
     const testDomain = 'example.com';
     const testDomainWildcard = `*.${testDomain}`;
-    const testChallengeType = 'http-01';
-    const testChallengeTypeWildcard = 'dns-01';
 
 
     /**
@@ -209,10 +206,9 @@ describe('client', () => {
             assert.isArray(item.challenges);
         });
 
-        testChallenge = testAuthz.challenges.filter(c => c.type === testChallengeType).pop();
-        testChallengeWildcard = testAuthzWildcard.challenges.filter(c => c.type === testChallengeTypeWildcard).pop();
+        testChallenges = testAuthz.challenges.concat(testAuthzWildcard.challenges);
 
-        [testChallenge, testChallengeWildcard].forEach((item) => {
+        testChallenges.forEach((item) => {
             assert.isObject(item);
             assert.strictEqual(item.status, 'pending');
             assert.isString(item.url);
@@ -225,7 +221,7 @@ describe('client', () => {
      */
 
     it('should get challenge key authorization', async () => {
-        await Promise.map([testChallenge, testChallengeWildcard], async (item) => {
+        await Promise.map(testChallenges, async (item) => {
             const keyAuth = await testClient.getChallengeKeyAuthorization(item);
             assert.isString(keyAuth);
         });

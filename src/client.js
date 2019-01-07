@@ -287,11 +287,18 @@ class AcmeClient {
         const result = `${challenge.token}.${thumbprint}`;
 
         if (challenge.type === 'http-01') {
-            /* https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#http-challenge */
+            /**
+             * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#http-challenge
+             */
+
             return result;
         }
-        else if (challenge.type === 'dns-01') {
-            /* https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge */
+        else if (['dns-01', 'tls-alpn-01'].includes(challenge.type)) {
+            /**
+             * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge
+             * https://tools.ietf.org/html/draft-ietf-acme-tls-alpn-01
+             */
+
             const shasum = crypto.createHash('sha256').update(result);
             return helper.b64escape(shasum.digest('base64'));
         }
