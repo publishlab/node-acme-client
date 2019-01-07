@@ -81,7 +81,7 @@ const [certificateKey, certificateCsr] = await acme.forge.createCsr({
 
 Uses [openssl-wrapper](https://www.npmjs.com/package/openssl-wrapper) to execute commands using the OpenSSL CLI.
 
-This backend requires OpenSSL to be installed and available in `$PATH`.
+This engine requires OpenSSL to be installed and available in `$PATH`.
 
 
 #### Example

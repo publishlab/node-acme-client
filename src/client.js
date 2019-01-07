@@ -293,7 +293,7 @@ class AcmeClient {
 
             return result;
         }
-        else if (['dns-01', 'tls-alpn-01'].includes(challenge.type)) {
+        else if ((challenge.type === 'dns-01') || (challenge.type === 'tls-alpn-01')) {
             /**
              * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge
              * https://tools.ietf.org/html/draft-ietf-acme-tls-alpn-01
