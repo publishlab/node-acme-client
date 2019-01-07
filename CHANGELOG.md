@@ -1,4 +1,4 @@
-## v2.2.2 `next`
+## v2.2.2 (2019-01-07)
 
 * `added` Support for `tls-alpn-01` challenge key authorization
 
