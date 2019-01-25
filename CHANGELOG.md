@@ -1,3 +1,8 @@
+## v2.2.3 (2019-01-25)
+
+* `added` DNS CNAME detection when verifying `dns-01` challenges
+
+
 ## v2.2.2 (2019-01-07)
 
 * `added` Support for `tls-alpn-01` challenge key authorization
