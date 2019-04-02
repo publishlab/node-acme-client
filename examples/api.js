@@ -69,11 +69,25 @@ module.exports = async function() {
         ]
     });
 
-    /* Get authorizations and select challenges */
+    /**
+     * authorizations / client.getAuthorizations(order);
+     * An array with one item per DNS name in the certificate order.
+     * All items require at least one satisfied challenge before order can be completed.
+     */
+
     const authorizations = await client.getAuthorizations(order);
 
     const promises = authorizations.map(async (authz) => {
-        const challenge = authz.challenges.pop();
+        /**
+         * challenges / authz.challenges
+         * An array of all available challenge types for a single DNS name.
+         * One of these challenges needs to be satisfied.
+         */
+
+        const challenges = { authz };
+
+        /* Just select any challenge */
+        const challenge = challenges.pop();
         const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
         try {

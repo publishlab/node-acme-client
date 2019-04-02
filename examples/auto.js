@@ -24,7 +24,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 
     /* http-01 */
     if (challenge.type === 'http-01') {
-        const filePath = `/var/www/html/.well-known/acme-challenges/${challenge.token}`;
+        const filePath = `/var/www/html/.well-known/acme-challenge/${challenge.token}`;
         const fileContents = keyAuthorization;
 
         log(`Creating challenge response for ${authz.identifier.value} at path: ${filePath}`);
@@ -62,7 +62,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
     /* http-01 */
     if (challenge.type === 'http-01') {
-        const filePath = `/var/www/html/.well-known/acme-challenges/${challenge.token}`;
+        const filePath = `/var/www/html/.well-known/acme-challenge/${challenge.token}`;
 
         log(`Removing challenge response for ${authz.identifier.value} at path: ${filePath}`);
 
