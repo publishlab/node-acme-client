@@ -1,3 +1,9 @@
+## v3.0.0
+
+* `breaking` Remove support for Node v4 and Node v6
+* `breaking` Remove Babel transpilation
+
+
 ## v2.2.3 (2019-01-25)
 
 * `added` DNS CNAME detection when verifying `dns-01` challenges
