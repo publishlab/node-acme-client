@@ -4,17 +4,11 @@
  * @namespace forge
  */
 
-const crypto = require('crypto');
 const net = require('net');
 const Promise = require('bluebird');
 const forge = require('node-forge');
 
-let nativeGenKeyPair;
-const forgeGenKeyPair = Promise.promisify(forge.pki.rsa.generateKeyPair);
-
-if (typeof crypto.generateKeyPair === 'function') {
-    nativeGenKeyPair = Promise.promisify(crypto.generateKeyPair, { multiArgs: true });
-}
+const generateKeyPair = Promise.promisify(forge.pki.rsa.generateKeyPair);
 
 
 /**
@@ -109,24 +103,8 @@ function parseDomains(obj) {
  */
 
 async function createPrivateKey(size = 2048) {
-    let pemKey;
-
-    /* Native implementation */
-    if (nativeGenKeyPair) {
-        const result = await nativeGenKeyPair('rsa', {
-            modulusLength: size,
-            publicKeyEncoding: { type: 'spki', format: 'pem' },
-            privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-        });
-
-        pemKey = result[1];
-    }
-    /* Forge implementation */
-    else {
-        const keyPair = await forgeGenKeyPair({ bits: size });
-        pemKey = forge.pki.privateKeyToPem(keyPair.privateKey);
-    }
-
+    const keyPair = await generateKeyPair({ bits: size });
+    const pemKey = forge.pki.privateKeyToPem(keyPair.privateKey);
     return Buffer.from(pemKey);
 }
 
