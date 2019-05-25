@@ -14,8 +14,8 @@ Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
 
 | acme-client   | API       | Style     |
 | ------------- | --------- | --------- |
-| v2.x          | ACMEv2    | Promise   |
-| v1.x          | ACMEv1    | callback  |
+| >= v2.x       | ACMEv2    | Promise   |
+| == v1.x       | ACMEv1    | callback  |
 
 
 ## Installation
