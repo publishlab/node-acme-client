@@ -71,7 +71,8 @@ function getAction(key) {
     if (keyString.match(/CERTIFICATE\sREQUEST-{5}$/m)) {
         return 'req';
     }
-    else if (keyString.match(/(PUBLIC|PRIVATE)\sKEY-{5}$/m)) {
+
+    if (keyString.match(/(PUBLIC|PRIVATE)\sKEY-{5}$/m)) {
         return 'rsa';
     }
 
