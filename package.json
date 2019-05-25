@@ -3,12 +3,11 @@
     "description": "Simple and unopinionated ACME client",
     "author": "nmorsman",
     "version": "2.2.3",
-    "main": "lib/index.js",
+    "main": "src/index.js",
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
     "dependencies": {
         "axios": "^0.18.0",
-        "babel-runtime": "^6.26.0",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^3.0.0",
@@ -17,10 +16,6 @@
         "tempfile": "^2.0.0"
     },
     "devDependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-preset-env": "^1.6.0",
-        "babel-register": "^6.26.0",
         "chai": "^4.1.0",
         "chai-as-promised": "^7.0.0",
         "eslint": "^5.16.0",
@@ -28,16 +23,13 @@
         "eslint-plugin-import": "^2.10.0",
         "jsdoc-to-markdown": "^4.0.0",
         "mocha": "^5.0.0",
-        "nock": "^9.2.0",
-        "rimraf": "^2.6.2"
+        "nock": "^9.2.0"
     },
     "scripts": {
-        "babel": "rimraf lib/ && babel -d lib/ src/",
         "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md && jsdoc2md src/crypto/forge.js > docs/forge.md",
         "lint": "eslint .",
-        "mocha": "mocha -b -t 30000 -r babel-register \"test/setup.js\" \"test/**/*.spec.js\"",
-        "prepublish": "npm run babel",
-        "test": "npm run babel && npm run lint && npm run mocha && npm run docs"
+        "mocha": "mocha -b -t 30000 \"test/setup.js\" \"test/**/*.spec.js\"",
+        "test": "yarn run lint && yarn run mocha && yarn run docs"
     },
     "repository": {
         "type": "git",
