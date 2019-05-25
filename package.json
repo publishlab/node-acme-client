@@ -10,10 +10,10 @@
         "axios": "^0.18.0",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
-        "debug": "^3.0.0",
+        "debug": "^4.1.1",
         "node-forge": "^0.7.6",
         "openssl-wrapper": "^0.3.0",
-        "tempfile": "^2.0.0"
+        "tempfile": "^3.0.0"
     },
     "devDependencies": {
         "chai": "^4.1.0",
