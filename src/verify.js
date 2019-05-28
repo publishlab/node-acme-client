@@ -4,8 +4,8 @@
 
 const Promise = require('bluebird');
 const dns = Promise.promisifyAll(require('dns'));
-const axios = require('axios');
 const debug = require('debug')('acme-client');
+const axiosWrapper = require('./axiosWrapper');
 
 
 /**
@@ -23,7 +23,7 @@ const debug = require('debug')('acme-client');
 async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = `/.well-known/acme-challenge/${challenge.token}`) {
     debug(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}`);
     const challengeUrl = `http://${authz.identifier.value}${suffix}`;
-    const resp = await axios.get(challengeUrl);
+    const resp = await axiosWrapper.getInstance().get(challengeUrl);
 
     debug(`Query successful, HTTP status code: ${resp.status}`);
 

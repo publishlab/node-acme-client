@@ -3,15 +3,10 @@
  */
 
 const crypto = require('crypto');
-const os = require('os');
-const axios = require('axios');
 const debug = require('debug')('acme-client');
+const axiosWrapper = require('./axiosWrapper');
 const helper = require('./helper');
 const forge = require('./crypto/forge');
-const pkg = require('./../package.json');
-
-const userAgentString = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
-
 
 /**
  * ACME HTTP client
@@ -50,10 +45,9 @@ class HttpClient {
         }
 
         opts.headers['Content-Type'] = 'application/jose+json';
-        opts.headers['User-Agent'] = userAgentString;
 
         debug(`HTTP request: ${method} ${url}`);
-        const resp = await axios.request(opts);
+        const resp = await axiosWrapper.getInstance().request(opts);
 
         debug(`RESP ${resp.status} ${method} ${url}`);
         return resp;
