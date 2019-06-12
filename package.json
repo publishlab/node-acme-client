@@ -7,7 +7,7 @@
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
     "dependencies": {
-        "axios": "^0.18.0",
+        "axios": "^0.19.0",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^4.1.1",
