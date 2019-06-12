@@ -2,7 +2,7 @@
  * ACME API client
  */
 
-const helper = require('./helper');
+const util = require('./util');
 
 
 /**
@@ -64,7 +64,7 @@ class AcmeApi {
         }
 
         if (validStatusCodes.length && (validStatusCodes.indexOf(resp.status) === -1)) {
-            throw new Error(helper.formatResponseError(resp));
+            throw new Error(util.formatResponseError(resp));
         }
 
         return resp;

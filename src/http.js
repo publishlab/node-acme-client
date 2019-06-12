@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const os = require('os');
 const axios = require('axios');
 const debug = require('debug')('acme-client');
-const helper = require('./helper');
+const util = require('./util');
 const forge = require('./crypto/forge');
 const pkg = require('./../package.json');
 
@@ -91,9 +91,9 @@ class HttpClient {
         const modulus = await forge.getModulus(this.accountKey);
 
         this.jwk = {
-            e: helper.b64encode(exponent),
+            e: util.b64encode(exponent),
             kty: 'RSA',
-            n: helper.b64encode(modulus)
+            n: util.b64encode(modulus)
         };
 
         return this.jwk;
@@ -169,13 +169,13 @@ class HttpClient {
 
         /* Request payload */
         const result = {
-            payload: helper.b64encode(JSON.stringify(payload)),
-            protected: helper.b64encode(JSON.stringify(header))
+            payload: util.b64encode(JSON.stringify(payload)),
+            protected: util.b64encode(JSON.stringify(header))
         };
 
         /* Signature */
         const signer = crypto.createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
-        result.signature = helper.b64escape(signer.sign(this.accountKey, 'base64'));
+        result.signature = util.b64escape(signer.sign(this.accountKey, 'base64'));
 
         return result;
     }

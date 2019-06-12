@@ -2,7 +2,7 @@
  * ACME tests
  */
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const Promise = require('bluebird');
 const acme = require('./../src');
 

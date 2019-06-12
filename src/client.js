@@ -10,7 +10,7 @@ const Promise = require('bluebird');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
 const verify = require('./verify');
-const helper = require('./helper');
+const util = require('./util');
 const auto = require('./auto');
 
 
@@ -220,8 +220,8 @@ class AcmeClient {
             csr = Buffer.from(csr);
         }
 
-        const body = helper.getPemBody(csr);
-        const data = { csr: helper.b64escape(body) };
+        const body = util.getPemBody(csr);
+        const data = { csr: util.b64escape(body) };
 
         const resp = await this.api.finalizeOrder(order.finalize, data);
         return resp.data;
@@ -283,7 +283,7 @@ class AcmeClient {
     async getChallengeKeyAuthorization(challenge) {
         const jwk = await this.http.getJwk();
         const keysum = crypto.createHash('sha256').update(JSON.stringify(jwk));
-        const thumbprint = helper.b64escape(keysum.digest('base64'));
+        const thumbprint = util.b64escape(keysum.digest('base64'));
         const result = `${challenge.token}.${thumbprint}`;
 
         /**
@@ -302,7 +302,7 @@ class AcmeClient {
 
         if ((challenge.type === 'dns-01') || (challenge.type === 'tls-alpn-01')) {
             const shasum = crypto.createHash('sha256').update(result);
-            return helper.b64escape(shasum.digest('base64'));
+            return util.b64escape(shasum.digest('base64'));
         }
 
         throw new Error(`Unable to produce key authorization, unknown challenge type: ${challenge.type}`);
@@ -333,7 +333,7 @@ class AcmeClient {
         };
 
         debug('Waiting for ACME challenge verification', this.backoffOpts);
-        return helper.retry(verifyFn, this.backoffOpts);
+        return util.retry(verifyFn, this.backoffOpts);
     }
 
 
@@ -378,7 +378,7 @@ class AcmeClient {
 
             if (resp.data.status === 'invalid') {
                 abort();
-                throw new Error(helper.formatResponseError(resp));
+                throw new Error(util.formatResponseError(resp));
             }
             else if (resp.data.status === 'pending') {
                 throw new Error('Operation is pending');
@@ -391,7 +391,7 @@ class AcmeClient {
         };
 
         debug(`Waiting for valid status from: ${item.url}`, this.backoffOpts);
-        return helper.retry(verifyFn, this.backoffOpts);
+        return util.retry(verifyFn, this.backoffOpts);
     }
 
 
@@ -429,8 +429,8 @@ class AcmeClient {
      */
 
     async revokeCertificate(cert, data = {}) {
-        const body = helper.getPemBody(cert);
-        data.certificate = helper.b64escape(body);
+        const body = util.getPemBody(cert);
+        data.certificate = util.b64escape(body);
 
         const resp = await this.api.revokeCert(data);
         return resp.data;

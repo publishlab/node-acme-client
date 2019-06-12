@@ -2,7 +2,7 @@
  * Challenge verification tests
  */
 
-const assert = require('chai').assert;
+const { assert } = require('chai');
 const nock = require('nock');
 const verify = require('./../src/verify');
 
@@ -30,6 +30,7 @@ describe('verify', () => {
 
     before(() => {
         nock(`http://${fixtures.http.authz.identifier.value}`)
+            .persist()
             .get(`/.well-known/acme-challenge/${fixtures.http.challenge.token}`)
             .reply(200, fixtures.http.challenge.token);
     });
