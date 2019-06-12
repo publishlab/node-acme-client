@@ -3,14 +3,13 @@
  */
 
 const crypto = require('crypto');
-const os = require('os');
 const axios = require('axios');
 const debug = require('debug')('acme-client');
 const util = require('./util');
 const forge = require('./crypto/forge');
 const pkg = require('./../package.json');
 
-const userAgentString = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.release()})`;
+const defaultUserAgent = `node-${pkg.name}/${pkg.version}`;
 
 
 /**
@@ -19,12 +18,14 @@ const userAgentString = `node-${pkg.name}/${pkg.version} (${os.type()} ${os.rele
  * @class
  * @param {string} directoryUrl ACME directory URL
  * @param {buffer} accountKey PEM encoded account private key
+ * @param {object} axiosOpts Default axios config (https://github.com/axios/axios#request-config)
  */
 
 class HttpClient {
-    constructor(directoryUrl, accountKey) {
+    constructor(directoryUrl, accountKey, axiosOpts = {}) {
         this.directoryUrl = directoryUrl;
         this.accountKey = accountKey;
+        this.axiosOpts = axiosOpts;
 
         this.directory = null;
         this.jwk = null;
@@ -36,22 +37,32 @@ class HttpClient {
      *
      * @param {string} url HTTP URL
      * @param {string} method HTTP method
-     * @param {object} [opts] Request options
+     * @param {object} [extraOpts] Request options
      * @returns {Promise<object>} HTTP response
      */
 
-    async request(url, method, opts = {}) {
-        opts.url = url;
-        opts.method = method;
-        opts.validateStatus = null;
+    async request(url, method, extraOpts = {}) {
+        const baseOpts = {
+            headers: {}
+        };
 
-        if (typeof opts.headers === 'undefined') {
-            opts.headers = {};
+        const requestOpts = {
+            url,
+            method,
+            validateStatus: null
+        };
+
+        /* Merge options */
+        const opts = Object.assign(baseOpts, this.axiosOpts, requestOpts, extraOpts);
+
+        /* Headers */
+        if (typeof opts.headers['User-Agent'] === 'undefined') {
+            opts.headers['User-Agent'] = defaultUserAgent;
         }
 
         opts.headers['Content-Type'] = 'application/jose+json';
-        opts.headers['User-Agent'] = userAgentString;
 
+        /* Request */
         debug(`HTTP request: ${method} ${url}`);
         const resp = await axios.request(opts);
 

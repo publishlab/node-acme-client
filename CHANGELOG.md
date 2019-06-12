@@ -1,5 +1,6 @@
 ## v3.0.0
 
+* `added` Allow passing `axios` config through to the HTTP client
 * `breaking` Remove support for Node v4 and Node v6
 * `breaking` Remove Babel transpilation
 
