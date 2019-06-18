@@ -67,7 +67,7 @@ describe('client', () => {
     });
 
     it('should refuse account creation without ToS', async () => {
-        await assert.isRejected(testClient.createAccount());
+        await assert.isRejected(testClient.createAccount(), /must agree to terms of service/i);
     });
 
     it('should create an account', async () => {
@@ -89,6 +89,17 @@ describe('client', () => {
      * Find existing account using secondary client
      */
 
+    it('should throw when trying to find account using invalid account key', async () => {
+        const client = new acme.Client({
+            directoryUrl: acme.directory.letsencrypt.staging,
+            accountKey: testSecondaryPrivateKey
+        });
+
+        await assert.isRejected(client.createAccount({
+            onlyReturnExisting: true
+        }), /no account exists/i);
+    });
+
     it('should find existing account using account key', async () => {
         const client = new acme.Client({
             directoryUrl: acme.directory.letsencrypt.staging,
@@ -96,12 +107,12 @@ describe('client', () => {
         });
 
         const account = await client.createAccount({
-            termsOfServiceAgreed: true
+            onlyReturnExisting: true
         });
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
-        assert.strictEqual(testAccount.id, account.id);
+        assert.deepEqual(account.key, testAccount.key);
     });
 
 
@@ -116,7 +127,7 @@ describe('client', () => {
             accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
         });
 
-        await assert.isRejected(client.updateAccount());
+        await assert.isRejected(client.updateAccount(), /jws verification error/i);
     });
 
     it('should find existing account using account URL', async () => {
@@ -126,11 +137,13 @@ describe('client', () => {
             accountUrl: testAccountUrl
         });
 
-        const account = await client.createAccount({});
+        const account = await client.createAccount({
+            onlyReturnExisting: true
+        });
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
-        assert.strictEqual(testAccount.id, account.id);
+        assert.deepEqual(account.key, testAccount.key);
     });
 
 
@@ -143,7 +156,7 @@ describe('client', () => {
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
-        assert.strictEqual(testAccount.id, account.id);
+        assert.deepEqual(account.key, testAccount.key);
     });
 
 
@@ -153,8 +166,10 @@ describe('client', () => {
 
     it('should change account private key', async () => {
         const account = await testClient.updateAccountKey(testSecondaryPrivateKey);
+
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
+        assert.notDeepEqual(account.key, testAccount.key);
     });
 
 
@@ -262,6 +277,6 @@ describe('client', () => {
             identifiers: [{ type: 'dns', value: 'nope.com' }]
         };
 
-        await assert.isRejected(testClient.createOrder(data));
+        await assert.isRejected(testClient.createOrder(data), /account is not valid/i);
     });
 });
