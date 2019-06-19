@@ -156,7 +156,7 @@ class AcmeClient {
         const accountUrl = this.api.getAccountUrl();
 
         /* Create new HTTP and API clients using new key */
-        const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey);
+        const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey, this.opts.axiosOpts);
         const newApiClient = new AcmeApi(newHttpClient, accountUrl);
 
         /* Get new JWK */
