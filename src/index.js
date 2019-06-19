@@ -23,3 +23,10 @@ exports.directory = {
 
 exports.forge = require('./crypto/forge');
 exports.openssl = require('./crypto/openssl');
+
+
+/**
+ * Axios
+ */
+
+exports.axios = require('./axios');

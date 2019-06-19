@@ -4,8 +4,8 @@
 
 const Promise = require('bluebird');
 const dns = Promise.promisifyAll(require('dns'));
-const axios = require('axios');
 const debug = require('debug')('acme-client');
+const axios = require('./axios');
 
 
 /**

@@ -147,6 +147,27 @@ const order = await client.createOrder({
 ```
 
 
+## HTTP defaults
+
+This module uses [axios](https://github.com/axios/axios) when communicating with the ACME API, and exposes the instance through `.axios`.
+
+Should you, for example, need to change the default axios configuration to route requests through an HTTP proxy, this can be achieved as follows:
+
+```js
+const acme = require('acme-client');
+
+acme.axios.defaults.proxy = {
+    host: '127.0.0.1',
+    port: 9000
+};
+```
+
+A complete list of axios options and documentation can be found at:
+
+* [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
+* [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
+
+
 ## Debugging
 
 `acme-client` uses [debug](https://www.npmjs.com/package/debug) for debugging which can be enabled by running

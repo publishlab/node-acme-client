@@ -24,8 +24,7 @@ const defaultOpts = {
     accountUrl: null,
     backoffAttempts: 5,
     backoffMin: 5000,
-    backoffMax: 30000,
-    axiosOpts: {}
+    backoffMax: 30000
 };
 
 
@@ -40,7 +39,6 @@ const defaultOpts = {
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
- * @param {object} [opts.axiosOpts] Default axios config (https://github.com/axios/axios#request-config)
  */
 
 class AcmeClient {
@@ -57,7 +55,7 @@ class AcmeClient {
             max: this.opts.backoffMax
         };
 
-        this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey, this.opts.axiosOpts);
+        this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey);
         this.api = new AcmeApi(this.http, this.opts.accountUrl);
     }
 
@@ -156,7 +154,7 @@ class AcmeClient {
         const accountUrl = this.api.getAccountUrl();
 
         /* Create new HTTP and API clients using new key */
-        const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey, this.opts.axiosOpts);
+        const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey);
         const newApiClient = new AcmeApi(newHttpClient, accountUrl);
 
         /* Get new JWK */

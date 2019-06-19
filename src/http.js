@@ -3,13 +3,10 @@
  */
 
 const crypto = require('crypto');
-const axios = require('axios');
 const debug = require('debug')('acme-client');
+const axios = require('./axios');
 const util = require('./util');
 const forge = require('./crypto/forge');
-const pkg = require('./../package.json');
-
-const defaultUserAgent = `node-${pkg.name}/${pkg.version}`;
 
 
 /**
@@ -18,14 +15,12 @@ const defaultUserAgent = `node-${pkg.name}/${pkg.version}`;
  * @class
  * @param {string} directoryUrl ACME directory URL
  * @param {buffer} accountKey PEM encoded account private key
- * @param {object} axiosOpts Default axios config (https://github.com/axios/axios#request-config)
  */
 
 class HttpClient {
-    constructor(directoryUrl, accountKey, axiosOpts = {}) {
+    constructor(directoryUrl, accountKey) {
         this.directoryUrl = directoryUrl;
         this.accountKey = accountKey;
-        this.axiosOpts = axiosOpts;
 
         this.directory = null;
         this.jwk = null;
@@ -37,27 +32,18 @@ class HttpClient {
      *
      * @param {string} url HTTP URL
      * @param {string} method HTTP method
-     * @param {object} [extraOpts] Request options
+     * @param {object} [opts] Request options
      * @returns {Promise<object>} HTTP response
      */
 
-    async request(url, method, extraOpts = {}) {
-        const baseOpts = {
-            headers: {}
-        };
-
-        const requestOpts = {
-            url,
-            method,
-            validateStatus: null
-        };
-
-        /* Merge options */
-        const opts = Object.assign(baseOpts, this.axiosOpts, requestOpts, extraOpts);
+    async request(url, method, opts = {}) {
+        opts.url = url;
+        opts.method = method;
+        opts.validateStatus = null;
 
         /* Headers */
-        if (typeof opts.headers['User-Agent'] === 'undefined') {
-            opts.headers['User-Agent'] = defaultUserAgent;
+        if (typeof opts.headers === 'undefined') {
+            opts.headers = {};
         }
 
         opts.headers['Content-Type'] = 'application/jose+json';
