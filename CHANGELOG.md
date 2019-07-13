@@ -1,4 +1,4 @@
-## v3.0.0
+## v3.0.0 (2019-07-13)
 
 * `added` Expose `axios` instance to allow manipulating HTTP client defaults
 * `breaking` Remove support for Node v4 and v6
