@@ -20,6 +20,8 @@ Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
 
 ## Installation
 
+**Notice: With the release of `acme-client v3.*` Node v4 and v6 is no longer supported.**
+
 ```bash
 $ npm install acme-client
 ```
