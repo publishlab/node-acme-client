@@ -4,6 +4,9 @@
 
 const acme = require('./../');
 
+// const Promise = require('bluebird');
+// const fs = Promise.promisifyAll(require('fs'));
+
 
 function log(m) {
     process.stdout.write(`${m}\n`);
@@ -31,7 +34,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would write "${fileContents}" to path "${filePath}"`);
-        // await fs.writeFile(filePath, fileContents);
+        // await fs.writeFileAsync(filePath, fileContents);
     }
 
     /* dns-01 */
@@ -43,7 +46,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would create TXT record "${dnsRecord}" with value "${recordValue}"`);
-        // await cloudflare.createRecord(dnsRecord, 'TXT', recordValue);
+        // await dnsProvider.createRecord(dnsRecord, 'TXT', recordValue);
     }
 }
 
@@ -68,7 +71,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would remove file on path "${filePath}"`);
-        // await fs.unlink(filePath);
+        // await fs.unlinkAsync(filePath);
     }
 
     /* dns-01 */
@@ -80,7 +83,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would remove TXT record "${dnsRecord}" with value "${recordValue}"`);
-        // await cloudflare.removeRecord(dnsRecord, 'TXT');
+        // await dnsProvider.removeRecord(dnsRecord, 'TXT');
     }
 }
 
