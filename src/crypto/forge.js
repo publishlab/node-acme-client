@@ -210,7 +210,12 @@ exports.readCertificateInfo = async function(cert) {
 function createCsrSubject(subjectObj) {
     return Object.entries(subjectObj).reduce((result, [shortName, value]) => {
         if (value) {
-            result.push({ shortName, value });
+            if (shortName !== 'C') {
+                result.push({ shortName, value, valueTagClass: forge.asn1.Type.UTF8 });
+            }
+            else {
+                result.push({ shortName, value });
+            }
         }
 
         return result;
