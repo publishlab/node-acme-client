@@ -168,10 +168,19 @@ class HttpClient {
         }
 
         /* Request payload */
-        const result = {
-            payload: helper.b64encode(JSON.stringify(payload)),
-            protected: helper.b64encode(JSON.stringify(header))
-        };
+        let result;
+        if (payload === "") {
+            result = {
+                payload: "",
+                protected: util.b64encode(JSON.stringify(header))
+            };
+        }
+        else {
+            result = {
+                payload: util.b64encode(JSON.stringify(payload)),
+                protected: util.b64encode(JSON.stringify(header))
+            };
+        }
 
         /* Signature */
         const signer = crypto.createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
