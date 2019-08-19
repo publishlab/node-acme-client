@@ -371,7 +371,7 @@ class AcmeClient {
         }
 
         const verifyFn = async (abort) => {
-            const resp = await this.api.get(item.url, [200]);
+            const resp = await this.api.apiRequest('', null, 'post', [200], true, item.url);
 
             /* Verify status */
             debug(`Item has status: ${resp.data.status}`);
@@ -413,7 +413,7 @@ class AcmeClient {
             throw new Error('Unable to download certificate, URL not found');
         }
 
-        const resp = await this.http.request(order.certificate, 'get', { responseType: 'text' });
+        const resp = await this.api.apiRequest('', null, 'post', [200], true, order.certificate);
         return resp.data;
     }
 
