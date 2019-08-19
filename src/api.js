@@ -189,7 +189,7 @@ class AcmeApi {
      */
 
     getAuthorization(url) {
-        return this.get(url, [200]);
+        return this.apiRequest('', null, 'post', [200], true, url);
     }
 
 
