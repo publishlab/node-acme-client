@@ -166,9 +166,9 @@ class HttpClient {
 
         /* Request payload */
         let result;
-        if (payload === "") {
+        if (payload === '') {
             result = {
-                payload: "",
+                payload: '',
                 protected: util.b64encode(JSON.stringify(header))
             };
         }
