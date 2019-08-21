@@ -1,4 +1,4 @@
-## v2.3.0
+## v2.3.0 (2019-08-21)
 
 * `backport` Implemented `POST-as-GET` for all ACME API requests
 
