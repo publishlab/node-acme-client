@@ -170,8 +170,8 @@ class HttpClient {
 
         /* Request payload */
         const result = {
-            payload: payload ? util.b64encode(JSON.stringify(payload)) : '',
-            protected: util.b64encode(JSON.stringify(header))
+            payload: payload ? helper.b64encode(JSON.stringify(payload)) : '',
+            protected: helper.b64encode(JSON.stringify(header))
         };
 
         /* Signature */

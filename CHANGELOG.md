@@ -1,3 +1,10 @@
+## v2.3.0
+
+* `backport` Implemented `POST-as-GET` for all ACME API requests
+
+**Notice: [On November 1st, 2019 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.1.0` or `>= v2.3.0` before this date to avoid being affected by this API change.**
+
+
 ## v2.2.3 (2019-01-25)
 
 * `added` DNS CNAME detection when verifying `dns-01` challenges
