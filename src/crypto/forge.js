@@ -200,6 +200,27 @@ exports.readCertificateInfo = async function(cert) {
 
 
 /**
+ * Determine ASN.1 type for CSR subject short name
+ * Note: https://tools.ietf.org/html/rfc5280
+ *
+ * @private
+ * @param {string} shortName CSR subject short name
+ * @returns {forge.asn1.Type} ASN.1 type
+ */
+
+function getCsrValueTagClass(shortName) {
+    switch (shortName) {
+        case 'C':
+            return forge.asn1.Type.PRINTABLESTRING;
+        case 'E':
+            return forge.asn1.Type.IA5STRING;
+        default:
+            return forge.asn1.Type.UTF8;
+    }
+}
+
+
+/**
  * Create array of short names and values for Certificate Signing Request subjects
  *
  * @private
@@ -210,12 +231,8 @@ exports.readCertificateInfo = async function(cert) {
 function createCsrSubject(subjectObj) {
     return Object.entries(subjectObj).reduce((result, [shortName, value]) => {
         if (value) {
-            if (shortName !== 'C') {
-                result.push({ shortName, value, valueTagClass: forge.asn1.Type.UTF8 });
-            }
-            else {
-                result.push({ shortName, value });
-            }
+            const valueTagClass = getCsrValueTagClass(shortName);
+            result.push({ shortName, value, valueTagClass });
         }
 
         return result;

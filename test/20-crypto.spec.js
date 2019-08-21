@@ -61,6 +61,7 @@ describe('crypto', () => {
         describe(`engine/${name}`, () => {
             let testCsr;
             let testSanCsr;
+            let testNonAsciiCsr;
 
 
             /**
@@ -111,6 +112,19 @@ describe('crypto', () => {
                 testSanCsr = csr;
             });
 
+            it('should generate a non-ASCII CSR', async () => {
+                const [key, csr] = await engine.createCsr({
+                    commonName: testCsrDomain,
+                    organization: '大安區',
+                    organizationUnit: '中文部門'
+                });
+
+                assert.strictEqual(Buffer.isBuffer(key), true);
+                assert.strictEqual(Buffer.isBuffer(csr), true);
+
+                testNonAsciiCsr = csr;
+            });
+
             it('should resolve domains from CSR', async () => {
                 const result = await engine.readCsrDomains(testCsr);
 
@@ -129,6 +143,16 @@ describe('crypto', () => {
                 assert.isArray(result.altNames);
                 assert.strictEqual(result.commonName, testSanCsrDomains[0]);
                 assert.deepEqual(result.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
+            });
+
+            it('should resolve domains from non-ASCII CSR', async () => {
+                const result = await engine.readCsrDomains(testNonAsciiCsr);
+
+                assert.isObject(result);
+                assert.isString(result.commonName);
+                assert.isArray(result.altNames);
+                assert.strictEqual(result.commonName, testCsrDomain);
+                assert.strictEqual(result.altNames.length, 0);
             });
 
 

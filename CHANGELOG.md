@@ -1,3 +1,8 @@
+## v3.0.1
+
+* `added` UTF-8 support when generating a CSR subject using forge
+
+
 ## v3.0.0 (2019-07-13)
 
 * `added` Expose `axios` instance to allow manipulating HTTP client defaults
