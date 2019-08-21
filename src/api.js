@@ -36,22 +36,17 @@ class AcmeApi {
 
 
     /**
-     * ACME API HTTP request
+     * ACME API request
      *
      * @private
-     * @param {object} payload Request payload
-     * @param {string} resource Request resource
+     * @param {string} url Request URL
+     * @param {object} [payload] Request payload, default: `null`
      * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
      * @param {boolean} [jwsKid] Use KID in JWS header, default: `true`
-     * @param {string} [url] HTTP request url
      * @returns {Promise<object>} HTTP response
      */
 
-    async apiRequest(payload, resource, validStatusCodes = [], jwsKid = true, url = null) {
-        if (!url) {
-            url = await this.http.getResourceUrl(resource);
-        }
-
+    async apiRequest(url, payload = null, validStatusCodes = [], jwsKid = true) {
         const kid = jwsKid ? this.getAccountUrl() : null;
         const resp = await this.http.signedRequest(url, payload, kid);
 
@@ -60,6 +55,23 @@ class AcmeApi {
         }
 
         return resp;
+    }
+
+
+    /**
+     * ACME API request by resource name helper
+     *
+     * @private
+     * @param {string} resource Request resource name
+     * @param {object} [payload] Request payload, default: `null`
+     * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
+     * @param {boolean} [jwsKid] Use KID in JWS header, default: `true`
+     * @returns {Promise<object>} HTTP response
+     */
+
+    async apiResourceRequest(resource, payload = null, validStatusCodes = [], jwsKid = true) {
+        const resourceUrl = await this.http.getResourceUrl(resource);
+        return this.apiRequest(resourceUrl, payload, validStatusCodes, jwsKid);
     }
 
 
@@ -90,7 +102,7 @@ class AcmeApi {
      */
 
     async createAccount(data) {
-        const resp = await this.apiRequest(data, 'newAccount', [200, 201], false);
+        const resp = await this.apiResourceRequest('newAccount', data, [200, 201], false);
 
         /* Set account URL */
         if (resp.headers.location) {
@@ -111,7 +123,7 @@ class AcmeApi {
      */
 
     updateAccount(data) {
-        return this.apiRequest(data, null, [200, 202], true, this.getAccountUrl());
+        return this.apiRequest(this.getAccountUrl(), data, [200, 202]);
     }
 
 
@@ -125,7 +137,7 @@ class AcmeApi {
      */
 
     updateAccountKey(data) {
-        return this.apiRequest(data, 'keyChange', [200]);
+        return this.apiResourceRequest('keyChange', data, [200]);
     }
 
 
@@ -139,7 +151,7 @@ class AcmeApi {
      */
 
     createOrder(data) {
-        return this.apiRequest(data, 'newOrder', [201]);
+        return this.apiResourceRequest('newOrder', data, [201]);
     }
 
 
@@ -154,7 +166,7 @@ class AcmeApi {
      */
 
     finalizeOrder(url, data) {
-        return this.apiRequest(data, null, [200], true, url);
+        return this.apiRequest(url, data, [200]);
     }
 
 
@@ -168,7 +180,7 @@ class AcmeApi {
      */
 
     getAuthorization(url) {
-        return this.apiRequest('', null, [200], true, url);
+        return this.apiRequest(url, null, [200]);
     }
 
 
@@ -183,7 +195,7 @@ class AcmeApi {
      */
 
     updateAuthorization(url, data) {
-        return this.apiRequest(data, null, [200], true, url);
+        return this.apiRequest(url, data, [200]);
     }
 
 
@@ -198,7 +210,7 @@ class AcmeApi {
      */
 
     completeChallenge(url, data) {
-        return this.apiRequest(data, null, [200], true, url);
+        return this.apiRequest(url, data, [200]);
     }
 
 
@@ -212,7 +224,7 @@ class AcmeApi {
      */
 
     revokeCert(data) {
-        return this.apiRequest(data, 'revokeCert', [200]);
+        return this.apiResourceRequest('revokeCert', data, [200]);
     }
 }
 
