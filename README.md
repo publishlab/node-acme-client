@@ -17,14 +17,16 @@ Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
 | >= v2.x       | ACMEv2    | Promise   |
 | == v1.x       | ACMEv1    | callback  |
 
+**Notice: [On November 1st, 2019 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.1.0` or `>= v2.3.0` before this date to avoid being affected by this API change.**
+
 
 ## Installation
-
-**Notice: With the release of `acme-client v3.*` Node v4 and v6 is no longer supported.**
 
 ```bash
 $ npm install acme-client
 ```
+
+**With the release of `acme-client v3.*` Node v4 and v6 are no longer supported.**
 
 
 ## Usage

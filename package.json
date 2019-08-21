@@ -2,7 +2,7 @@
     "name": "acme-client",
     "description": "Simple and unopinionated ACME client",
     "author": "nmorsman",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "main": "src/index.js",
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
@@ -36,13 +36,12 @@
         "url": "https://github.com/publishlab/node-acme-client"
     },
     "keywords": [
-        "simple",
         "acme",
-        "acmev2",
         "client",
-        "boulder",
         "lets",
-        "encrypt"
+        "encrypt",
+        "acmev2",
+        "boulder"
     ],
     "bugs": {
         "url": "https://github.com/publishlab/node-acme-client/issues"
