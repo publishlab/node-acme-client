@@ -185,16 +185,15 @@ class HttpClient {
      * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#request-authentication
      *
      * @param {string} url Request URL
-     * @param {string} method HTTP method
      * @param {object} payload Request payload
      * @param {string} [kid] Request KID
      * @returns {Promise<object>} HTTP response
      */
 
-    async signedRequest(url, method, payload, kid = null) {
+    async signedRequest(url, payload, kid = null) {
         const nonce = await this.getNonce();
         const data = await this.createSignedBody(url, payload, nonce, kid);
-        return this.request(url, method, { data });
+        return this.request(url, 'post', { data });
     }
 }
 
