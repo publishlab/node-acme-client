@@ -1,6 +1,9 @@
-## v3.0.1
+## v3.1.0
 
 * `added` UTF-8 support when generating a CSR subject using forge
+* `fixed` Implemented `POST-as-GET` for all ACME API requests
+
+**Notice: [On November 1st, 2019 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client` >= v3.1.0 before this date to avoid being affected by this API change.**
 
 
 ## v3.0.0 (2019-07-13)
