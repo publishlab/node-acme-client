@@ -18,3 +18,4 @@ rules:
   no-param-reassign: 0
   comma-dangle: [2, 'never']
   max-len: [1, 200, 2, { ignoreUrls: true, ignoreComments: false }]
+  prefer-object-spread: 0

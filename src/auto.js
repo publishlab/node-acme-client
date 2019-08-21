@@ -69,7 +69,7 @@ module.exports = async function(client, userOpts) {
      */
 
     debug('[auto] Placing new certificate order with ACME provider');
-    const orderPayload = { identifiers: domains.map(d => ({ type: 'dns', value: d })) };
+    const orderPayload = { identifiers: domains.map((d) => ({ type: 'dns', value: d })) };
     const order = await client.createOrder(orderPayload);
     const authorizations = await client.getAuthorizations(order);
 

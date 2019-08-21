@@ -65,15 +65,15 @@ function parseDomains(obj) {
     let altNames = [];
     let altNamesDict = [];
 
-    const commonNameObject = (obj.subject.attributes || []).find(a => a.name === 'commonName');
-    const rootAltNames = (obj.extensions || []).find(e => 'altNames' in e);
-    const rootExtensions = (obj.attributes || []).find(a => 'extensions' in a);
+    const commonNameObject = (obj.subject.attributes || []).find((a) => a.name === 'commonName');
+    const rootAltNames = (obj.extensions || []).find((e) => 'altNames' in e);
+    const rootExtensions = (obj.attributes || []).find((a) => 'extensions' in a);
 
     if (rootAltNames && rootAltNames.altNames && rootAltNames.altNames.length) {
         altNamesDict = rootAltNames.altNames;
     }
     else if (rootExtensions && rootExtensions.extensions && rootExtensions.extensions.length) {
-        const extAltNames = rootExtensions.extensions.find(e => 'altNames' in e);
+        const extAltNames = rootExtensions.extensions.find((e) => 'altNames' in e);
 
         if (extAltNames && extAltNames.altNames && extAltNames.altNames.length) {
             altNamesDict = extAltNames.altNames;
@@ -85,7 +85,7 @@ function parseDomains(obj) {
     }
 
     if (altNamesDict) {
-        altNames = altNamesDict.map(a => a.value);
+        altNames = altNamesDict.map((a) => a.value);
     }
 
     return {

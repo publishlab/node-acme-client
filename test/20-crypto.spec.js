@@ -231,21 +231,21 @@ describe('crypto', () => {
         it('should have identical public keys', () => {
             if (publicKeyStore.length > 1) {
                 const reference = publicKeyStore.shift();
-                publicKeyStore.forEach(item => assert.strictEqual(reference, item));
+                publicKeyStore.forEach((item) => assert.strictEqual(reference, item));
             }
         });
 
         it('should have identical moduli', () => {
             if (modulusStore.length > 1) {
                 const reference = modulusStore.shift();
-                modulusStore.forEach(item => assert.deepStrictEqual(reference, item));
+                modulusStore.forEach((item) => assert.deepStrictEqual(reference, item));
             }
         });
 
         it('should have identical public exponents', () => {
             if (exponentStore.length > 1) {
                 const reference = exponentStore.shift();
-                exponentStore.forEach(item => assert.deepStrictEqual(reference, item));
+                exponentStore.forEach((item) => assert.deepStrictEqual(reference, item));
             }
         });
     });
