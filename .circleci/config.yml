@@ -33,7 +33,12 @@ commands:
   test:
     steps:
       - run: yarn
-      - run: yarn run test
+
+      - run:
+          command: yarn run test
+          environment:
+            NODE_EXTRA_CA_CERTS: /tmp/ca.cert.pem
+            ACME_DIRECTORY_URL: https://localhost:14000/dir
 
 jobs:
   v8: { docker: [{ image: circleci/node:8 }], steps: [ pre, install, test ]}

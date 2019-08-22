@@ -9,7 +9,7 @@ const acme = require('./../src');
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 
 
-describe('client', () => {
+describe(`client - ${directoryUrl}`, () => {
     let testPrivateKey;
     let testSecondaryPrivateKey;
     let testClient;
@@ -69,7 +69,7 @@ describe('client', () => {
     });
 
     it('should refuse account creation without ToS', async () => {
-        await assert.isRejected(testClient.createAccount(), /must agree to terms of service/i);
+        await assert.isRejected(testClient.createAccount());
     });
 
     it('should create an account', async () => {
@@ -99,7 +99,7 @@ describe('client', () => {
 
         await assert.isRejected(client.createAccount({
             onlyReturnExisting: true
-        }), /no account exists/i);
+        }));
     });
 
     it('should find existing account using account key', async () => {
@@ -129,7 +129,7 @@ describe('client', () => {
             accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
         });
 
-        await assert.isRejected(client.updateAccount(), /jws verification error/i);
+        await assert.isRejected(client.updateAccount());
     });
 
     it('should find existing account using account URL', async () => {
@@ -167,7 +167,11 @@ describe('client', () => {
      */
 
     it('should change account private key', async () => {
-        const account = await testClient.updateAccountKey(testSecondaryPrivateKey);
+        await testClient.updateAccountKey(testSecondaryPrivateKey);
+
+        const account = await testClient.createAccount({
+            onlyReturnExisting: true
+        });
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
@@ -279,6 +283,6 @@ describe('client', () => {
             identifiers: [{ type: 'dns', value: 'nope.com' }]
         };
 
-        await assert.isRejected(testClient.createOrder(data), /account is not valid/i);
+        await assert.isRejected(testClient.createOrder(data));
     });
 });
