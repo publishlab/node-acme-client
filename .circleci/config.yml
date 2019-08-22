@@ -2,24 +2,47 @@
 version: 2.1
 
 commands:
-  test:
+  pre:
     steps:
       - run: node --version
       - run: npm --version
       - run: yarn --version
       - run: openssl version
       - checkout
+
+  install:
+    steps:
+      - run:
+          name: Install Pebble
+          command: /bin/bash ./scripts/test-suite-install-pebble.sh
+
+      - run:
+          name: Start Pebble Challenge Test Server
+          command: /tmp/pebble-challtestsrv
+          background: true
+
+      - run:
+          name: Start Pebble
+          command: /tmp/pebble -strict -config /tmp/pebble.json
+          background: true
+
+      - run:
+          name: Wait for Pebble
+          command: /bin/bash ./scripts/test-suite-wait-for-pebble.sh
+
+  test:
+    steps:
       - run: yarn
       - run: yarn run test
 
 jobs:
-  node-v8: { docker: [{ image: circleci/node:8 }], steps: [ test ]}
-  node-v10: { docker: [{ image: circleci/node:10 }], steps: [ test ]}
-  node-v12: { docker: [{ image: circleci/node:12 }], steps: [ test ]}
+  v8: { docker: [{ image: circleci/node:8 }], steps: [ pre, install, test ]}
+  v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install, test ]}
+  v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install, test ]}
 
 workflows:
   test-suite:
     jobs:
-      - node-v8
-      - node-v10
-      - node-v12
+      - v8
+      - v10
+      - v12
