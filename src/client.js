@@ -136,6 +136,11 @@ class AcmeClient {
             delete data.onlyReturnExisting;
         }
 
+        /* POST-as-GET */
+        if (Object.keys(data).length === 0) {
+            data = null;
+        }
+
         const resp = await this.api.updateAccount(data);
         return resp.data;
     }
