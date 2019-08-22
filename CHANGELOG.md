@@ -1,3 +1,8 @@
+## next
+
+* `fixed` Retry signed API requests on `urn:ietf:params:acme:error:badNonce`
+
+
 ## v3.1.0 (2019-08-21)
 
 * `added` UTF-8 support when generating a CSR subject using forge

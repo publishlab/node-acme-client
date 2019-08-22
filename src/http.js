@@ -22,6 +22,7 @@ class HttpClient {
         this.directoryUrl = directoryUrl;
         this.accountKey = accountKey;
 
+        this.maxBadNonceRetries = 5;
         this.directory = null;
         this.jwk = null;
     }
@@ -187,13 +188,31 @@ class HttpClient {
      * @param {string} url Request URL
      * @param {object} payload Request payload
      * @param {string} [kid] Request KID
+     * @param {string} [nonce] Request anti-replay nonce
+     * @param {number} [attempts] Request attempt counter
      * @returns {Promise<object>} HTTP response
      */
 
-    async signedRequest(url, payload, kid = null) {
-        const nonce = await this.getNonce();
+    async signedRequest(url, payload, kid = null, nonce = null, attempts = 0) {
+        if (!nonce) {
+            nonce = await this.getNonce();
+        }
+
+        /* Sign body and send request */
         const data = await this.createSignedBody(url, payload, nonce, kid);
-        return this.request(url, 'post', { data });
+        const resp = await this.request(url, 'post', { data });
+
+        /* Retry on bad nonce - https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-6.4 */
+        if (resp.data && resp.data.type && (resp.status === 400) && (resp.data.type === 'urn:ietf:params:acme:error:badNonce') && (attempts < this.maxBadNonceRetries)) {
+            const newNonce = resp.headers['replay-nonce'] || null;
+            attempts += 1;
+
+            debug(`Caught invalid nonce error, retrying (${attempts}/${this.maxBadNonceRetries}) signed request to: ${url}`);
+            return this.signedRequest(url, payload, kid, newNonce, attempts);
+        }
+
+        /* Return response */
+        return resp;
     }
 }
 
