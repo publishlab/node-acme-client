@@ -131,6 +131,11 @@ class AcmeClient {
             return this.createAccount(data);
         }
 
+        /* Remove data only applicable to createAccount() */
+        if ('onlyReturnExisting' in data) {
+            delete data.onlyReturnExisting;
+        }
+
         const resp = await this.api.updateAccount(data);
         return resp.data;
     }
