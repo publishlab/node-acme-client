@@ -6,6 +6,8 @@ const { assert } = require('chai');
 const Promise = require('bluebird');
 const acme = require('./../src');
 
+const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+
 
 describe('client', () => {
     let testPrivateKey;
@@ -44,7 +46,7 @@ describe('client', () => {
 
     it('should initialize client', () => {
         testClient = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
+            directoryUrl,
             accountKey: testPrivateKey
         });
     });
@@ -91,7 +93,7 @@ describe('client', () => {
 
     it('should throw when trying to find account using invalid account key', async () => {
         const client = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
+            directoryUrl,
             accountKey: testSecondaryPrivateKey
         });
 
@@ -102,7 +104,7 @@ describe('client', () => {
 
     it('should find existing account using account key', async () => {
         const client = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
+            directoryUrl,
             accountKey: testPrivateKey
         });
 
@@ -122,7 +124,7 @@ describe('client', () => {
 
     it('should refuse invalid account URL', async () => {
         const client = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
+            directoryUrl,
             accountKey: testPrivateKey,
             accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
         });
@@ -132,7 +134,7 @@ describe('client', () => {
 
     it('should find existing account using account URL', async () => {
         const client = new acme.Client({
-            directoryUrl: acme.directory.letsencrypt.staging,
+            directoryUrl,
             accountKey: testPrivateKey,
             accountUrl: testAccountUrl
         });
