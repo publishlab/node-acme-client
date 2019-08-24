@@ -355,11 +355,7 @@ class AcmeClient {
      */
 
     async completeChallenge(challenge) {
-        const data = {
-            keyAuthorization: await this.getChallengeKeyAuthorization(challenge)
-        };
-
-        const resp = await this.api.completeChallenge(challenge.url, data);
+        const resp = await this.api.completeChallenge(challenge.url, {});
         return resp.data;
     }
 
