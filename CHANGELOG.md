@@ -5,6 +5,7 @@
     - This change is not considered breaking since `commonName: 'localhost'` will result in an error when ordering a certificate
 * `fixed` Retry signed API requests on `urn:ietf:params:acme:error:badNonce`
 * `fixed` Minor bugs related to `POST-as-GET` when calling `updateAccount()`
+* `fixed` Ensure subject common name is present in SAN when creating a CSR
 
 
 ## v3.1.0 (2019-08-21)

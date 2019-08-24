@@ -282,12 +282,21 @@ exports.createCsr = async function(data, key = null) {
         key = Buffer.from(key);
     }
 
+    if (typeof data.altNames === 'undefined') {
+        data.altNames = [];
+    }
+
     const csr = forge.pki.createCertificationRequest();
 
     /* Public key */
     const privateKey = forge.pki.privateKeyFromPem(key);
     const publicKey = forge.pki.rsa.setPublicKey(privateKey.n, privateKey.e);
     csr.publicKey = publicKey;
+
+    /* Ensure subject common name is present in SAN - https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf */
+    if (data.commonName && !data.altNames.includes(data.commonName)) {
+        data.altNames.unshift(data.commonName);
+    }
 
     /* Subject */
     const subject = createCsrSubject({
@@ -303,7 +312,7 @@ exports.createCsr = async function(data, key = null) {
     csr.setSubject(subject);
 
     /* SAN extension */
-    if (data.altNames && data.altNames.length) {
+    if (data.altNames.length) {
         csr.setAttributes([{
             name: 'extensionRequest',
             extensions: [{

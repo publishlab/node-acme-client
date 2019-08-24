@@ -336,6 +336,15 @@ exports.createCsr = async function(data, key = null) {
         key = Buffer.from(key);
     }
 
+    if (typeof data.altNames === 'undefined') {
+        data.altNames = [];
+    }
+
+    /* Ensure subject common name is present in SAN - https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf */
+    if (data.commonName && !data.altNames.includes(data.commonName)) {
+        data.altNames.unshift(data.commonName);
+    }
+
     /* Create CSR options */
     const opts = {
         new: true,
@@ -346,7 +355,7 @@ exports.createCsr = async function(data, key = null) {
     /* Create CSR config for SAN CSR */
     let csrConfig = null;
 
-    if (data.altNames && data.altNames.length) {
+    if (data.altNames.length) {
         opts.extensions = 'v3_req';
 
         const altNames = Object.entries(data.altNames).map(([k, v]) => {

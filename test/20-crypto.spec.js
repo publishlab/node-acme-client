@@ -61,6 +61,7 @@ describe('crypto', () => {
         describe(`engine/${name}`, () => {
             let testCsr;
             let testSanCsr;
+            let testNonCnCsr;
             let testNonAsciiCsr;
 
 
@@ -112,6 +113,17 @@ describe('crypto', () => {
                 testSanCsr = csr;
             });
 
+            it('should generate a CSR without common name', async () => {
+                const [key, csr] = await engine.createCsr({
+                    altNames: testSanCsrDomains
+                });
+
+                assert.strictEqual(Buffer.isBuffer(key), true);
+                assert.strictEqual(Buffer.isBuffer(csr), true);
+
+                testNonCnCsr = csr;
+            });
+
             it('should generate a non-ASCII CSR', async () => {
                 const [key, csr] = await engine.createCsr({
                     commonName: testCsrDomain,
@@ -132,7 +144,7 @@ describe('crypto', () => {
                 assert.isString(result.commonName);
                 assert.isArray(result.altNames);
                 assert.strictEqual(result.commonName, testCsrDomain);
-                assert.strictEqual(result.altNames.length, 0);
+                assert.deepStrictEqual(result.altNames, [testCsrDomain]);
             });
 
             it('should resolve domains from SAN CSR', async () => {
@@ -142,7 +154,16 @@ describe('crypto', () => {
                 assert.isString(result.commonName);
                 assert.isArray(result.altNames);
                 assert.strictEqual(result.commonName, testSanCsrDomains[0]);
-                assert.deepEqual(result.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
+                assert.deepStrictEqual(result.altNames, testSanCsrDomains);
+            });
+
+            it('should resolve domains from SAN without common name', async () => {
+                const result = await engine.readCsrDomains(testNonCnCsr);
+
+                assert.isObject(result);
+                assert.isNull(result.commonName);
+                assert.isArray(result.altNames);
+                assert.deepStrictEqual(result.altNames, testSanCsrDomains);
             });
 
             it('should resolve domains from non-ASCII CSR', async () => {
@@ -152,7 +173,7 @@ describe('crypto', () => {
                 assert.isString(result.commonName);
                 assert.isArray(result.altNames);
                 assert.strictEqual(result.commonName, testCsrDomain);
-                assert.strictEqual(result.altNames.length, 0);
+                assert.deepStrictEqual(result.altNames, [testCsrDomain]);
             });
 
 
