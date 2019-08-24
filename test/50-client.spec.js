@@ -3,13 +3,14 @@
  */
 
 const { assert } = require('chai');
+const uuid = require('uuid/v4');
 const Promise = require('bluebird');
-const acme = require('./../src');
+const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 
 
-describe(`client - ${directoryUrl}`, () => {
+describe('client', () => {
     let testPrivateKey;
     let testSecondaryPrivateKey;
     let testClient;
@@ -23,6 +24,7 @@ describe(`client - ${directoryUrl}`, () => {
 
     const testDomain = 'example.com';
     const testDomainWildcard = `*.${testDomain}`;
+    const testContact = `mailto:test-${uuid()}@nope.com`;
 
 
     /**
@@ -53,6 +55,7 @@ describe(`client - ${directoryUrl}`, () => {
 
     it('should produce a valid JWK', async () => {
         const jwk = await testClient.http.getJwk();
+
         assert.isObject(jwk);
         assert.strictEqual(jwk.e, 'AQAB');
         assert.strictEqual(jwk.kty, 'RSA');
@@ -154,11 +157,14 @@ describe(`client - ${directoryUrl}`, () => {
      */
 
     it('should update account contact info', async () => {
-        const account = await testClient.updateAccount({});
+        const data = { contact: [testContact] };
+        const account = await testClient.updateAccount(data);
 
         assert.isObject(account);
         assert.strictEqual(account.status, 'valid');
         assert.deepEqual(account.key, testAccount.key);
+        assert.isArray(account.contact);
+        assert.include(account.contact, testContact);
     });
 
 

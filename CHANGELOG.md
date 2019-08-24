@@ -1,6 +1,8 @@
 ## next
 
+* `added` More extensive testing using [letsencrypt/pebble](https://github.com/letsencrypt/pebble)
 * `fixed` Retry signed API requests on `urn:ietf:params:acme:error:badNonce`
+* `fixed` Minor bugs related to `POST-as-GET` when calling `updateAccount()`
 
 
 ## v3.1.0 (2019-08-21)

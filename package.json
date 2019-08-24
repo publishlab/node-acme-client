@@ -23,7 +23,8 @@
         "eslint-plugin-import": "^2.10.0",
         "jsdoc-to-markdown": "^5.0.0",
         "mocha": "^6.1.4",
-        "nock": "^10.0.6"
+        "nock": "^10.0.6",
+        "uuid": "^3.3.3"
     },
     "scripts": {
         "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md && jsdoc2md src/crypto/forge.js > docs/forge.md",

@@ -18,12 +18,12 @@ commands:
 
       - run:
           name: Start Pebble Challenge Test Server
-          command: /tmp/pebble-challtestsrv
+          command: /tmp/pebble-challtestsrv -dns01 "127.0.0.1:8053" -tlsalpn01 "127.0.0.1:5001" -http01 "127.0.0.1:5002" -https01 "127.0.0.1:5003"
           background: true
 
       - run:
           name: Start Pebble
-          command: /tmp/pebble -strict -config /tmp/pebble.json
+          command: /tmp/pebble -strict -config /tmp/pebble.json -dnsserver "127.0.0.1:8053"
           background: true
 
       - run:
@@ -38,7 +38,12 @@ commands:
           command: yarn run test
           environment:
             NODE_EXTRA_CA_CERTS: /tmp/ca.cert.pem
-            ACME_DIRECTORY_URL: https://localhost:14000/dir
+            ACME_DIRECTORY_URL: https://127.0.0.1:14000/dir
+            ACME_CHALLTESTSRV_URL: http://127.0.0.1:8055
+            ACME_DNS_RESOLVER: 127.0.0.1:8053
+            ACME_TLSALPN_PORT: 5001
+            ACME_HTTP_PORT: 5002
+            ACME_HTTPS_PORT: 5003
 
 jobs:
   v8: { docker: [{ image: circleci/node:8 }], steps: [ pre, install, test ]}

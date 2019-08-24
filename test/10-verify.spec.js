@@ -3,36 +3,34 @@
  */
 
 const { assert } = require('chai');
-const nock = require('nock');
+const uuid = require('uuid/v4');
+const cts = require('./challtestsrv');
 const verify = require('./../src/verify');
+
+const httpPort = process.env.ACME_HTTP_PORT || 80;
 
 
 describe('verify', () => {
     const challengeTypes = ['http-01', 'dns-01'];
 
-    const fixtures = {
-        http: {
-            authz: { identifier: { type: 'dns', value: 'example.com' } },
-            challenge: { type: 'http-01', status: 'pending', token: 'test' },
-            key: 'test'
-        },
-        dns: {
-            authz: { identifier: { type: 'dns', value: 'example.com' } },
-            challenge: { type: 'dns-01', status: 'pending', token: 'test' },
-            key: 'v=spf1 -all'
-        }
-    };
+    const testHttp01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com:${httpPort}` } };
+    const testHttp01Challenge = { type: 'http-01', status: 'pending', token: uuid() };
+    const testHttp01Key = uuid();
+
+    const testDns01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com` } };
+    const testDns01Challenge = { type: 'dns-01', status: 'pending', token: uuid() };
+    const testDns01Key = uuid();
+    const testDns01Cname = `${uuid()}.example.com`;
 
 
     /**
-     * HTTP mocking
+     * Pebble CTS required
      */
 
-    before(() => {
-        nock(`http://${fixtures.http.authz.identifier.value}`)
-            .persist()
-            .get(`/.well-known/acme-challenge/${fixtures.http.challenge.token}`)
-            .reply(200, fixtures.http.challenge.token);
+    before(function() {
+        if (!cts.isEnabled()) {
+            this.skip();
+        }
     });
 
 
@@ -49,13 +47,20 @@ describe('verify', () => {
      * http-01
      */
 
-    it('should verify http-01 challenge', async () => {
-        const resp = await verify['http-01'](fixtures.http.authz, fixtures.http.challenge, fixtures.http.key);
-        assert.strictEqual(resp, true);
-    });
+    describe('http-01', () => {
+        it('should reject challenge', async () => {
+            await assert.isRejected(verify['http-01'](testHttp01Authz, testHttp01Challenge, testHttp01Key));
+        });
 
-    it('should reject http-01 challenge', async () => {
-        await assert.isRejected(verify['http-01'](fixtures.http.authz, fixtures.http.challenge, 'err'));
+        it('should mock challenge response', async () => {
+            const resp = await cts.addHttp01ChallengeResponse(testHttp01Challenge.token, testHttp01Key);
+            assert.isTrue(resp);
+        });
+
+        it('should verify challenge', async () => {
+            const resp = await verify['http-01'](testHttp01Authz, testHttp01Challenge, testHttp01Key);
+            assert.strictEqual(resp, true);
+        });
     });
 
 
@@ -63,12 +68,29 @@ describe('verify', () => {
      * dns-01
      */
 
-    it('should verify dns-01 challenge', async () => {
-        const resp = await verify['dns-01'](fixtures.dns.authz, fixtures.dns.challenge, fixtures.dns.key, '');
-        assert.strictEqual(resp, true);
-    });
+    describe('dns-01', () => {
+        it('should reject challenge', async () => {
+            await assert.isRejected(verify['dns-01'](testDns01Authz, testDns01Challenge, testDns01Key));
+        });
 
-    it('should reject dns-01 challenge', async () => {
-        await assert.isRejected(verify['dns-01'](fixtures.dns.authz, fixtures.dns.challenge, 'err'));
+        it('should mock challenge response', async () => {
+            const resp = await cts.addDns01ChallengeResponse(`_acme-challenge.${testDns01Authz.identifier.value}.`, testDns01Key);
+            assert.isTrue(resp);
+        });
+
+        it('should add cname to challenge response', async () => {
+            const resp = await cts.setDnsCnameRecord(testDns01Cname, `_acme-challenge.${testDns01Authz.identifier.value}.`);
+            assert.isTrue(resp);
+        });
+
+        it('should verify challenge', async () => {
+            const resp = await verify['dns-01'](testDns01Authz, testDns01Challenge, testDns01Key);
+            assert.strictEqual(resp, true);
+        });
+
+        it('should verify challenge using cname', async () => {
+            const resp = await verify['dns-01'](testDns01Authz, testDns01Challenge, testDns01Key);
+            assert.strictEqual(resp, true);
+        });
     });
 });
