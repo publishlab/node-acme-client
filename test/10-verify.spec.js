@@ -7,13 +7,11 @@ const uuid = require('uuid/v4');
 const cts = require('./challtestsrv');
 const verify = require('./../src/verify');
 
-const httpPort = process.env.ACME_HTTP_PORT || 80;
-
 
 describe('verify', () => {
     const challengeTypes = ['http-01', 'dns-01'];
 
-    const testHttp01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com:${httpPort}` } };
+    const testHttp01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com` } };
     const testHttp01Challenge = { type: 'http-01', status: 'pending', token: uuid() };
     const testHttp01Key = uuid();
 

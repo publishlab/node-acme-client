@@ -19,6 +19,15 @@ chai.use(chaiAsPromised);
 
 
 /**
+ * HTTP challenge port
+ */
+
+if (process.env.ACME_HTTP_PORT) {
+    axios.defaults.acmeSettings.httpChallengePort = process.env.ACME_HTTP_PORT;
+}
+
+
+/**
  * Custom DNS resolver
  */
 
@@ -34,7 +43,7 @@ if (process.env.ACME_DNS_RESOLVER) {
         const urlObj = url.parse(config.url);
 
         /* Bypass */
-        if (axios.defaults.bypassCustomDnsResolver === true) {
+        if (axios.defaults.acmeSettings.bypassCustomDnsResolver === true) {
             return config;
         }
 

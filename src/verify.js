@@ -21,8 +21,10 @@ const axios = require('./axios');
  */
 
 async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = `/.well-known/acme-challenge/${challenge.token}`) {
-    debug(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}`);
-    const challengeUrl = `http://${authz.identifier.value}${suffix}`;
+    const httpPort = axios.defaults.acmeSettings.httpChallengePort || 80;
+    const challengeUrl = `http://${authz.identifier.value}:${httpPort}${suffix}`;
+
+    debug(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}, port: ${httpPort}`);
     const resp = await axios.get(challengeUrl);
 
     debug(`Query successful, HTTP status code: ${resp.status}`);

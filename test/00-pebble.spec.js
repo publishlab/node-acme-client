@@ -9,7 +9,7 @@ const uuid = require('uuid/v4');
 const cts = require('./challtestsrv');
 const axios = require('./../src/axios');
 
-const httpPort = process.env.ACME_HTTP_PORT || 80;
+const httpPort = axios.defaults.acmeSettings.httpChallengePort || 80;
 
 
 describe('pebble', () => {
@@ -21,7 +21,7 @@ describe('pebble', () => {
     const testHttp01ChallengeHost = `${uuid()}.example.com`;
     const testHttp01ChallengeToken = uuid();
     const testHttp01ChallengeContent = uuid();
-    const testDns01ChallengeHost = `${uuid()}.example.com.`;
+    const testDns01ChallengeHost = `_acme-challenge.${uuid()}.example.com.`;
     const testDns01ChallengeValue = uuid();
 
 
