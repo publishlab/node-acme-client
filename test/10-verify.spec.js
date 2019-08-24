@@ -57,7 +57,7 @@ describe('verify', () => {
 
         it('should verify challenge', async () => {
             const resp = await verify['http-01'](testHttp01Authz, testHttp01Challenge, testHttp01Key);
-            assert.strictEqual(resp, true);
+            assert.isTrue(resp);
         });
     });
 
@@ -83,12 +83,12 @@ describe('verify', () => {
 
         it('should verify challenge', async () => {
             const resp = await verify['dns-01'](testDns01Authz, testDns01Challenge, testDns01Key);
-            assert.strictEqual(resp, true);
+            assert.isTrue(resp);
         });
 
         it('should verify challenge using cname', async () => {
             const resp = await verify['dns-01'](testDns01Authz, testDns01Challenge, testDns01Key);
-            assert.strictEqual(resp, true);
+            assert.isTrue(resp);
         });
     });
 });

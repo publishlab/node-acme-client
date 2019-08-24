@@ -33,12 +33,12 @@ describe('client', () => {
 
     it('should generate a private key', async () => {
         testPrivateKey = await acme.forge.createPrivateKey();
-        assert.strictEqual(Buffer.isBuffer(testPrivateKey), true);
+        assert.isTrue(Buffer.isBuffer(testPrivateKey));
     });
 
     it('should create a second private key', async () => {
         testSecondaryPrivateKey = await acme.forge.createPrivateKey(2048);
-        assert.strictEqual(Buffer.isBuffer(testSecondaryPrivateKey), true);
+        assert.isTrue(Buffer.isBuffer(testSecondaryPrivateKey));
     });
 
 

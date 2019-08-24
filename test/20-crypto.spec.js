@@ -38,17 +38,17 @@ describe('crypto', () => {
     describe('fixtures', () => {
         it('should read private key fixture', async () => {
             testPemKey = await fs.readFileAsync(testKeyPath);
-            assert.strictEqual(Buffer.isBuffer(testPemKey), true);
+            assert.isTrue(Buffer.isBuffer(testPemKey));
         });
 
         it('should read certificate fixture', async () => {
             testCert = await fs.readFileAsync(testCertPath);
-            assert.strictEqual(Buffer.isBuffer(testCert), true);
+            assert.isTrue(Buffer.isBuffer(testCert));
         });
 
         it('should read SAN certificate fixture', async () => {
             testSanCert = await fs.readFileAsync(testSanCertPath);
-            assert.strictEqual(Buffer.isBuffer(testSanCert), true);
+            assert.isTrue(Buffer.isBuffer(testSanCert));
         });
     });
 
@@ -71,17 +71,17 @@ describe('crypto', () => {
 
             it('should generate a private key', async () => {
                 const key = await engine.createPrivateKey();
-                assert.strictEqual(Buffer.isBuffer(key), true);
+                assert.isTrue(Buffer.isBuffer(key));
             });
 
             it('should generate a private key with size=1024', async () => {
                 const key = await engine.createPrivateKey(1024);
-                assert.strictEqual(Buffer.isBuffer(key), true);
+                assert.isTrue(Buffer.isBuffer(key));
             });
 
             it('should generate a public key', async () => {
                 const key = await engine.createPublicKey(testPemKey);
-                assert.strictEqual(Buffer.isBuffer(key), true);
+                assert.isTrue(Buffer.isBuffer(key));
                 publicKeyStore.push(key.toString().replace(/[\r\n]/gm, ''));
             });
 
@@ -95,8 +95,8 @@ describe('crypto', () => {
                     commonName: testCsrDomain
                 });
 
-                assert.strictEqual(Buffer.isBuffer(key), true);
-                assert.strictEqual(Buffer.isBuffer(csr), true);
+                assert.isTrue(Buffer.isBuffer(key));
+                assert.isTrue(Buffer.isBuffer(csr));
 
                 testCsr = csr;
             });
@@ -107,8 +107,8 @@ describe('crypto', () => {
                     altNames: testSanCsrDomains.slice(1, testSanCsrDomains.length)
                 });
 
-                assert.strictEqual(Buffer.isBuffer(key), true);
-                assert.strictEqual(Buffer.isBuffer(csr), true);
+                assert.isTrue(Buffer.isBuffer(key));
+                assert.isTrue(Buffer.isBuffer(csr));
 
                 testSanCsr = csr;
             });
@@ -118,8 +118,8 @@ describe('crypto', () => {
                     altNames: testSanCsrDomains
                 });
 
-                assert.strictEqual(Buffer.isBuffer(key), true);
-                assert.strictEqual(Buffer.isBuffer(csr), true);
+                assert.isTrue(Buffer.isBuffer(key));
+                assert.isTrue(Buffer.isBuffer(csr));
 
                 testNonCnCsr = csr;
             });
@@ -131,8 +131,8 @@ describe('crypto', () => {
                     organizationUnit: '中文部門'
                 });
 
-                assert.strictEqual(Buffer.isBuffer(key), true);
-                assert.strictEqual(Buffer.isBuffer(csr), true);
+                assert.isTrue(Buffer.isBuffer(key));
+                assert.isTrue(Buffer.isBuffer(csr));
 
                 testNonAsciiCsr = csr;
             });
@@ -219,7 +219,7 @@ describe('crypto', () => {
             it('should get modulus', async () => {
                 const result = await Promise.all([testPemKey, testCert, testSanCert].map(async (item) => {
                     const mod = await engine.getModulus(item);
-                    assert.strictEqual(Buffer.isBuffer(mod), true);
+                    assert.isTrue(Buffer.isBuffer(mod));
 
                     return mod;
                 }));
@@ -230,7 +230,7 @@ describe('crypto', () => {
             it('should get public exponent', async () => {
                 const result = await Promise.all([testPemKey, testCert, testSanCert].map(async (item) => {
                     const exp = await engine.getPublicExponent(item);
-                    assert.strictEqual(Buffer.isBuffer(exp), true);
+                    assert.isTrue(Buffer.isBuffer(exp));
 
                     const b64exp = exp.toString('base64');
                     assert.strictEqual(b64exp, 'AQAB');
