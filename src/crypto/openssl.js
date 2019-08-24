@@ -300,7 +300,7 @@ function createCsrSubject(opts) {
         L: opts.locality,
         O: opts.organization,
         OU: opts.organizationUnit,
-        CN: opts.commonName || 'localhost',
+        CN: opts.commonName,
         emailAddress: opts.emailAddress
     };
 
@@ -316,7 +316,7 @@ function createCsrSubject(opts) {
  *
  * @param {object} data
  * @param {number} [data.keySize] Size of newly created private key, default: `2048`
- * @param {string} [data.commonName] default: `localhost`
+ * @param {string} [data.commonName]
  * @param {array} [data.altNames] default: `[]`
  * @param {string} [data.country]
  * @param {string} [data.state]
@@ -340,7 +340,7 @@ exports.createCsr = async function(data, key = null) {
     const opts = {
         new: true,
         sha256: true,
-        subj: createCsrSubject(data)
+        subj: createCsrSubject(data) || '/'
     };
 
     /* Create CSR config for SAN CSR */

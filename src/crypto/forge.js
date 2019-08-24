@@ -262,7 +262,7 @@ function formatCsrAltNames(altNames) {
  *
  * @param {object} data
  * @param {number} [data.keySize] Size of newly created private key, default: `2048`
- * @param {string} [data.commonName] default: `localhost`
+ * @param {string} [data.commonName]
  * @param {array} [data.altNames] default: `[]`
  * @param {string} [data.country]
  * @param {string} [data.state]
@@ -291,7 +291,7 @@ exports.createCsr = async function(data, key = null) {
 
     /* Subject */
     const subject = createCsrSubject({
-        CN: data.commonName || 'localhost',
+        CN: data.commonName,
         C: data.country,
         ST: data.state,
         L: data.locality,

@@ -1,6 +1,8 @@
 ## next
 
 * `added` More extensive testing using [letsencrypt/pebble](https://github.com/letsencrypt/pebble)
+* `changed` When creating a CSR, `commonName` no longer defaults to `'localhost'`
+    - This change is not considered breaking since `commonName: 'localhost'` will result in an error when ordering a certificate
 * `fixed` Retry signed API requests on `urn:ietf:params:acme:error:badNonce`
 * `fixed` Minor bugs related to `POST-as-GET` when calling `updateAccount()`
 
