@@ -18,7 +18,7 @@ commands:
 
       - run:
           name: Start Pebble Challenge Test Server
-          command: /tmp/pebble-challtestsrv -dns01 "127.0.0.1:8053" -tlsalpn01 "127.0.0.1:5001" -http01 "127.0.0.1:5002" -https01 "127.0.0.1:5003"
+          command: /tmp/pebble-challtestsrv -dns01 ":8053" -tlsalpn01 ":5001" -http01 ":5002" -https01 ":5003" -defaultIPv4 "127.0.0.1" -defaultIPv6 ""
           background: true
 
       - run:

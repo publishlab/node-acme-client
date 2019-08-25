@@ -29,7 +29,7 @@
     "scripts": {
         "docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/openssl.js > docs/openssl.md && jsdoc2md src/crypto/forge.js > docs/forge.md",
         "lint": "eslint .",
-        "mocha": "mocha -b -t 30000 \"test/setup.js\" \"test/**/*.spec.js\"",
+        "mocha": "mocha -b -t 60000 \"test/setup.js\" \"test/**/*.spec.js\"",
         "test": "yarn run lint && yarn run mocha && yarn run docs",
         "test-local": "/bin/bash scripts/run-tests.sh"
     },

@@ -1,5 +1,5 @@
 /**
- * ACME tests
+ * ACME client tests
  */
 
 const { assert } = require('chai');
