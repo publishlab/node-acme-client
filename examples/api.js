@@ -84,7 +84,7 @@ module.exports = async function() {
          * One of these challenges needs to be satisfied.
          */
 
-        const challenges = { authz };
+        const { challenges } = authz;
 
         /* Just select any challenge */
         const challenge = challenges.pop();
