@@ -1,6 +1,11 @@
 **Notice:** [On November 1st, 2020 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.2.0` or `>= v2.3.1` before this date to avoid being affected by this API change.
 
 
+## v3.2.1
+
+* `added` New option `skipChallengeVerification` added to `auto()` to bypass internal challenge verification
+
+
 ## v3.2.0 (2019-08-26)
 
 * `added` More extensive testing using [letsencrypt/pebble](https://github.com/letsencrypt/pebble)

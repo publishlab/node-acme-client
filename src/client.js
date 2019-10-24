@@ -304,7 +304,6 @@ class AcmeClient {
             return result;
         }
 
-
         /**
          * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge
          * https://tools.ietf.org/html/draft-ietf-acme-tls-alpn-01
@@ -452,6 +451,7 @@ class AcmeClient {
      * @param {function} opts.challengeRemoveFn Function returning Promise triggered after completing ACME challenge
      * @param {string} [opts.email] Account email address
      * @param {boolean} [opts.termsOfServiceAgreed] Agree to Terms of Service, default: `false`
+     * @param {boolean} [opts.skipChallengeVerification] Skip internal challenge verification before notifying ACME provider, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
      * @returns {Promise<string>} Certificate
      */

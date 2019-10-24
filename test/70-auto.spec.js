@@ -57,6 +57,14 @@ describe('client.auto', () => {
         return true;
     }
 
+    async function challengeNoopFn() {
+        return true;
+    }
+
+    async function challengeThrowFn() {
+        throw new Error('oops');
+    }
+
 
     /**
      * Initialize client
@@ -64,7 +72,78 @@ describe('client.auto', () => {
 
     it('should initialize client', async () => {
         const accountKey = await acme.forge.createPrivateKey();
-        testClient = new acme.Client({ directoryUrl, accountKey });
+
+        testClient = new acme.Client({
+            directoryUrl,
+            accountKey,
+            backoffMin: 1000,
+            backoffMax: 5000
+        });
+    });
+
+
+    /**
+     * Invalid challenge response
+     */
+
+    it('should throw on invalid challenge response', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        await assert.isRejected(testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            challengeCreateFn: challengeNoopFn,
+            challengeRemoveFn: challengeNoopFn
+        }), /^authorization not found/i);
+    });
+
+    it('should throw on invalid challenge response with opts.skipChallengeVerification=true', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        await assert.isRejected(testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            skipChallengeVerification: true,
+            challengeCreateFn: challengeNoopFn,
+            challengeRemoveFn: challengeNoopFn
+        }));
+    });
+
+
+    /**
+     * Challenge function exceptions
+     */
+
+    it('should throw on challengeCreate exception', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        await assert.isRejected(testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            challengeCreateFn: challengeThrowFn,
+            challengeRemoveFn: challengeNoopFn
+        }), /^oops$/);
+    });
+
+    it('should not throw on challengeRemove exception', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        const cert = await testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            challengeCreateFn,
+            challengeRemoveFn: challengeThrowFn
+        });
+
+        assert.isString(cert);
     });
 
 
@@ -120,6 +199,22 @@ describe('client.auto', () => {
 
         assert.isString(cert);
         testWildcardCertificate = cert;
+    });
+
+    it('should order certificate with opts.skipChallengeVerification=true', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        const cert = await testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            skipChallengeVerification: true,
+            challengeCreateFn,
+            challengeRemoveFn
+        });
+
+        assert.isString(cert);
     });
 
 

@@ -10,6 +10,7 @@ const defaultOpts = {
     csr: null,
     email: null,
     termsOfServiceAgreed: false,
+    skipChallengeVerification: false,
     challengePriority: ['http-01', 'dns-01'],
     challengeCreateFn: async () => { throw new Error('Missing challengeCreateFn()'); },
     challengeRemoveFn: async () => { throw new Error('Missing challengeRemoveFn()'); }
@@ -108,9 +109,17 @@ module.exports = async function(client, userOpts) {
         try {
             await opts.challengeCreateFn(authz, challenge, keyAuthorization);
 
-            /* Verify challenge and wait for valid status */
-            debug(`[auto] [${d}] Verifying challenge and waiting for valid status`);
-            await client.verifyChallenge(authz, challenge);
+            /* Challenge verification */
+            if (userOpts.skipChallengeVerification === true) {
+                debug(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
+            }
+            else {
+                debug(`[auto] [${d}] Running challenge verification`);
+                await client.verifyChallenge(authz, challenge);
+            }
+
+            /* Complete challenge and wait for valid status */
+            debug(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
             await client.completeChallenge(challenge);
             await client.waitForValidStatus(challenge);
         }
