@@ -11,7 +11,7 @@
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^4.1.1",
-        "node-forge": "^0.8.4",
+        "node-forge": "^0.9.1",
         "openssl-wrapper": "^0.3.0",
         "tempfile": "^3.0.0"
     },
@@ -23,7 +23,7 @@
         "eslint-plugin-import": "^2.10.0",
         "jsdoc-to-markdown": "^5.0.0",
         "mocha": "^6.1.4",
-        "nock": "^10.0.6",
+        "nock": "^11.7.0",
         "uuid": "^3.3.3"
     },
     "scripts": {
