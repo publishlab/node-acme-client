@@ -274,6 +274,7 @@ Auto mode
 | opts.challengeRemoveFn | <code>function</code> | Function returning Promise triggered after completing ACME challenge |
 | [opts.email] | <code>string</code> | Account email address |
 | [opts.termsOfServiceAgreed] | <code>boolean</code> | Agree to Terms of Service, default: `false` |
+| [opts.skipChallengeVerification] | <code>boolean</code> | Skip internal challenge verification before notifying ACME provider, default: `false` |
 | [opts.challengePriority] | <code>Array.&lt;string&gt;</code> | Array defining challenge type priority, default: `['http-01', 'dns-01']` |
 
 <a name="Client"></a>
