@@ -4,19 +4,32 @@
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
 
-ACME specification: [https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md](https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md)
-
-Information on how the Boulder/Let's Encrypt API diverges from the ACME spec:
-[https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
+- RFC 8555 - Automatic Certificate Management Environment (ACME): [https://tools.ietf.org/html/rfc8555](https://tools.ietf.org/html/rfc8555)
+- Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
 
 
 ### ACME compatibility
 
-| acme-client   | API       | Style     | Node.js
-| ------------- | --------- | --------- | -------
-| v3.x          | ACMEv2    | Promise   | >= v8
-| v2.x          | ACMEv2    | Promise   | >= v4
-| v1.x          | ACMEv1    | callback  | >= v4
+| acme-client   | API       | Style     | Node.js |
+| ------------- | --------- | --------- | ------- |
+| v3.x          | ACMEv2    | Promise   | >= v8   |
+| v2.x          | ACMEv2    | Promise   | >= v4   |
+| v1.x          | ACMEv1    | callback  | >= v4   |
+
+
+### Table of contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Cryptography](#cryptography)
+    - [acme.forge](#acmeforge)
+    - [acme.openssl](#acmeopenssl)
+- [Auto mode](#auto-mode)
+    - [Internal challenge verification](#internal-challenge-verification)
+- [API](#api)
+- [HTTP client defaults](#http-client-defaults)
+- [Debugging](#debugging)
+- [License](#license)
 
 
 ## Installation
@@ -53,9 +66,10 @@ acme.directory.letsencrypt.production;
 For key pair generation and Certificate Signing Requests, `acme-client` supports multiple interchangeable cryptographic engines.
 
 
-### `acme.forge` -- [docs/forge.md](docs/forge.md)
+### `acme.forge`
 
-*Recommended when `node >= v10.12.0` or OpenSSL CLI dependency can not be met.*
+- Should be used when `node >= v10.12.0` or OpenSSL CLI dependency can not be met
+- API documentation: [docs/forge.md](docs/forge.md)
 
 Uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
 
@@ -76,9 +90,11 @@ const [certificateKey, certificateCsr] = await acme.forge.createCsr({
 ```
 
 
-### `acme.openssl` -- [docs/openssl.md](docs/openssl.md)
+### `acme.openssl`
 
-*Recommended when `node < v10.12.0` and OpenSSL CLI dependency can be met.*
+- Can be used when `node < v10.12.0` and OpenSSL CLI dependency can be met
+- API documentation: [docs/openssl.md](docs/openssl.md)
+- __Warning:__ Will most likely be deprecated some time in the future
 
 Uses [openssl-wrapper](https://www.npmjs.com/package/openssl-wrapper) to execute commands using the OpenSSL CLI.
 
@@ -122,6 +138,23 @@ const certificate = await client.auto(autoOpts);
 ```
 
 
+### Internal challenge verification
+
+When ordering a certificate using auto mode, `acme-client` will first validate that challenges are satisfied internally before completing the challenge at the ACME provider.
+In some cases (firewalls, etc) this internal challenge verification might not be possible to complete.
+
+If internal challenge validation needs to travel through an HTTP proxy, see [HTTP client defaults](#http-client-defaults).
+
+To completely disable `acme-client`s internal challenge verification, enable `skipChallengeVerification`:
+
+```js
+await client.auto({
+    ...,
+    skipChallengeVerification: true
+})
+```
+
+
 ## API
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
@@ -148,11 +181,11 @@ const order = await client.createOrder({
 ```
 
 
-## HTTP defaults
+## HTTP client defaults
 
-This module uses [axios](https://github.com/axios/axios) when communicating with the ACME API, and exposes the instance through `.axios`.
+This module uses [axios](https://github.com/axios/axios) when communicating with the ACME HTTP API, and exposes the client instance through `.axios`.
 
-Should you, for example, need to change the default axios configuration to route requests through an HTTP proxy, this can be achieved as follows:
+For example, should you need to change the default axios configuration to route requests through an HTTP proxy, this can be achieved as follows:
 
 ```js
 const acme = require('acme-client');
@@ -165,8 +198,8 @@ acme.axios.defaults.proxy = {
 
 A complete list of axios options and documentation can be found at:
 
-* [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
-* [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
+- [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
+- [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
 
 
 ## Debugging
