@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Wait for Pebble Server to accept connetions.
+# Wait for Pebble Server to accept connections.
 #
 set -eu
 

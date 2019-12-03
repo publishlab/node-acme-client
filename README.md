@@ -86,7 +86,7 @@ const privateKey = await acme.forge.createPrivateKey();
 const [certificateKey, certificateCsr] = await acme.forge.createCsr({
     commonName: '*.example.com',
     altNames: ['example.com']
-})
+});
 ```
 
 
@@ -109,7 +109,7 @@ const privateKey = await acme.openssl.createPrivateKey();
 const [certificateKey, certificateCsr] = await acme.openssl.createCsr({
     commonName: '*.example.com',
     altNames: ['example.com']
-})
+});
 ```
 
 
@@ -132,7 +132,7 @@ const autoOpts = {
     termsOfServiceAgreed: true,
     challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
     challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
-}
+};
 
 const certificate = await client.auto(autoOpts);
 ```
@@ -151,7 +151,7 @@ To completely disable `acme-client`s internal challenge verification, enable `sk
 await client.auto({
     ...,
     skipChallengeVerification: true
-})
+});
 ```
 
 
