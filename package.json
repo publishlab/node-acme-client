@@ -4,6 +4,7 @@
     "author": "nmorsman",
     "version": "3.2.1",
     "main": "src/index.js",
+    "types": "types",
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
     "dependencies": {
@@ -16,8 +17,10 @@
         "tempfile": "^3.0.0"
     },
     "devDependencies": {
+        "@types/node": "^12.12.14",
         "chai": "^4.1.0",
         "chai-as-promised": "^7.0.0",
+        "dtslint": "^2.0.2",
         "eslint": "^6.0.1",
         "eslint-config-airbnb-base": "^14.0.0",
         "eslint-plugin-import": "^2.10.0",
