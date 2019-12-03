@@ -43,6 +43,28 @@ commands:
           name: Wait for Pebble
           command: /bin/bash ./scripts/test-suite-wait-for-ca.sh
 
+  install-step:
+    steps:
+      - run:
+          name: Install Step Certificates
+          command: /bin/bash ./scripts/test-suite-install-step.sh
+
+      - run:
+          name: Start Step CA
+          command: /usr/bin/step-ca --password-file="/tmp/password" ~/.step/config/ca.json
+          background: true
+
+      - run:
+          name: Set up environment
+          command: |
+            echo 'export NODE_EXTRA_CA_CERTS="/home/circleci/.step/certs/root_ca.crt"' >> $BASH_ENV
+            echo 'export ACME_CA_CERT_PATH="/home/circleci/.step/certs/root_ca.crt"' >> $BASH_ENV
+            echo 'export ACME_DIRECTORY_URL="https://localhost:8443/acme/acme/directory"' >> $BASH_ENV
+
+      - run:
+          name: Wait for Step CA
+          command: /bin/bash ./scripts/test-suite-wait-for-ca.sh
+
   test:
     steps:
       - run: yarn
@@ -60,6 +82,7 @@ jobs:
   v8: { docker: [{ image: circleci/node:8 }], steps: [ pre, install-cts, install-pebble, test ]}
   v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, test ]}
   v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, test ]}
+  # v12-step: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
 
 workflows:
   test-suite:
@@ -67,3 +90,4 @@ workflows:
       - v8
       - v10
       - v12
+      # - v12-step
