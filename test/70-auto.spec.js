@@ -17,6 +17,8 @@ describe('client.auto', () => {
     let testWildcardCertificate;
 
     const testDomain = `${uuid()}.example.com`;
+    const testHttpDomain = `${uuid()}.example.com`;
+    const testDnsDomain = `${uuid()}.example.com`;
     const testWildcardDomain = `${uuid()}.example.com`;
 
     const testSanDomains = [
@@ -41,13 +43,23 @@ describe('client.auto', () => {
      * Mock challenge response with Pebble CTS
      */
 
+    async function assertHttpChallengeCreateFn(authz, challenge, keyAuthorization) {
+        assert.strictEqual(challenge.type, 'http-01');
+        return cts.addHttp01ChallengeResponse(challenge.token, keyAuthorization);
+    }
+
+    async function assertDnsChallengeCreateFn(authz, challenge, keyAuthorization) {
+        assert.strictEqual(challenge.type, 'dns-01');
+        return cts.addDns01ChallengeResponse(`_acme-challenge.${authz.identifier.value}.`, keyAuthorization);
+    }
+
     async function challengeCreateFn(authz, challenge, keyAuthorization) {
         if (challenge.type === 'http-01') {
-            return cts.addHttp01ChallengeResponse(challenge.token, keyAuthorization);
+            return assertHttpChallengeCreateFn(authz, challenge, keyAuthorization);
         }
 
         if (challenge.type === 'dns-01') {
-            return cts.addDns01ChallengeResponse(`_acme-challenge.${authz.identifier.value}.`, keyAuthorization);
+            return assertDnsChallengeCreateFn(authz, challenge, keyAuthorization);
         }
 
         throw new Error(`Unsupported challenge type ${challenge.type}`);
@@ -165,6 +177,38 @@ describe('client.auto', () => {
 
         assert.isString(cert);
         testCertificate = cert;
+    });
+
+    it('should order certificate using http-01', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: testHttpDomain
+        });
+
+        const cert = await testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            challengeCreateFn: assertHttpChallengeCreateFn,
+            challengeRemoveFn,
+            challengePriority: ['http-01']
+        });
+
+        assert.isString(cert);
+    });
+
+    it('should order certificate using dns-01', async () => {
+        const [, csr] = await acme.forge.createCsr({
+            commonName: testDnsDomain
+        });
+
+        const cert = await testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            challengeCreateFn: assertDnsChallengeCreateFn,
+            challengeRemoveFn,
+            challengePriority: ['dns-01']
+        });
+
+        assert.isString(cert);
     });
 
     it('should order SAN certificate', async () => {
