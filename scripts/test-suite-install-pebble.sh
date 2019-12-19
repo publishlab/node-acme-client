@@ -4,8 +4,6 @@
 #
 set -eu
 
-PEBBLE_VERSION="2.2.2"
-
 
 # Download certs and config
 wget -nv "https://raw.githubusercontent.com/letsencrypt/pebble/v${PEBBLE_VERSION}/test/certs/pebble.minica.pem" -O /tmp/ca.cert.pem
