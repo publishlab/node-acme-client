@@ -16,7 +16,7 @@ commands:
           name: Install Pebble Challenge Test Server
           command: /bin/bash ./scripts/test-suite-install-cts.sh
           environment:
-            PEBBLECTS_VERSION: 2.2.2
+            PEBBLECTS_VERSION: 2.3.0
 
       - run:
           name: Start Pebble Challenge Test Server
@@ -29,7 +29,7 @@ commands:
           name: Install Pebble
           command: /bin/bash ./scripts/test-suite-install-pebble.sh
           environment:
-            PEBBLE_VERSION: 2.2.2
+            PEBBLE_VERSION: 2.3.0
 
       - run:
           name: Start Pebble
