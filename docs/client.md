@@ -31,7 +31,7 @@ AcmeClient
 
 * [AcmeClient](#AcmeClient)
     * [new AcmeClient(opts)](#new_AcmeClient_new)
-    * [.getTermsOfServiceUrl()](#AcmeClient+getTermsOfServiceUrl) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.getTermsOfServiceUrl()](#AcmeClient+getTermsOfServiceUrl) ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
     * [.getAccountUrl()](#AcmeClient+getAccountUrl) ⇒ <code>string</code>
     * [.createAccount([data])](#AcmeClient+createAccount) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.updateAccount([data])](#AcmeClient+updateAccount) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -64,11 +64,11 @@ AcmeClient
 
 <a name="AcmeClient+getTermsOfServiceUrl"></a>
 
-### acmeClient.getTermsOfServiceUrl() ⇒ <code>Promise.&lt;string&gt;</code>
-Get Terms of Service URL
+### acmeClient.getTermsOfServiceUrl() ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
+Get Terms of Service URL if available
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
-**Returns**: <code>Promise.&lt;string&gt;</code> - ToS URL  
+**Returns**: <code>Promise.&lt;(string\|null)&gt;</code> - ToS URL  
 <a name="AcmeClient+getAccountUrl"></a>
 
 ### acmeClient.getAccountUrl() ⇒ <code>string</code>
