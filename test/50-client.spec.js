@@ -8,6 +8,7 @@ const Promise = require('bluebird');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 
 
 describe('client', () => {
@@ -66,12 +67,23 @@ describe('client', () => {
      * Create account
      */
 
-    it('should get Terms of Service URL', async () => {
+    it('should attempt to get Terms of Service URL', async () => {
         const tos = await testClient.getTermsOfServiceUrl();
-        assert.isString(tos);
+
+        if (capMetaTosField) {
+            assert.isString(tos);
+        }
+        else {
+            assert.isNull(tos);
+        }
     });
 
-    it('should refuse account creation without ToS', async () => {
+    it('should refuse account creation without ToS', async function() {
+        /* Skip if no ToS field capability */
+        if (!capMetaTosField) {
+            this.skip();
+        }
+
         await assert.isRejected(testClient.createAccount());
     });
 

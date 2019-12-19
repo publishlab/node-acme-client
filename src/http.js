@@ -137,6 +137,24 @@ class HttpClient {
 
 
     /**
+     * Get directory meta field
+     *
+     * @param {string} field Meta field name
+     * @returns {Promise<string|null>} Meta field value
+     */
+
+    async getMetaField(field) {
+        await this.getDirectory();
+
+        if (('meta' in this.directory) && (field in this.directory.meta)) {
+            return this.directory.meta[field];
+        }
+
+        return null;
+    }
+
+
+    /**
      * Create signed HTTP request body
      *
      * @param {string} url Request URL

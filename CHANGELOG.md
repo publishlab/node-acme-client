@@ -1,9 +1,10 @@
 **Notice:** [On November 1st, 2020 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.2.0` or `>= v2.3.1` before this date to avoid being affected by this API change.
 
 
-## v3.2.2
+## v3.3.0
 
 * `added` TypeScript definitions
+* `fixed` Allow missing ACME directory meta field - [RFC 8555 Section 7.1.1](https://tools.ietf.org/html/rfc8555#section-7.1.1)
 
 
 ## v3.2.1 (2019-11-14)

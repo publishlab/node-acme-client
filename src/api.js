@@ -76,19 +76,15 @@ class AcmeApi {
 
 
     /**
-     * Get Terms of Service URL
+     * Get Terms of Service URL if available
      *
-     * @returns {Promise<string>} ToS URL
+     * https://tools.ietf.org/html/rfc8555#section-7.1.1
+     *
+     * @returns {Promise<string|null>} ToS URL
      */
 
     async getTermsOfServiceUrl() {
-        const meta = await this.http.getResourceUrl('meta');
-
-        if (!meta.termsOfService) {
-            throw new Error('Unable to locate Terms of Service URL');
-        }
-
-        return meta.termsOfService;
+        return this.http.getMetaField('termsOfService');
     }
 
 

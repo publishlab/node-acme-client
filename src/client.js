@@ -61,9 +61,9 @@ class AcmeClient {
 
 
     /**
-     * Get Terms of Service URL
+     * Get Terms of Service URL if available
      *
-     * @returns {Promise<string>} ToS URL
+     * @returns {Promise<string|null>} ToS URL
      */
 
     getTermsOfServiceUrl() {
