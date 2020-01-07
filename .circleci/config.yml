@@ -75,6 +75,9 @@ commands:
   test:
     steps:
       - run: yarn
+      - run: yarn run lint
+      - run: yarn run lint-types
+      - run: yarn run build-docs
 
       - run:
           command: yarn run test
