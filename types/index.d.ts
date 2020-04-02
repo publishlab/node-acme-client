@@ -96,8 +96,8 @@ export interface CsrDomains {
 
 export interface CertificateInfo {
     domains: CsrDomains;
-    notAfter: string;
-    notBefore: string;
+    notAfter: Date;
+    notBefore: Date;
 }
 
 export interface CsrOptions {
