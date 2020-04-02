@@ -19,3 +19,4 @@ rules:
   comma-dangle: [2, 'never']
   max-len: [1, 200, 2, { ignoreUrls: true, ignoreComments: false }]
   prefer-object-spread: 0
+  import/no-useless-path-segments: 0
