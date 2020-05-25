@@ -3,7 +3,7 @@
  */
 
 const { assert } = require('chai');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const nock = require('nock');
 const axios = require('./../src/axios');
 const HttpClient = require('./../src/http');

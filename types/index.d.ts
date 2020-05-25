@@ -1,5 +1,3 @@
-// Minimum TypeScript Version: 3.0
-
 /**
  * acme-client type definitions
  */

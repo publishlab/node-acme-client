@@ -5,7 +5,7 @@
 const Promise = require('bluebird');
 const dns = Promise.promisifyAll(require('dns'));
 const { assert } = require('chai');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const cts = require('./challtestsrv');
 const axios = require('./../src/axios');
 

@@ -3,7 +3,7 @@
  */
 
 const { assert } = require('chai');
-const uuid = require('uuid/v4');
+const { v4: uuid } = require('uuid');
 const cts = require('./challtestsrv');
 const acme = require('./../');
 
