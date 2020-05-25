@@ -12,6 +12,7 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 
 | acme-client   | API       | Style     | Node.js |
 | ------------- | --------- | --------- | ------- |
+| v4.x          | ACMEv2    | Promise   | >= v10  |
 | v3.x          | ACMEv2    | Promise   | >= v8   |
 | v2.x          | ACMEv2    | Promise   | >= v4   |
 | v1.x          | ACMEv1    | callback  | >= v4   |

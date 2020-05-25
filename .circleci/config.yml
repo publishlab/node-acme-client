@@ -89,7 +89,6 @@ commands:
             ACME_HTTPS_PORT: 5003
 
 jobs:
-  v8: { docker: [{ image: circleci/node:8 }], steps: [ pre, install-cts, install-pebble, test ]}
   v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, test ]}
   v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, test ]}
   # v12-step: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
@@ -97,7 +96,6 @@ jobs:
 workflows:
   test-suite:
     jobs:
-      - v8
       - v10
       - v12
       # - v12-step
