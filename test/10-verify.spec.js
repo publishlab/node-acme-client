@@ -59,6 +59,16 @@ describe('verify', () => {
             const resp = await verify['http-01'](testHttp01Authz, testHttp01Challenge, testHttp01Key);
             assert.isTrue(resp);
         });
+
+        it('should mock challenge response with trailing newline', async () => {
+            const resp = await cts.addHttp01ChallengeResponse(testHttp01Challenge.token, `${testHttp01Key}\n`);
+            assert.isTrue(resp);
+        });
+
+        it('should verify challenge with trailing newline', async () => {
+            const resp = await verify['http-01'](testHttp01Authz, testHttp01Challenge, testHttp01Key);
+            assert.isTrue(resp);
+        });
     });
 
 

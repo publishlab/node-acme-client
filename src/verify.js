@@ -26,10 +26,11 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
 
     debug(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}, port: ${httpPort}`);
     const resp = await axios.get(challengeUrl);
+    const data = (resp.data || '').replace(/\s+$/, '');
 
     debug(`Query successful, HTTP status code: ${resp.status}`);
 
-    if (!resp.data || (resp.data !== keyAuthorization)) {
+    if (!data || (data !== keyAuthorization)) {
         throw new Error(`Authorization not found in HTTP response from ${authz.identifier.value}`);
     }
 

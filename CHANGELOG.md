@@ -4,6 +4,7 @@
 ## v4.0.0
 
 * `fixed` Incorrect TypeScript `CertificateInfo` definitions
+* `fixed` Allow trailing whitespace character in `http-01` challenge response
 * `breaking` Remove support for Node v8
 
 
