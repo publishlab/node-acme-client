@@ -7,7 +7,6 @@ commands:
       - run: node --version
       - run: npm --version
       - run: yarn --version
-      - run: openssl version
       - checkout
 
   install-cts:

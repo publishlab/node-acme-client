@@ -6,6 +6,7 @@
 * `fixed` Incorrect TypeScript `CertificateInfo` definitions
 * `fixed` Allow trailing whitespace character in `http-01` challenge response
 * `breaking` Remove support for Node v8
+* `breaking` Remove deprecated `openssl` crypto module
 
 
 ## v3.3.1 (2020-01-07)

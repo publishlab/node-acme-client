@@ -23,8 +23,6 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 - [Installation](#installation)
 - [Usage](#usage)
 - [Cryptography](#cryptography)
-    - [acme.forge](#acmeforge)
-    - [acme.openssl](#acmeopenssl)
 - [Auto mode](#auto-mode)
     - [Challenge priority](#challenge-priority)
     - [Internal challenge verification](#internal-challenge-verification)
@@ -65,19 +63,9 @@ acme.directory.letsencrypt.production;
 
 ## Cryptography
 
-For key pair generation and Certificate Signing Requests, `acme-client` supports multiple interchangeable cryptographic engines.
+For key pair generation and Certificate Signing Requests, `acme-client` uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
 
-
-### `acme.forge`
-
-- Should be used when `node >= v10.12.0` or OpenSSL CLI dependency can not be met
-- API documentation: [docs/forge.md](docs/forge.md)
-
-Uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
-
-This engine has no external dependencies since it is completely implemented in JavaScript, however CPU-intensive tasks (like generating a large size key pair) has a performance penalty and will be slower than doing it natively.
-
-This caveat is removed in Node v10.12.0 with the introduction of [crypto.generateKeyPair()](https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypair_type_options_callback), a native Node API for key pair generation. The forge engine will automatically use this API when available.
+__API documentation: [docs/forge.md](docs/forge.md)__
 
 
 #### Example
@@ -86,29 +74,6 @@ This caveat is removed in Node v10.12.0 with the introduction of [crypto.generat
 const privateKey = await acme.forge.createPrivateKey();
 
 const [certificateKey, certificateCsr] = await acme.forge.createCsr({
-    commonName: '*.example.com',
-    altNames: ['example.com']
-});
-```
-
-
-### `acme.openssl`
-
-- Can be used when `node < v10.12.0` and OpenSSL CLI dependency can be met
-- API documentation: [docs/openssl.md](docs/openssl.md)
-- __Warning:__ Will most likely be deprecated some time in the future
-
-Uses [openssl-wrapper](https://www.npmjs.com/package/openssl-wrapper) to execute commands using the OpenSSL CLI.
-
-This engine requires OpenSSL to be installed and available in `$PATH`.
-
-
-#### Example
-
-```js
-const privateKey = await acme.openssl.createPrivateKey();
-
-const [certificateKey, certificateCsr] = await acme.openssl.createCsr({
     commonName: '*.example.com',
     altNames: ['example.com']
 });
@@ -145,7 +110,7 @@ const certificate = await client.auto(autoOpts);
 When ordering a certificate using auto mode, `acme-client` uses a priority list when selecting challenges to respond to.
 Its default value is `['http-01', 'dns-01']` which translates to "use `http-01` if any challenges exist, otherwise fall back to `dns-01`".
 
-While most challenges can be validated using the method of your choosing, please note that **wildcard certificates can only be validated through `dns-01`**.
+While most challenges can be validated using the method of your choosing, please note that __wildcard certificates can only be validated through `dns-01`__.
 More information regarding Let's Encrypt challenge types [can be found here](https://letsencrypt.org/docs/challenge-types/).
 
 To modify challenge priority, provide a list of challenge types in `challengePriority`:
@@ -181,7 +146,7 @@ For more fine-grained control you can interact with the ACME API using the metho
 
 A full example can be found at [examples/api.js](examples/api.js).
 
-__Documentation: [docs/client.md](docs/client.md)__
+__API documentation: [docs/client.md](docs/client.md)__
 
 
 #### Example

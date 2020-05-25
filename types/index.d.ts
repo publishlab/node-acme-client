@@ -123,7 +123,6 @@ export interface CryptoInterface {
 }
 
 export const forge: CryptoInterface;
-export const openssl: CryptoInterface;
 
 
 /**

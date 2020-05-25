@@ -7,11 +7,9 @@ const fs = Promise.promisifyAll(require('fs'));
 const path = require('path');
 const { assert } = require('chai');
 const forge = require('./../src/crypto/forge');
-const openssl = require('./../src/crypto/openssl');
 
 const cryptoEngines = {
-    forge,
-    openssl
+    forge
 };
 
 
