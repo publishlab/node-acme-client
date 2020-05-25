@@ -53,12 +53,12 @@ commands:
           name: Install Step Certificates
           command: /bin/bash ./scripts/test-suite-install-step.sh
           environment:
-            STEPCA_VERSION: 0.13.3
-            STEPCLI_VERSION: 0.13.3
+            STEPCA_VERSION: 0.14.4
+            STEPCLI_VERSION: 0.14.4
 
       - run:
           name: Start Step CA
-          command: /usr/bin/step-ca --password-file="/tmp/password" ~/.step/config/ca.json
+          command: /usr/bin/step-ca --resolver="127.0.0.1:8053" --password-file="/tmp/password" ~/.step/config/ca.json
           background: true
 
       - run:
@@ -67,6 +67,8 @@ commands:
             echo 'export NODE_EXTRA_CA_CERTS="/home/circleci/.step/certs/root_ca.crt"' >> $BASH_ENV
             echo 'export ACME_CA_CERT_PATH="/home/circleci/.step/certs/root_ca.crt"' >> $BASH_ENV
             echo 'export ACME_DIRECTORY_URL="https://localhost:8443/acme/acme/directory"' >> $BASH_ENV
+
+            echo 'export ACME_CAP_META_TOS_FIELD=0' >> $BASH_ENV
 
       - run:
           name: Wait for Step CA
