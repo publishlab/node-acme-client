@@ -26,6 +26,7 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
     - [acme.forge](#acmeforge)
     - [acme.openssl](#acmeopenssl)
 - [Auto mode](#auto-mode)
+    - [Challenge priority](#challenge-priority)
     - [Internal challenge verification](#internal-challenge-verification)
 - [API](#api)
 - [HTTP client defaults](#http-client-defaults)
