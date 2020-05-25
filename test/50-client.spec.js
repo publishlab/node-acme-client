@@ -64,28 +64,32 @@ describe('client', () => {
 
 
     /**
+     * Terms of Service
+     */
+
+    if (capMetaTosField) {
+        it('tos=enabled should produce Terms of Service URL', async () => {
+            const tos = await testClient.getTermsOfServiceUrl();
+            assert.isString(tos);
+        });
+    }
+    else {
+        it('tos=disabled should not produce Terms of Service URL', async () => {
+            const tos = await testClient.getTermsOfServiceUrl();
+            assert.isNull(tos);
+        });
+    }
+
+
+    /**
      * Create account
      */
 
-    it('should attempt to get Terms of Service URL', async () => {
-        const tos = await testClient.getTermsOfServiceUrl();
-
-        if (capMetaTosField) {
-            assert.isString(tos);
-        }
-        else {
-            assert.isNull(tos);
-        }
-    });
-
-    it('should refuse account creation without ToS', async function() {
-        /* Skip if no ToS field capability */
-        if (!capMetaTosField) {
-            this.skip();
-        }
-
-        await assert.isRejected(testClient.createAccount());
-    });
+    if (capMetaTosField) {
+        it('tos=enabled should refuse account creation without ToS', async () => {
+            await assert.isRejected(testClient.createAccount());
+        });
+    }
 
     it('should create an account', async () => {
         testAccount = await testClient.createAccount({
