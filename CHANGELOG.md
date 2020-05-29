@@ -1,7 +1,7 @@
 **Notice:** [On November 1st, 2020 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.2.0` or `>= v2.3.1` before this date to avoid being affected by this API change.
 
 
-## v4.0.0
+## v4.0.0 (2020-05-29)
 
 * `fixed` Incorrect TypeScript `CertificateInfo` definitions
 * `fixed` Allow trailing whitespace character in `http-01` challenge response
