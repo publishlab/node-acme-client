@@ -4,11 +4,11 @@
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
 
-- RFC 8555 - Automatic Certificate Management Environment (ACME): [https://tools.ietf.org/html/rfc8555](https://tools.ietf.org/html/rfc8555)
-- Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
+* RFC 8555 - Automatic Certificate Management Environment (ACME): [https://tools.ietf.org/html/rfc8555](https://tools.ietf.org/html/rfc8555)
+* Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
 
 
-### ACME compatibility
+### Compatibility
 
 | acme-client   | API       | Style     | Node.js |
 | ------------- | --------- | --------- | ------- |
@@ -20,16 +20,16 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 
 ### Table of contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Cryptography](#cryptography)
-- [Auto mode](#auto-mode)
-    - [Challenge priority](#challenge-priority)
-    - [Internal challenge verification](#internal-challenge-verification)
-- [API](#api)
-- [HTTP client defaults](#http-client-defaults)
-- [Debugging](#debugging)
-- [License](#license)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Cryptography](#cryptography)
+* [Auto mode](#auto-mode)
+    * [Challenge priority](#challenge-priority)
+    * [Internal challenge verification](#internal-challenge-verification)
+* [API](#api)
+* [HTTP client defaults](#http-client-defaults)
+* [Debugging](#debugging)
+* [License](#license)
 
 
 ## Installation
@@ -65,6 +65,8 @@ acme.directory.letsencrypt.production;
 
 For key pair generation and Certificate Signing Requests, `acme-client` uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
 
+These utility methods are exposed through `.forge`.
+
 __API documentation: [docs/forge.md](docs/forge.md)__
 
 
@@ -82,8 +84,7 @@ const [certificateKey, certificateCsr] = await acme.forge.createCsr({
 
 ## Auto mode
 
-For convenience an `auto()` method is included in the client that takes a single config object.
-This method will handle the entire process of getting a certificate for one or multiple domains.
+For convenience an `auto()` method is included in the client that takes a single config object. This method will handle the entire process of getting a certificate for one or multiple domains.
 
 A full example can be found at [examples/auto.js](examples/auto.js).
 
@@ -107,11 +108,9 @@ const certificate = await client.auto(autoOpts);
 
 ### Challenge priority
 
-When ordering a certificate using auto mode, `acme-client` uses a priority list when selecting challenges to respond to.
-Its default value is `['http-01', 'dns-01']` which translates to "use `http-01` if any challenges exist, otherwise fall back to `dns-01`".
+When ordering a certificate using auto mode, `acme-client` uses a priority list when selecting challenges to respond to. Its default value is `['http-01', 'dns-01']` which translates to "use `http-01` if any challenges exist, otherwise fall back to `dns-01`".
 
-While most challenges can be validated using the method of your choosing, please note that __wildcard certificates can only be validated through `dns-01`__.
-More information regarding Let's Encrypt challenge types [can be found here](https://letsencrypt.org/docs/challenge-types/).
+While most challenges can be validated using the method of your choosing, please note that __wildcard certificates can only be validated through `dns-01`__. More information regarding Let's Encrypt challenge types [can be found here](https://letsencrypt.org/docs/challenge-types/).
 
 To modify challenge priority, provide a list of challenge types in `challengePriority`:
 
@@ -125,8 +124,7 @@ await client.auto({
 
 ### Internal challenge verification
 
-When using auto mode, `acme-client` will first validate that challenges are satisfied internally before completing the challenge at the ACME provider.
-In some cases (firewalls, etc) this internal challenge verification might not be possible to complete.
+When using auto mode, `acme-client` will first validate that challenges are satisfied internally before completing the challenge at the ACME provider. In some cases (firewalls, etc) this internal challenge verification might not be possible to complete.
 
 If internal challenge validation needs to travel through an HTTP proxy, see [HTTP client defaults](#http-client-defaults).
 
@@ -183,8 +181,8 @@ acme.axios.defaults.proxy = {
 
 A complete list of axios options and documentation can be found at:
 
-- [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
-- [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
+* [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
+* [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
 
 
 ## Debugging

@@ -29,7 +29,7 @@
 
 * `added` More extensive testing using [letsencrypt/pebble](https://github.com/letsencrypt/pebble)
 * `changed` When creating a CSR, `commonName` no longer defaults to `'localhost'`
-    - This change is not considered breaking since `commonName: 'localhost'` will result in an error when ordering a certificate
+    * This change is not considered breaking since `commonName: 'localhost'` will result in an error when ordering a certificate
 * `fixed` Retry signed API requests on `urn:ietf:params:acme:error:badNonce` - [RFC 8555 Section 6.5](https://tools.ietf.org/html/rfc8555#section-6.5)
 * `fixed` Minor bugs related to `POST-as-GET` when calling `updateAccount()`
 * `fixed` Ensure subject common name is present in SAN when creating a CSR - [CAB v1.2.3 Section 9.2.2](https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf)
