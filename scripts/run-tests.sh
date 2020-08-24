@@ -17,7 +17,7 @@ CONFIG_PATH="${PROJECT_DIR}/.circleci/.temp.yml"
 
 # Run all jobs by default
 if [[ ${#JOBS[@]} -eq 0 ]]; then
-    JOBS=("v8" "v10" "v12")
+    JOBS=("v10" "v12" "v14")
 fi
 
 # Download CircleCI CLI
