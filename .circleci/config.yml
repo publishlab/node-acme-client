@@ -68,6 +68,7 @@ commands:
             echo 'export ACME_DIRECTORY_URL="https://localhost:8443/acme/acme/directory"' >> $BASH_ENV
 
             echo 'export ACME_CAP_META_TOS_FIELD=0' >> $BASH_ENV
+            echo 'export ACME_CAP_UPDATE_ACCOUNT_KEY=0' >> $BASH_ENV
 
       - run:
           name: Wait for Step CA

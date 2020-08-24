@@ -9,6 +9,7 @@ const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
+const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
 
 
 describe('client', () => {
@@ -195,7 +196,11 @@ describe('client', () => {
      * Change account private key
      */
 
-    it('should change account private key', async () => {
+    it('should change account private key [ACME_CAP_UPDATE_ACCOUNT_KEY]', async function() {
+        if (!capUpdateAccountKey) {
+            this.skip();
+        }
+
         await testClient.updateAccountKey(testSecondaryPrivateKey);
 
         const account = await testClient.createAccount({
