@@ -11,7 +11,7 @@ const axios = require('./axios');
 /**
  * Verify ACME HTTP challenge
  *
- * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#http-challenge
+ * https://tools.ietf.org/html/rfc8555#section-8.3
  *
  * @param {object} authz Identifier authorization
  * @param {object} challenge Authorization challenge
@@ -42,7 +42,7 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
 /**
  * Verify ACME DNS challenge
  *
- * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge
+ * https://tools.ietf.org/html/rfc8555#section-8.4
  *
  * @param {object} authz Identifier authorization
  * @param {object} challenge Authorization challenge

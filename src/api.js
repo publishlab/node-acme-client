@@ -91,7 +91,7 @@ class AcmeApi {
     /**
      * Create new account
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
+     * https://tools.ietf.org/html/rfc8555#section-7.3
      *
      * @param {object} data Request payload
      * @returns {Promise<object>} HTTP response
@@ -112,7 +112,7 @@ class AcmeApi {
     /**
      * Update account
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-update
+     * https://tools.ietf.org/html/rfc8555#section-7.3.2
      *
      * @param {object} data Request payload
      * @returns {Promise<object>} HTTP response
@@ -126,7 +126,7 @@ class AcmeApi {
     /**
      * Update account key
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-key-roll-over
+     * https://tools.ietf.org/html/rfc8555#section-7.3.5
      *
      * @param {object} data Request payload
      * @returns {Promise<object>} HTTP response
@@ -140,7 +140,7 @@ class AcmeApi {
     /**
      * Create new order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     * https://tools.ietf.org/html/rfc8555#section-7.4
      *
      * @param {object} data Request payload
      * @returns {Promise<object>} HTTP response
@@ -154,7 +154,7 @@ class AcmeApi {
     /**
      * Finalize order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     * https://tools.ietf.org/html/rfc8555#section-7.4
      *
      * @param {string} url Finalization URL
      * @param {object} data Request payload
@@ -169,7 +169,7 @@ class AcmeApi {
     /**
      * Get identifier authorization
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
+     * https://tools.ietf.org/html/rfc8555#section-7.5
      *
      * @param {string} url Authorization URL
      * @returns {Promise<object>} HTTP response
@@ -183,7 +183,7 @@ class AcmeApi {
     /**
      * Update identifier authorization
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactivating-an-authorization
+     * https://tools.ietf.org/html/rfc8555#section-7.5.2
      *
      * @param {string} url Authorization URL
      * @param {object} data Request payload
@@ -198,7 +198,7 @@ class AcmeApi {
     /**
      * Complete challenge
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+     * https://tools.ietf.org/html/rfc8555#section-7.5.1
      *
      * @param {string} url Challenge URL
      * @param {object} data Request payload
@@ -213,7 +213,7 @@ class AcmeApi {
     /**
      * Revoke certificate
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#certificate-revocation
+     * https://tools.ietf.org/html/rfc8555#section-7.6
      *
      * @param {object} data Request payload
      * @returns {Promise<object>} HTTP response

@@ -81,7 +81,7 @@ Get current account URL
 ### acmeClient.createAccount([data]) ⇒ <code>Promise.&lt;object&gt;</code>
 Create a new account
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
+https://tools.ietf.org/html/rfc8555#section-7.3
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Account  
@@ -95,7 +95,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account
 ### acmeClient.updateAccount([data]) ⇒ <code>Promise.&lt;object&gt;</code>
 Update existing account
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-update
+https://tools.ietf.org/html/rfc8555#section-7.3.2
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Account  
@@ -109,7 +109,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account
 ### acmeClient.updateAccountKey(newAccountKey, [data]) ⇒ <code>Promise.&lt;object&gt;</code>
 Update account private key
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-key-roll-over
+https://tools.ietf.org/html/rfc8555#section-7.3.5
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Account  
@@ -124,7 +124,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account
 ### acmeClient.createOrder(data) ⇒ <code>Promise.&lt;object&gt;</code>
 Create a new order
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+https://tools.ietf.org/html/rfc8555#section-7.4
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Order  
@@ -138,7 +138,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applyin
 ### acmeClient.finalizeOrder(order, csr) ⇒ <code>Promise.&lt;object&gt;</code>
 Finalize order
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+https://tools.ietf.org/html/rfc8555#section-7.4
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Order  
@@ -153,7 +153,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applyin
 ### acmeClient.getAuthorizations(order) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 Get identifier authorizations from order
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
+https://tools.ietf.org/html/rfc8555#section-7.5
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - Authorizations  
@@ -167,7 +167,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identif
 ### acmeClient.deactivateAuthorization(authz) ⇒ <code>Promise.&lt;object&gt;</code>
 Deactivate identifier authorization
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactivating-an-authorization
+https://tools.ietf.org/html/rfc8555#section-7.5.2
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Authorization  
@@ -181,7 +181,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactiv
 ### acmeClient.getChallengeKeyAuthorization(challenge) ⇒ <code>Promise.&lt;string&gt;</code>
 Get key authorization for ACME challenge
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#key-authorizations
+https://tools.ietf.org/html/rfc8555#section-8.1
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Key authorization  
@@ -207,7 +207,7 @@ Verify that ACME challenge is satisfied
 ### acmeClient.completeChallenge(challenge) ⇒ <code>Promise.&lt;object&gt;</code>
 Notify provider that challenge has been completed
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+https://tools.ietf.org/html/rfc8555#section-7.5.1
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Challenge  
@@ -221,7 +221,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#respond
 ### acmeClient.waitForValidStatus(item) ⇒ <code>Promise.&lt;object&gt;</code>
 Wait for ACME provider to verify status on a order, authorization or challenge
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+https://tools.ietf.org/html/rfc8555#section-7.5.1
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - Valid order, authorization or challenge  
@@ -235,7 +235,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#respond
 ### acmeClient.getCertificate(order) ⇒ <code>Promise.&lt;string&gt;</code>
 Get certificate from ACME order
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
+https://tools.ietf.org/html/rfc8555#section-7.4.2
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Certificate  
@@ -249,7 +249,7 @@ https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloa
 ### acmeClient.revokeCertificate(cert, [data]) ⇒ <code>Promise</code>
 Revoke certificate
 
-https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#certificate-revocation
+https://tools.ietf.org/html/rfc8555#section-7.6
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 

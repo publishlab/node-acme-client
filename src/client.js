@@ -85,7 +85,7 @@ class AcmeClient {
     /**
      * Create a new account
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-creation
+     * https://tools.ietf.org/html/rfc8555#section-7.3
      *
      * @param {object} [data] Request data
      * @returns {Promise<object>} Account
@@ -116,7 +116,7 @@ class AcmeClient {
     /**
      * Update existing account
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-update
+     * https://tools.ietf.org/html/rfc8555#section-7.3.2
      *
      * @param {object} [data] Request data
      * @returns {Promise<object>} Account
@@ -149,7 +149,7 @@ class AcmeClient {
     /**
      * Update account private key
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#account-key-roll-over
+     * https://tools.ietf.org/html/rfc8555#section-7.3.5
      *
      * @param {buffer|string} newAccountKey New PEM encoded private key
      * @param {object} [data] Additional request data
@@ -192,7 +192,7 @@ class AcmeClient {
     /**
      * Create a new order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     * https://tools.ietf.org/html/rfc8555#section-7.4
      *
      * @param {object} data Request data
      * @returns {Promise<object>} Order
@@ -214,7 +214,7 @@ class AcmeClient {
     /**
      * Finalize order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#applying-for-certificate-issuance
+     * https://tools.ietf.org/html/rfc8555#section-7.4
      *
      * @param {object} order Order object
      * @param {buffer|string} csr PEM encoded Certificate Signing Request
@@ -241,7 +241,7 @@ class AcmeClient {
     /**
      * Get identifier authorizations from order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#identifier-authorization
+     * https://tools.ietf.org/html/rfc8555#section-7.5
      *
      * @param {object} order Order
      * @returns {Promise<object[]>} Authorizations
@@ -261,7 +261,7 @@ class AcmeClient {
     /**
      * Deactivate identifier authorization
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#deactivating-an-authorization
+     * https://tools.ietf.org/html/rfc8555#section-7.5.2
      *
      * @param {object} authz Identifier authorization
      * @returns {Promise<object>} Authorization
@@ -284,7 +284,7 @@ class AcmeClient {
     /**
      * Get key authorization for ACME challenge
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#key-authorizations
+     * https://tools.ietf.org/html/rfc8555#section-8.1
      *
      * @param {object} challenge Challenge object returned by API
      * @returns {Promise<string>} Key authorization
@@ -297,7 +297,7 @@ class AcmeClient {
         const result = `${challenge.token}.${thumbprint}`;
 
         /**
-         * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#http-challenge
+         * https://tools.ietf.org/html/rfc8555#section-8.3
          */
 
         if (challenge.type === 'http-01') {
@@ -305,7 +305,7 @@ class AcmeClient {
         }
 
         /**
-         * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#dns-challenge
+         * https://tools.ietf.org/html/rfc8555#section-8.4
          * https://tools.ietf.org/html/draft-ietf-acme-tls-alpn-01
          */
 
@@ -349,7 +349,7 @@ class AcmeClient {
     /**
      * Notify provider that challenge has been completed
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+     * https://tools.ietf.org/html/rfc8555#section-7.5.1
      *
      * @param {object} challenge Challenge object returned by API
      * @returns {Promise<object>} Challenge
@@ -364,7 +364,7 @@ class AcmeClient {
     /**
      * Wait for ACME provider to verify status on a order, authorization or challenge
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#responding-to-challenges
+     * https://tools.ietf.org/html/rfc8555#section-7.5.1
      *
      * @param {object} item An order, authorization or challenge object
      * @returns {Promise<object>} Valid order, authorization or challenge
@@ -403,7 +403,7 @@ class AcmeClient {
     /**
      * Get certificate from ACME order
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#downloading-the-certificate
+     * https://tools.ietf.org/html/rfc8555#section-7.4.2
      *
      * @param {object} order Order object
      * @returns {Promise<string>} Certificate
@@ -426,7 +426,7 @@ class AcmeClient {
     /**
      * Revoke certificate
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#certificate-revocation
+     * https://tools.ietf.org/html/rfc8555#section-7.6
      *
      * @param {buffer|string} cert PEM encoded certificate
      * @param {object} [data] Additional request data

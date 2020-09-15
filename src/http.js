@@ -61,7 +61,7 @@ class HttpClient {
     /**
      * Ensure provider directory exists
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#directory
+     * https://tools.ietf.org/html/rfc8555#section-7.1.1
      *
      * @returns {Promise}
      */
@@ -101,7 +101,7 @@ class HttpClient {
     /**
      * Get nonce from directory API endpoint
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#getting-a-nonce
+     * https://tools.ietf.org/html/rfc8555#section-7.2
      *
      * @returns {Promise<string>} nonce
      */
@@ -201,7 +201,7 @@ class HttpClient {
     /**
      * Signed HTTP request
      *
-     * https://github.com/ietf-wg-acme/acme/blob/master/draft-ietf-acme-acme.md#request-authentication
+     * https://tools.ietf.org/html/rfc8555#section-6.2
      *
      * @param {string} url Request URL
      * @param {object} payload Request payload
