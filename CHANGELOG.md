@@ -3,7 +3,7 @@
 
 ## v4.0.1 (2020-09-15)
 
-* `fixed` Upgrade dependencies to latest
+* `fixed` Upgrade `node-forge@0.10.0` - [CVE-2020-7720](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7720)
 
 
 ## v4.0.0 (2020-05-29)
