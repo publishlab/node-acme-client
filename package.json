@@ -15,7 +15,7 @@
         "types"
     ],
     "dependencies": {
-        "axios": "^0.19.0",
+        "axios": "0.19.2",
         "backo2": "^1.0.0",
         "bluebird": "^3.5.0",
         "debug": "^4.1.1",
