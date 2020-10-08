@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.0.2
+## v4.0.2 (2020-10-09)
 
 * `fixed` Explicitly set default `axios` HTTP adapter - [axios/axios#1180](https://github.com/axios/axios/issues/1180)
 
