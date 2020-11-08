@@ -60,6 +60,7 @@ export class Client {
     updateAccount(data?: rfc8555.AccountUpdateRequest): Promise<rfc8555.Account>;
     updateAccountKey(newAccountKey: PrivateKeyBuffer | PrivateKeyString, data?: object): Promise<rfc8555.Account>;
     createOrder(data: rfc8555.OrderCreateRequest): Promise<Order>;
+    getOrder(order: Order): Promise<Order>;
     finalizeOrder(order: Order, csr: CsrBuffer | CsrString): Promise<Order>;
     getAuthorizations(order: Order): Promise<Authorization[]>;
     deactivateAuthorization(authz: Authorization): Promise<Authorization>;

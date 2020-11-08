@@ -37,6 +37,7 @@ AcmeClient
     * [.updateAccount([data])](#AcmeClient+updateAccount) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.updateAccountKey(newAccountKey, [data])](#AcmeClient+updateAccountKey) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.createOrder(data)](#AcmeClient+createOrder) ⇒ <code>Promise.&lt;object&gt;</code>
+    * [.getOrder(order)](#AcmeClient+getOrder) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.finalizeOrder(order, csr)](#AcmeClient+finalizeOrder) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.getAuthorizations(order)](#AcmeClient+getAuthorizations) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     * [.deactivateAuthorization(authz)](#AcmeClient+deactivateAuthorization) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -132,6 +133,20 @@ https://tools.ietf.org/html/rfc8555#section-7.4
 | Param | Type | Description |
 | --- | --- | --- |
 | data | <code>object</code> | Request data |
+
+<a name="AcmeClient+getOrder"></a>
+
+### acmeClient.getOrder(order) ⇒ <code>Promise.&lt;object&gt;</code>
+Get status of order
+
+https://tools.ietf.org/html/rfc8555#section-7.4
+
+**Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - Order  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| order | <code>object</code> | Order object |
 
 <a name="AcmeClient+finalizeOrder"></a>
 
