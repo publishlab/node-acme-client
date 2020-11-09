@@ -1,7 +1,7 @@
 /**
  * ACME API client
  */
-
+const crypto = require('crypto');
 const util = require('./util');
 
 
@@ -13,9 +13,13 @@ const util = require('./util');
  */
 
 class AcmeApi {
-    constructor(httpClient, accountUrl = null) {
+    constructor(httpClient, accountUrl = null, externalAccountBinding = null) {
         this.http = httpClient;
         this.accountUrl = accountUrl;
+        if (externalAccountBinding && externalAccountBinding.kid && externalAccountBinding.key) {
+            this.eabKid = externalAccountBinding.kid;
+            this.eabKey = externalAccountBinding.key;
+        }
     }
 
 
@@ -98,7 +102,43 @@ class AcmeApi {
      */
 
     async createAccount(data) {
-        const resp = await this.apiResourceRequest('newAccount', data, [200, 201], false);
+        const resource = 'newAccount';
+        const payload = { ...data };
+
+        // Add externalAccountBinding info if present
+        // TODO: fold into generic http function
+        if(this.eabKey && this.eabKid){
+            const url = await this.http.getResourceUrl(resource);
+            /* EAB JWS header */
+            const eabHeader = {
+                url,
+                alg: 'HS256',
+                kid: this.eabKid,
+            };
+            /* EAB JWS payload which is just the outer JWS's jwk field in base64 */
+            const accJwk = await this.http.getJwk();
+            const eabPayload = util.b64encode(JSON.stringify(accJwk));
+
+            const eabJws = {
+                protected: util.b64encode(JSON.stringify(eabHeader)),
+                payload: eabPayload,
+            }
+
+            /* 
+            Signature with HMAC256
+            See: https://github.com/auth0/node-jwa/blob/8ddd78abc5ebfbb7914e3d1ce5edae1e69f74e8d/index.js#L128
+            */
+            const signature = crypto.createHmac('sha256', this.eabKey)
+                .update(`${eabJws.protected}.${eabJws.payload}`, 'utf8')
+                .digest('base64');
+
+            payload.externalAccountBinding = {
+                ...eabJws,
+                signature,
+            }
+        }
+
+        const resp = await this.apiResourceRequest(resource, payload, [200, 201], false);
 
         /* Set account URL */
         if (resp.headers.location) {

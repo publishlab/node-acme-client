@@ -11,6 +11,10 @@ wget -nv "https://raw.githubusercontent.com/letsencrypt/pebble/v${PEBBLE_VERSION
 wget -nv "https://raw.githubusercontent.com/letsencrypt/pebble/v${PEBBLE_VERSION}/test/certs/localhost/key.pem" -O /tmp/key.pem
 wget -nv "https://raw.githubusercontent.com/letsencrypt/pebble/v${PEBBLE_VERSION}/test/config/pebble-config.json" -O /tmp/pebble.json
 
+# Pebble config with EAB enabled
+# wget -nv "https://raw.githubusercontent.com/letsencrypt/pebble/v${PEBBLE_VERSION}/test/config/pebble-config-external-account-bindings.json" -O /tmp/pebble.json
+
+
 # Download Pebble
 wget -nv "https://github.com/letsencrypt/pebble/releases/download/v${PEBBLE_VERSION}/pebble_linux-amd64" -O /tmp/pebble
 

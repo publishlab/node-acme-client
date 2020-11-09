@@ -40,6 +40,15 @@ export interface ClientOptions {
     backoffAttempts?: number;
     backoffMin?: number;
     backoffMax?: number;
+    /** EAB credentials attached to the new-account request */
+    externalAccountBinding?: {
+        /** EAB KID provided by CA */
+        kid: string;
+        /** EAB HMAC Key provided by CA */
+        key: string;
+        /** Currently assumes HS256 */
+        // alg: string;
+    }
 }
 
 export interface ClientAutoOptions {

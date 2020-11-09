@@ -22,6 +22,7 @@ const defaultOpts = {
     directoryUrl: undefined,
     accountKey: undefined,
     accountUrl: null,
+    // externalAccountBinding: undefined,
     backoffAttempts: 5,
     backoffMin: 5000,
     backoffMax: 30000
@@ -39,6 +40,9 @@ const defaultOpts = {
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
+ * @param {object} [opts.externalAccountBinding] EAB credentials attached to the new-account request, default: null
+ * @param {object} opts.externalAccountBinding.kid EAB KID provided by CA
+ * @param {object} opts.externalAccountBinding.key PEM encoded EAB HMAC Key provided by CA
  */
 
 class AcmeClient {
@@ -54,9 +58,14 @@ class AcmeClient {
             min: this.opts.backoffMin,
             max: this.opts.backoffMax
         };
+        // Deep copy eab options
+        // TODO: Add pebble test instance with EAB enabled 
+        if(opts.externalAccountBinding){
+            this.opts.externalAccountBinding = Object.assign({}, opts.externalAccountBinding);
+        }
 
         this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey);
-        this.api = new AcmeApi(this.http, this.opts.accountUrl);
+        this.api = new AcmeApi(this.http, this.opts.accountUrl, this.opts.externalAccountBinding);
     }
 
 
