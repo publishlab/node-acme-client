@@ -6,6 +6,8 @@
  * https://tools.ietf.org/html/rfc8555#section-7.3.2
  */
 
+import { Interface } from "readline";
+
 export interface Account {
     status: 'valid' | 'deactivated' | 'revoked';
     contact?: string[];
@@ -18,7 +20,7 @@ export interface AccountCreateRequest {
     contact?: string[];
     termsOfServiceAgreed?: boolean;
     onlyReturnExisting?: boolean;
-    externalAccountBinding?: object;
+    externalAccountBinding?: ExternalAccountBinding;
 }
 
 export interface AccountUpdateRequest {
@@ -27,6 +29,39 @@ export interface AccountUpdateRequest {
     termsOfServiceAgreed?: boolean;
 }
 
+/**
+ * External Account Binding
+ * https://tools.ietf.org/html/rfc8555#section-7.3.4
+ * https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html#rfc.section.7.3.4
+ */
+export interface ExternalAccountBinding {
+    /**
+     * Contains the base64 encoded instance of
+     * ExternalAccountBindingProtectedHeader
+     */
+    protected: string;
+    /**
+     * Base64 encoded public key of account key ('jwk' in outer JWS)
+     */
+    payload: string;
+    /**
+     * The “signature” field of the JWS will contain the
+     * MAC value computed with the MAC key provided by the CA
+     * */
+    signature: string;
+}
+/**
+ * Contents of the base64 encoded JWS for ExternalAccountBinding
+ */
+export interface ExternalAccountBindingProtectedHeader {
+    /** field MUST indicate a MAC-based algorithm. Usually 'HS256' */
+    alg: string;
+    /** The “kid” field MUST contain the key identifier provided by the CA */
+    kid: string;
+    /** field MUST be set to the same value as the outer JWS
+     * https://example.com/acme/new-account */
+    url: string;
+}
 
 /**
  * Order
