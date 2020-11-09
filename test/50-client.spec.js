@@ -238,6 +238,41 @@ describe('client', () => {
 
 
     /**
+     * Get status of existing certificate order
+     */
+
+    it('should get existing order', async () => {
+        const data1 = { identifiers: [{ type: 'dns', value: testDomain }] };
+        const data2 = { identifiers: [{ type: 'dns', value: testDomainWildcard }] };
+
+        testOrder = await testClient.createOrder(data1);
+        testOrderWildcard = await testClient.createOrder(data2);
+
+        testGetOrder = await testClient.getOrder({ url: testOrder.url });
+        testGetOrderWildcard = await testClient.getOrder({ url: testOrderWildcard.url });
+
+        [
+            {createOrder: testOrder, getOrder: testGetOrder},
+            {createOrder: testOrderWildcard, getOrder: testGetOrderWildcard},
+        ].forEach(({createOrder, getOrder}) => {
+            assert.isObject(getOrder);
+            assert.strictEqual(createOrder.status, getOrder.status);
+
+            assert.isArray(getOrder.identifiers);
+            assert.isArray(getOrder.authorizations);
+            
+            assert.deepEqual(createOrder.identifiers.sort(),getOrder.identifiers.sort());
+            assert.deepEqual(createOrder.authorizations.sort(),getOrder.authorizations.sort());
+
+            assert.isString(getOrder.url);
+            assert.strictEqual(createOrder.url, getOrder.url);
+            assert.isString(getOrder.finalize);
+            assert.strictEqual(createOrder.finalize, getOrder.finalize);
+        });
+    });
+
+
+    /**
      * Get identifier authorization
      */
 
