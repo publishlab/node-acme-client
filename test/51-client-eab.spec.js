@@ -5,13 +5,16 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
-const acme = require('./../');
+const acme = require('../types');
 
-const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+const directoryUrl = process.env.ACME_EAB_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
 
-describe('client', () => {
+// console.log(`using ACME_DIRECTORY_URL: ${process.env.ACME_DIRECTORY_URL}`);
+// console.log(`using ACME_EAB_DIRECTORY_URL: ${process.env.ACME_EAB_DIRECTORY_URL}`);
+
+describe('client with eab', () => {
     // non-EAB
     let testPrivateKey;
     let testSecondaryPrivateKey;
@@ -48,10 +51,18 @@ describe('client', () => {
      * Initialize clients
      */
 
-    it('should initialize client', () => {
+    it('should initialize client with eab', () => {
+        // Pull the kid info 
+        const config = require('/tmp/pebble-config-external-account-bindings.json');
+        const kid = 'kid-1';
+
         testClient = new acme.Client({
             directoryUrl,
-            accountKey: testPrivateKey
+            accountKey: testPrivateKey,
+            externalAccountBinding: {
+              kid,
+              key: config.pebble.externalAccountMACKeys[kid],
+            },
         });
     });
 
