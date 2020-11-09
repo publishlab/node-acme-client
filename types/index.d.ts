@@ -48,7 +48,7 @@ export interface ClientOptions {
         key: string;
         /** Currently assumes HS256 */
         // alg: string;
-    }
+    };
 }
 
 export interface ClientAutoOptions {

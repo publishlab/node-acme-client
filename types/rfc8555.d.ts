@@ -47,7 +47,7 @@ export interface ExternalAccountBinding {
     /**
      * The “signature” field of the JWS will contain the
      * MAC value computed with the MAC key provided by the CA
-     * */
+     */
     signature: string;
 }
 /**
@@ -58,8 +58,10 @@ export interface ExternalAccountBindingProtectedHeader {
     alg: string;
     /** The “kid” field MUST contain the key identifier provided by the CA */
     kid: string;
-    /** field MUST be set to the same value as the outer JWS
-     * https://example.com/acme/new-account */
+    /**
+     * The 'url' field MUST be set to the same value as the outer JWS
+     * i.e. https://example.com/acme/new-account
+     */
     url: string;
 }
 
