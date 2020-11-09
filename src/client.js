@@ -59,8 +59,8 @@ class AcmeClient {
             max: this.opts.backoffMax
         };
         // Deep copy eab options
-        // TODO: Add pebble test instance with EAB enabled 
-        if(opts.externalAccountBinding){
+        // TODO: Add pebble test instance with EAB enabled
+        if (opts.externalAccountBinding) {
             this.opts.externalAccountBinding = Object.assign({}, opts.externalAccountBinding);
         }
 

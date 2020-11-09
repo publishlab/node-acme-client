@@ -107,13 +107,13 @@ class AcmeApi {
 
         // Add externalAccountBinding info if present
         // TODO: fold into generic http function
-        if(this.eabKey && this.eabKid){
+        if (this.eabKey && this.eabKid) {
             const url = await this.http.getResourceUrl(resource);
             /* EAB JWS header */
             const eabHeader = {
                 url,
                 alg: 'HS256',
-                kid: this.eabKid,
+                kid: this.eabKid
             };
             /* EAB JWS payload which is just the outer JWS's jwk field in base64 */
             const accJwk = await this.http.getJwk();
@@ -121,10 +121,10 @@ class AcmeApi {
 
             const eabJws = {
                 protected: util.b64encode(JSON.stringify(eabHeader)),
-                payload: eabPayload,
-            }
+                payload: eabPayload
+            };
 
-            /* 
+            /*
             Signature with HMAC256
             See: https://github.com/auth0/node-jwa/blob/8ddd78abc5ebfbb7914e3d1ce5edae1e69f74e8d/index.js#L128
             */
@@ -134,8 +134,8 @@ class AcmeApi {
 
             payload.externalAccountBinding = {
                 ...eabJws,
-                signature,
-            }
+                signature
+            };
         }
 
         const resp = await this.apiResourceRequest(resource, payload, [200, 201], false);
