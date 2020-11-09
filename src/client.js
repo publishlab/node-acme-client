@@ -35,14 +35,14 @@ const defaultOpts = {
  * @class
  * @param {object} opts
  * @param {string} opts.directoryUrl ACME directory URL
- * @param {buffer|string} opts.accountKey PEM encoded account private key
+ * @param {buffer|string} opts.accountKey PEM encoded account private key (only `RS256` currently supported)
  * @param {string} [opts.accountUrl] Account URL, default: `null`
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
  * @param {object} [opts.externalAccountBinding] EAB credentials attached to the new-account request, default: null
  * @param {object} opts.externalAccountBinding.kid EAB KID provided by CA
- * @param {object} opts.externalAccountBinding.key PEM encoded EAB HMAC Key provided by CA
+ * @param {object} opts.externalAccountBinding.key EAB HMAC Key ('secret') provided by CA (only `HS256` currently supported)
  */
 
 class AcmeClient {
