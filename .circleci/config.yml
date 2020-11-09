@@ -36,11 +36,17 @@ commands:
           background: true
 
       - run:
+          name: Start Pebble with EAB
+          command: /tmp/pebble -strict -config /tmp/pebble-config-external-account-bindings.json -dnsserver "127.0.0.1:8053"
+          background: true
+
+      - run:
           name: Set up environment
           command: |
             echo 'export NODE_EXTRA_CA_CERTS="/tmp/ca.cert.pem"' >> $BASH_ENV
             echo 'export ACME_CA_CERT_PATH="/tmp/ca.cert.pem"' >> $BASH_ENV
             echo 'export ACME_DIRECTORY_URL="https://127.0.0.1:14000/dir"' >> $BASH_ENV
+            echo 'export ACME_EAB_DIRECTORY_URL="https://127.0.0.1:24000/dir"' >> $BASH_ENV
 
       - run:
           name: Wait for Pebble
@@ -89,6 +95,10 @@ commands:
             ACME_TLSALPN_PORT: 5001
             ACME_HTTP_PORT: 5002
             ACME_HTTPS_PORT: 5003
+            ACME_EAB_TLSALPN_PORT: 25001
+            ACME_EAB_HTTP_PORT: 25002
+            ACME_EAB_HTTPS_PORT: 25003
+
 
 jobs:
   v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, test ]}

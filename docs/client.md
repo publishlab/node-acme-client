@@ -56,11 +56,14 @@ AcmeClient
 | --- | --- | --- |
 | opts | <code>object</code> |  |
 | opts.directoryUrl | <code>string</code> | ACME directory URL |
-| opts.accountKey | <code>buffer</code> \| <code>string</code> | PEM encoded account private key |
+| opts.accountKey | <code>buffer</code> \| <code>string</code> | PEM encoded account private key (only `RS256` currently supported) |
 | [opts.accountUrl] | <code>string</code> | Account URL, default: `null` |
 | [opts.backoffAttempts] | <code>number</code> | Maximum number of backoff attempts, default: `5` |
 | [opts.backoffMin] | <code>number</code> | Minimum backoff attempt delay in milliseconds, default: `5000` |
 | [opts.backoffMax] | <code>number</code> | Maximum backoff attempt delay in milliseconds, default: `30000` |
+| [opts.externalAccountBinding] | <code>object</code> | EAB credentials attached to the new-account request, default: null |
+| opts.externalAccountBinding.kid | <code>object</code> | EAB KID provided by CA |
+| opts.externalAccountBinding.key | <code>object</code> | EAB HMAC Key ('secret') provided by CA (only `HS256` currently supported) |
 
 <a name="AcmeClient+getTermsOfServiceUrl"></a>
 
