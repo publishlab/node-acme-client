@@ -11,6 +11,8 @@ const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencryp
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
 
+console.log(`using ACME_DIRECTORY_URL: ${process.env.ACME_DIRECTORY_URL}`);
+console.log(`using ACME_EAB_DIRECTORY_URL: ${process.env.ACME_EAB_DIRECTORY_URL}`);
 
 describe('client', () => {
     let testPrivateKey;
