@@ -128,16 +128,15 @@ class AcmeApi {
             Signature with HMAC256
             See: https://github.com/auth0/node-jwa/blob/8ddd78abc5ebfbb7914e3d1ce5edae1e69f74e8d/index.js#L128
             */
-            const signature = crypto.createHmac('sha256', this.eabKey)
+            const signatureBuffer = crypto.createHmac('sha256', Buffer.from(this.eabKey, 'base64'))
                 .update(`${eabJws.protected}.${eabJws.payload}`, 'utf8')
-                .digest('base64');
+                .digest();
 
             payload.externalAccountBinding = {
                 ...eabJws,
-                signature
+                signature: util.b64encode(signatureBuffer)
             };
         }
-
         const resp = await this.apiResourceRequest(resource, payload, [200, 201], false);
 
         /* Set account URL */
