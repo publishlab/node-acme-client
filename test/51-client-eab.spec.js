@@ -5,7 +5,7 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
-const acme = require('../types');
+const acme = require('./../');
 
 const directoryUrl = process.env.ACME_EAB_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
@@ -52,7 +52,8 @@ describe('client with eab', () => {
      */
 
     it('should initialize client with eab', () => {
-        // Pull the kid info 
+        // Pull the kid info
+        // eslint-disable-next-line global-require, import/no-absolute-path
         const config = require('/tmp/pebble-config-external-account-bindings.json');
         const kid = 'kid-1';
 
@@ -60,9 +61,9 @@ describe('client with eab', () => {
             directoryUrl,
             accountKey: testPrivateKey,
             externalAccountBinding: {
-              kid,
-              key: config.pebble.externalAccountMACKeys[kid],
-            },
+                kid,
+                key: config.pebble.externalAccountMACKeys[kid]
+            }
         });
     });
 
