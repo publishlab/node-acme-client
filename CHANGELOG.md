@@ -4,6 +4,7 @@
 
 * `added` New method `client.getOrder()` to refresh order from CA
 * `fixed` Upgrade `axios@0.21.0`
+* `fixed` Missing URL augmentation in `client.finalizeOrder()` and `client.deactivateAuthorization()`
 
 
 ## v4.0.2 (2020-10-09)
@@ -37,7 +38,7 @@
 
 ## v3.2.1 (2019-11-14)
 
-* `added` New option `skipChallengeVerification` added to `auto()` to bypass internal challenge verification
+* `added` New option `skipChallengeVerification` added to `client.auto()` to bypass internal challenge verification
 
 
 ## v3.2.0 (2019-08-26)
@@ -53,7 +54,7 @@
 
 ## v2.3.1 (2019-08-26)
 
-* `backport` Minor bugs related to `POST-as-GET` when calling `updateAccount()`
+* `backport` Minor bugs related to `POST-as-GET` when calling `client.updateAccount()`
 * `backport` Send empty JSON body when responding to challenges
 
 

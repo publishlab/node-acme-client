@@ -310,6 +310,7 @@ class AcmeClient {
         }
 
         const resp = await this.api.getOrder(order.url);
+
         /* Add URL to response */
         resp.data.url = order.url;
         return resp.data;
@@ -345,6 +346,9 @@ class AcmeClient {
         const data = { csr: util.b64escape(body) };
 
         const resp = await this.api.finalizeOrder(order.finalize, data);
+
+        /* Add URL to response */
+        resp.data.url = order.url;
         return resp.data;
     }
 
@@ -368,7 +372,7 @@ class AcmeClient {
      * ```
      */
 
-    getAuthorizations(order) {
+    async getAuthorizations(order) {
         return Promise.map((order.authorizations || []), async (url) => {
             const resp = await this.api.getAuthorization(url);
 
@@ -404,6 +408,9 @@ class AcmeClient {
         };
 
         const resp = await this.api.updateAuthorization(authz.url, data);
+
+        /* Add URL to response */
+        resp.data.url = authz.url;
         return resp.data;
     }
 
