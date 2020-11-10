@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.1.0
+
+* `added` New method `client.getOrder()` to refresh order from CA
+* `fixed` Upgrade `axios@0.21.0`
+
+
 ## v4.0.2 (2020-10-09)
 
 * `fixed` Explicitly set default `axios` HTTP adapter - [axios/axios#1180](https://github.com/axios/axios/issues/1180)
