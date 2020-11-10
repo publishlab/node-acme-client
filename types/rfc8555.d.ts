@@ -8,10 +8,10 @@
 
 export interface Account {
     status: 'valid' | 'deactivated' | 'revoked';
+    orders: string;
     contact?: string[];
     termsOfServiceAgreed?: boolean;
     externalAccountBinding?: object;
-    orders: string;
 }
 
 export interface AccountCreateRequest {
@@ -37,13 +37,13 @@ export interface AccountUpdateRequest {
 
 export interface Order {
     status: 'pending' | 'ready' | 'processing' | 'valid' | 'invalid';
-    expires?: string;
     identifiers: Identifier[];
+    authorizations: string[];
+    finalize: string;
+    expires?: string;
     notBefore?: string;
     notAfter?: string;
     error?: object;
-    authorizations: string[];
-    finalize: string;
     certificate?: string;
 }
 
@@ -63,8 +63,8 @@ export interface OrderCreateRequest {
 export interface Authorization {
     identifier: Identifier;
     status: 'pending' | 'valid' | 'invalid' | 'deactivated' | 'expired' | 'revoked';
-    expires?: string;
     challenges: Challenge[];
+    expires?: string;
     wildcard?: boolean;
 }
 
