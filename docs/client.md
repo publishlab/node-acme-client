@@ -63,6 +63,26 @@ AcmeClient
 | [opts.backoffMin] | <code>number</code> | Minimum backoff attempt delay in milliseconds, default: `5000` |
 | [opts.backoffMax] | <code>number</code> | Maximum backoff attempt delay in milliseconds, default: `30000` |
 
+**Example**  
+Create ACME client instance
+```js
+const client = new acme.Client({
+    directoryUrl: acme.directory.letsencrypt.staging,
+    accountKey: 'Private key goes here'
+});
+```
+**Example**  
+Create ACME client instance
+```js
+const client = new acme.Client({
+    directoryUrl: acme.directory.letsencrypt.staging,
+    accountKey: 'Private key goes here',
+    accountUrl: 'Optional account URL goes here',
+    backoffAttempts: 5,
+    backoffMin: 5000,
+    backoffMax: 30000
+});
+```
 <a name="AcmeClient+getTermsOfServiceUrl"></a>
 
 ### acmeClient.getTermsOfServiceUrl() ⇒ <code>Promise.&lt;(string\|null)&gt;</code>
@@ -70,6 +90,15 @@ Get Terms of Service URL if available
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;(string\|null)&gt;</code> - ToS URL  
+**Example**  
+Get Terms of Service URL
+```js
+const termsOfService = client.getTermsOfServiceUrl();
+
+if (!termsOfService) {
+    // CA did not provide Terms of Service
+}
+```
 <a name="AcmeClient+getAccountUrl"></a>
 
 ### acmeClient.getAccountUrl() ⇒ <code>string</code>
@@ -77,6 +106,20 @@ Get current account URL
 
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>string</code> - Account URL  
+**Throws**:
+
+- <code>Error</code> No account URL found
+
+**Example**  
+Get current account URL
+```js
+try {
+    const accountUrl = client.getAccountUrl();
+}
+catch (e) {
+    // No account URL exists, need to create account first
+}
+```
 <a name="AcmeClient+createAccount"></a>
 
 ### acmeClient.createAccount([data]) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -91,6 +134,21 @@ https://tools.ietf.org/html/rfc8555#section-7.3
 | --- | --- | --- |
 | [data] | <code>object</code> | Request data |
 
+**Example**  
+Create a new account
+```js
+const account = await client.createAccount({
+    termsOfServiceAgreed: true
+});
+```
+**Example**  
+Create a new account with contact info
+```js
+const account = await client.createAccount({
+    termsOfServiceAgreed: true,
+    contact: ['mailto:test@example.com']
+});
+```
 <a name="AcmeClient+updateAccount"></a>
 
 ### acmeClient.updateAccount([data]) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -105,6 +163,13 @@ https://tools.ietf.org/html/rfc8555#section-7.3.2
 | --- | --- | --- |
 | [data] | <code>object</code> | Request data |
 
+**Example**  
+Update existing account
+```js
+const account = await client.updateAccount({
+    contact: ['mailto:foo@example.com']
+});
+```
 <a name="AcmeClient+updateAccountKey"></a>
 
 ### acmeClient.updateAccountKey(newAccountKey, [data]) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -120,6 +185,12 @@ https://tools.ietf.org/html/rfc8555#section-7.3.5
 | newAccountKey | <code>buffer</code> \| <code>string</code> | New PEM encoded private key |
 | [data] | <code>object</code> | Additional request data |
 
+**Example**  
+Update account private key
+```js
+const newAccountKey = 'New private key goes here';
+const result = await client.updateAccountKey(newAccountKey);
+```
 <a name="AcmeClient+createOrder"></a>
 
 ### acmeClient.createOrder(data) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -134,10 +205,20 @@ https://tools.ietf.org/html/rfc8555#section-7.4
 | --- | --- | --- |
 | data | <code>object</code> | Request data |
 
+**Example**  
+Create a new order
+```js
+const order = await client.createOrder({
+    identifiers: [
+        { type: 'dns', value: 'example.com' },
+        { type: 'dns', value: 'test.example.com' }
+    ]
+});
+```
 <a name="AcmeClient+getOrder"></a>
 
 ### acmeClient.getOrder(order) ⇒ <code>Promise.&lt;object&gt;</code>
-Get status of order
+Refresh order object from CA
 
 https://tools.ietf.org/html/rfc8555#section-7.4
 
@@ -148,6 +229,11 @@ https://tools.ietf.org/html/rfc8555#section-7.4
 | --- | --- | --- |
 | order | <code>object</code> | Order object |
 
+**Example**  
+```js
+const order = { ... }; // Previously created order object
+const result = await client.getOrder(order);
+```
 <a name="AcmeClient+finalizeOrder"></a>
 
 ### acmeClient.finalizeOrder(order, csr) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -163,6 +249,13 @@ https://tools.ietf.org/html/rfc8555#section-7.4
 | order | <code>object</code> | Order object |
 | csr | <code>buffer</code> \| <code>string</code> | PEM encoded Certificate Signing Request |
 
+**Example**  
+Finalize order
+```js
+const order = { ... }; // Previously created order object
+const csr = { ... }; // Previously created Certificate Signing Request
+const result = await client.finalizeOrder(order, csr);
+```
 <a name="AcmeClient+getAuthorizations"></a>
 
 ### acmeClient.getAuthorizations(order) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
@@ -177,6 +270,16 @@ https://tools.ietf.org/html/rfc8555#section-7.5
 | --- | --- | --- |
 | order | <code>object</code> | Order |
 
+**Example**  
+Get identifier authorizations
+```js
+const order = { ... }; // Previously created order object
+const authorizations = await client.getAuthorizations(order);
+
+authorizations.forEach((authz) => {
+    const { challenges } = authz;
+});
+```
 <a name="AcmeClient+deactivateAuthorization"></a>
 
 ### acmeClient.deactivateAuthorization(authz) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -191,6 +294,12 @@ https://tools.ietf.org/html/rfc8555#section-7.5.2
 | --- | --- | --- |
 | authz | <code>object</code> | Identifier authorization |
 
+**Example**  
+Deactivate identifier authorization
+```js
+const authz = { ... }; // Identifier authorization resolved from previously created order
+const result = await client.deactivateAuthorization(authz);
+```
 <a name="AcmeClient+getChallengeKeyAuthorization"></a>
 
 ### acmeClient.getChallengeKeyAuthorization(challenge) ⇒ <code>Promise.&lt;string&gt;</code>
@@ -205,6 +314,14 @@ https://tools.ietf.org/html/rfc8555#section-8.1
 | --- | --- | --- |
 | challenge | <code>object</code> | Challenge object returned by API |
 
+**Example**  
+Get challenge key authorization
+```js
+const challenge = { ... }; // Challenge from previously resolved identifier authorization
+const key = await client.getChallengeKeyAuthorization(challenge);
+
+// Write key somewhere to satisfy challenge
+```
 <a name="AcmeClient+verifyChallenge"></a>
 
 ### acmeClient.verifyChallenge(authz, challenge) ⇒ <code>Promise</code>
@@ -217,10 +334,17 @@ Verify that ACME challenge is satisfied
 | authz | <code>object</code> | Identifier authorization |
 | challenge | <code>object</code> | Authorization challenge |
 
+**Example**  
+Verify satisfied ACME challenge
+```js
+const authz = { ... }; // Identifier authorization
+const challenge = { ... }; // Satisfied challenge
+await client.verifyChallenge(authz, challenge);
+```
 <a name="AcmeClient+completeChallenge"></a>
 
 ### acmeClient.completeChallenge(challenge) ⇒ <code>Promise.&lt;object&gt;</code>
-Notify provider that challenge has been completed
+Notify CA that challenge has been completed
 
 https://tools.ietf.org/html/rfc8555#section-7.5.1
 
@@ -231,6 +355,12 @@ https://tools.ietf.org/html/rfc8555#section-7.5.1
 | --- | --- | --- |
 | challenge | <code>object</code> | Challenge object returned by API |
 
+**Example**  
+Notify CA that challenge has been completed
+```js
+const challenge = { ... }; // Satisfied challenge
+const result = await client.completeChallenge(challenge);
+```
 <a name="AcmeClient+waitForValidStatus"></a>
 
 ### acmeClient.waitForValidStatus(item) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -245,6 +375,24 @@ https://tools.ietf.org/html/rfc8555#section-7.5.1
 | --- | --- | --- |
 | item | <code>object</code> | An order, authorization or challenge object |
 
+**Example**  
+Wait for valid challenge status
+```js
+const challenge = { ... };
+await client.waitForValidStatus(challenge);
+```
+**Example**  
+Wait for valid authoriation status
+```js
+const authz = { ... };
+await client.waitForValidStatus(authz);
+```
+**Example**  
+Wait for valid order status
+```js
+const order = { ... };
+await client.waitForValidStatus(order);
+```
 <a name="AcmeClient+getCertificate"></a>
 
 ### acmeClient.getCertificate(order) ⇒ <code>Promise.&lt;string&gt;</code>
@@ -259,6 +407,12 @@ https://tools.ietf.org/html/rfc8555#section-7.4.2
 | --- | --- | --- |
 | order | <code>object</code> | Order object |
 
+**Example**  
+Get certificate
+```js
+const order = { ... }; // Previously created order
+const certificate = await client.getCertificate(order);
+```
 <a name="AcmeClient+revokeCertificate"></a>
 
 ### acmeClient.revokeCertificate(cert, [data]) ⇒ <code>Promise</code>
@@ -273,6 +427,20 @@ https://tools.ietf.org/html/rfc8555#section-7.6
 | cert | <code>buffer</code> \| <code>string</code> | PEM encoded certificate |
 | [data] | <code>object</code> | Additional request data |
 
+**Example**  
+Revoke certificate
+```js
+const certificate = { ... }; // Previously created certificate
+const result = await client.revokeCertificate(certificate);
+```
+**Example**  
+Revoke certificate with reason
+```js
+const certificate = { ... }; // Previously created certificate
+const result = await client.revokeCertificate(certificate, {
+    reason: 4
+});
+```
 <a name="AcmeClient+auto"></a>
 
 ### acmeClient.auto(opts) ⇒ <code>Promise.&lt;string&gt;</code>
@@ -292,6 +460,25 @@ Auto mode
 | [opts.skipChallengeVerification] | <code>boolean</code> | Skip internal challenge verification before notifying ACME provider, default: `false` |
 | [opts.challengePriority] | <code>Array.&lt;string&gt;</code> | Array defining challenge type priority, default: `['http-01', 'dns-01']` |
 
+**Example**  
+Order a certificate using auto mode
+```js
+const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+    commonName: 'test.example.com'
+});
+
+const certificate = await client.auto({
+    csr: certificateRequest,
+    email: 'test@example.com',
+    termsOfServiceAgreed: true,
+    challengeCreateFn: async (authz, challenge, keyAuthorization) => {
+        // Satisfy challenge here
+    },
+    challengeRemoveFn: async (authz, challenge, keyAuthorization) => {
+        // Clean up challenge here
+    }
+});
+```
 <a name="Client"></a>
 
 ## Client : <code>object</code>

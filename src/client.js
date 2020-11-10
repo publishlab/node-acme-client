@@ -39,6 +39,26 @@ const defaultOpts = {
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
+ *
+ * @example Create ACME client instance
+ * ```js
+ * const client = new acme.Client({
+ *     directoryUrl: acme.directory.letsencrypt.staging,
+ *     accountKey: 'Private key goes here'
+ * });
+ * ```
+ *
+ * @example Create ACME client instance
+ * ```js
+ * const client = new acme.Client({
+ *     directoryUrl: acme.directory.letsencrypt.staging,
+ *     accountKey: 'Private key goes here',
+ *     accountUrl: 'Optional account URL goes here',
+ *     backoffAttempts: 5,
+ *     backoffMin: 5000,
+ *     backoffMax: 30000
+ * });
+ * ```
  */
 
 class AcmeClient {
@@ -64,6 +84,15 @@ class AcmeClient {
      * Get Terms of Service URL if available
      *
      * @returns {Promise<string|null>} ToS URL
+     *
+     * @example Get Terms of Service URL
+     * ```js
+     * const termsOfService = client.getTermsOfServiceUrl();
+     *
+     * if (!termsOfService) {
+     *     // CA did not provide Terms of Service
+     * }
+     * ```
      */
 
     getTermsOfServiceUrl() {
@@ -75,6 +104,17 @@ class AcmeClient {
      * Get current account URL
      *
      * @returns {string} Account URL
+     * @throws {Error} No account URL found
+     *
+     * @example Get current account URL
+     * ```js
+     * try {
+     *     const accountUrl = client.getAccountUrl();
+     * }
+     * catch (e) {
+     *     // No account URL exists, need to create account first
+     * }
+     * ```
      */
 
     getAccountUrl() {
@@ -89,6 +129,21 @@ class AcmeClient {
      *
      * @param {object} [data] Request data
      * @returns {Promise<object>} Account
+     *
+     * @example Create a new account
+     * ```js
+     * const account = await client.createAccount({
+     *     termsOfServiceAgreed: true
+     * });
+     * ```
+     *
+     * @example Create a new account with contact info
+     * ```js
+     * const account = await client.createAccount({
+     *     termsOfServiceAgreed: true,
+     *     contact: ['mailto:test@example.com']
+     * });
+     * ```
      */
 
     async createAccount(data = {}) {
@@ -120,6 +175,13 @@ class AcmeClient {
      *
      * @param {object} [data] Request data
      * @returns {Promise<object>} Account
+     *
+     * @example Update existing account
+     * ```js
+     * const account = await client.updateAccount({
+     *     contact: ['mailto:foo@example.com']
+     * });
+     * ```
      */
 
     async updateAccount(data = {}) {
@@ -154,6 +216,12 @@ class AcmeClient {
      * @param {buffer|string} newAccountKey New PEM encoded private key
      * @param {object} [data] Additional request data
      * @returns {Promise<object>} Account
+     *
+     * @example Update account private key
+     * ```js
+     * const newAccountKey = 'New private key goes here';
+     * const result = await client.updateAccountKey(newAccountKey);
+     * ```
      */
 
     async updateAccountKey(newAccountKey, data = {}) {
@@ -196,6 +264,16 @@ class AcmeClient {
      *
      * @param {object} data Request data
      * @returns {Promise<object>} Order
+     *
+     * @example Create a new order
+     * ```js
+     * const order = await client.createOrder({
+     *     identifiers: [
+     *         { type: 'dns', value: 'example.com' },
+     *         { type: 'dns', value: 'test.example.com' }
+     *     ]
+     * });
+     * ```
      */
 
     async createOrder(data) {
@@ -212,12 +290,18 @@ class AcmeClient {
 
 
     /**
-     * Get status of order
+     * Refresh order object from CA
      *
      * https://tools.ietf.org/html/rfc8555#section-7.4
      *
      * @param {object} order Order object
      * @returns {Promise<object>} Order
+     *
+     * @example
+     * ```js
+     * const order = { ... }; // Previously created order object
+     * const result = await client.getOrder(order);
+     * ```
      */
 
     async getOrder(order) {
@@ -239,6 +323,13 @@ class AcmeClient {
      * @param {object} order Order object
      * @param {buffer|string} csr PEM encoded Certificate Signing Request
      * @returns {Promise<object>} Order
+     *
+     * @example Finalize order
+     * ```js
+     * const order = { ... }; // Previously created order object
+     * const csr = { ... }; // Previously created Certificate Signing Request
+     * const result = await client.finalizeOrder(order, csr);
+     * ```
      */
 
     async finalizeOrder(order, csr) {
@@ -265,6 +356,16 @@ class AcmeClient {
      *
      * @param {object} order Order
      * @returns {Promise<object[]>} Authorizations
+     *
+     * @example Get identifier authorizations
+     * ```js
+     * const order = { ... }; // Previously created order object
+     * const authorizations = await client.getAuthorizations(order);
+     *
+     * authorizations.forEach((authz) => {
+     *     const { challenges } = authz;
+     * });
+     * ```
      */
 
     getAuthorizations(order) {
@@ -285,6 +386,12 @@ class AcmeClient {
      *
      * @param {object} authz Identifier authorization
      * @returns {Promise<object>} Authorization
+     *
+     * @example Deactivate identifier authorization
+     * ```js
+     * const authz = { ... }; // Identifier authorization resolved from previously created order
+     * const result = await client.deactivateAuthorization(authz);
+     * ```
      */
 
     async deactivateAuthorization(authz) {
@@ -308,6 +415,14 @@ class AcmeClient {
      *
      * @param {object} challenge Challenge object returned by API
      * @returns {Promise<string>} Key authorization
+     *
+     * @example Get challenge key authorization
+     * ```js
+     * const challenge = { ... }; // Challenge from previously resolved identifier authorization
+     * const key = await client.getChallengeKeyAuthorization(challenge);
+     *
+     * // Write key somewhere to satisfy challenge
+     * ```
      */
 
     async getChallengeKeyAuthorization(challenge) {
@@ -344,6 +459,13 @@ class AcmeClient {
      * @param {object} authz Identifier authorization
      * @param {object} challenge Authorization challenge
      * @returns {Promise}
+     *
+     * @example Verify satisfied ACME challenge
+     * ```js
+     * const authz = { ... }; // Identifier authorization
+     * const challenge = { ... }; // Satisfied challenge
+     * await client.verifyChallenge(authz, challenge);
+     * ```
      */
 
     async verifyChallenge(authz, challenge) {
@@ -367,12 +489,18 @@ class AcmeClient {
 
 
     /**
-     * Notify provider that challenge has been completed
+     * Notify CA that challenge has been completed
      *
      * https://tools.ietf.org/html/rfc8555#section-7.5.1
      *
      * @param {object} challenge Challenge object returned by API
      * @returns {Promise<object>} Challenge
+     *
+     * @example Notify CA that challenge has been completed
+     * ```js
+     * const challenge = { ... }; // Satisfied challenge
+     * const result = await client.completeChallenge(challenge);
+     * ```
      */
 
     async completeChallenge(challenge) {
@@ -388,6 +516,24 @@ class AcmeClient {
      *
      * @param {object} item An order, authorization or challenge object
      * @returns {Promise<object>} Valid order, authorization or challenge
+     *
+     * @example Wait for valid challenge status
+     * ```js
+     * const challenge = { ... };
+     * await client.waitForValidStatus(challenge);
+     * ```
+     *
+     * @example Wait for valid authoriation status
+     * ```js
+     * const authz = { ... };
+     * await client.waitForValidStatus(authz);
+     * ```
+     *
+     * @example Wait for valid order status
+     * ```js
+     * const order = { ... };
+     * await client.waitForValidStatus(order);
+     * ```
      */
 
     async waitForValidStatus(item) {
@@ -427,6 +573,12 @@ class AcmeClient {
      *
      * @param {object} order Order object
      * @returns {Promise<string>} Certificate
+     *
+     * @example Get certificate
+     * ```js
+     * const order = { ... }; // Previously created order
+     * const certificate = await client.getCertificate(order);
+     * ```
      */
 
     async getCertificate(order) {
@@ -451,6 +603,20 @@ class AcmeClient {
      * @param {buffer|string} cert PEM encoded certificate
      * @param {object} [data] Additional request data
      * @returns {Promise}
+     *
+     * @example Revoke certificate
+     * ```js
+     * const certificate = { ... }; // Previously created certificate
+     * const result = await client.revokeCertificate(certificate);
+     * ```
+     *
+     * @example Revoke certificate with reason
+     * ```js
+     * const certificate = { ... }; // Previously created certificate
+     * const result = await client.revokeCertificate(certificate, {
+     *     reason: 4
+     * });
+     * ```
      */
 
     async revokeCertificate(cert, data = {}) {
@@ -474,6 +640,25 @@ class AcmeClient {
      * @param {boolean} [opts.skipChallengeVerification] Skip internal challenge verification before notifying ACME provider, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
      * @returns {Promise<string>} Certificate
+     *
+     * @example Order a certificate using auto mode
+     * ```js
+     * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+     *     commonName: 'test.example.com'
+     * });
+     *
+     * const certificate = await client.auto({
+     *     csr: certificateRequest,
+     *     email: 'test@example.com',
+     *     termsOfServiceAgreed: true,
+     *     challengeCreateFn: async (authz, challenge, keyAuthorization) => {
+     *         // Satisfy challenge here
+     *     },
+     *     challengeRemoveFn: async (authz, challenge, keyAuthorization) => {
+     *         // Clean up challenge here
+     *     }
+     * });
+     * ```
      */
 
     auto(opts) {

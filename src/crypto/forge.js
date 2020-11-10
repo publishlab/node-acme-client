@@ -21,34 +21,34 @@ const generateKeyPair = Promise.promisify(forge.pki.rsa.generateKeyPair);
 
 function forgeObjectFromPem(input) {
     const msg = forge.pem.decode(input)[0];
-    let key;
+    let result;
 
     switch (msg.type) {
         case 'PRIVATE KEY':
         case 'RSA PRIVATE KEY':
-            key = forge.pki.privateKeyFromPem(input);
+            result = forge.pki.privateKeyFromPem(input);
             break;
 
         case 'PUBLIC KEY':
         case 'RSA PUBLIC KEY':
-            key = forge.pki.publicKeyFromPem(input);
+            result = forge.pki.publicKeyFromPem(input);
             break;
 
         case 'CERTIFICATE':
         case 'X509 CERTIFICATE':
         case 'TRUSTED CERTIFICATE':
-            key = forge.pki.certificateFromPem(input).publicKey;
+            result = forge.pki.certificateFromPem(input).publicKey;
             break;
 
         case 'CERTIFICATE REQUEST':
-            key = forge.pki.certificationRequestFromPem(input).publicKey;
+            result = forge.pki.certificationRequestFromPem(input).publicKey;
             break;
 
         default:
             throw new Error('Unable to detect forge message type');
     }
 
-    return key;
+    return result;
 }
 
 
@@ -99,7 +99,17 @@ function parseDomains(obj) {
  * Generate a private RSA key
  *
  * @param {number} [size] Size of the key, default: `2048`
- * @returns {Promise<buffer>} Private RSA key
+ * @returns {Promise<buffer>} PEM encoded private RSA key
+ *
+ * @example Generate private RSA key
+ * ```js
+ * const privateKey = await acme.forge.createPrivateKey();
+ * ```
+ *
+ * @example Private RSA key with defined size
+ * ```js
+ * const privateKey = await acme.forge.createPrivateKey(4096);
+ * ```
  */
 
 async function createPrivateKey(size = 2048) {
@@ -112,10 +122,15 @@ exports.createPrivateKey = createPrivateKey;
 
 
 /**
- * Generate a public RSA key
+ * Create public key from a private RSA key
  *
- * @param {buffer|string} key PEM encoded private key
- * @returns {Promise<buffer>} Public RSA key
+ * @param {buffer|string} key PEM encoded private RSA key
+ * @returns {Promise<buffer>} PEM encoded public RSA key
+ *
+ * @example Create public key
+ * ```js
+ * const publicKey = await acme.forge.createPublicKey(privateKey);
+ * ```
  */
 
 exports.createPublicKey = async function(key) {
@@ -131,6 +146,13 @@ exports.createPublicKey = async function(key) {
  *
  * @param {buffer|string} input PEM encoded private key, certificate or CSR
  * @returns {Promise<buffer>} Modulus
+ *
+ * @example Get modulus
+ * ```js
+ * const m1 = await acme.forge.getModulus(privateKey);
+ * const m2 = await acme.forge.getModulus(certificate);
+ * const m3 = await acme.forge.getModulus(certificateRequest);
+ * ```
  */
 
 exports.getModulus = async function(input) {
@@ -148,6 +170,13 @@ exports.getModulus = async function(input) {
  *
  * @param {buffer|string} input PEM encoded private key, certificate or CSR
  * @returns {Promise<buffer>} Exponent
+ *
+ * @example Get public exponent
+ * ```js
+ * const e1 = await acme.forge.getPublicExponent(privateKey);
+ * const e2 = await acme.forge.getPublicExponent(certificate);
+ * const e3 = await acme.forge.getPublicExponent(certificateRequest);
+ * ```
  */
 
 exports.getPublicExponent = async function(input) {
@@ -165,6 +194,14 @@ exports.getPublicExponent = async function(input) {
  *
  * @param {buffer|string} csr PEM encoded Certificate Signing Request
  * @returns {Promise<object>} {commonName, altNames}
+ *
+ * @example Read Certificate Signing Request domains
+ * ```js
+ * const { commonName, altNames } = await acme.forge.readCsrDomains(certificateRequest);
+ *
+ * console.log(`Common name: ${commonName}`);
+ * console.log('Alt names: ${altNames.join(', ')}`);
+ * ```
  */
 
 exports.readCsrDomains = async function(csr) {
@@ -182,6 +219,18 @@ exports.readCsrDomains = async function(csr) {
  *
  * @param {buffer|string} cert PEM encoded certificate
  * @returns {Promise<object>} Certificate info
+ *
+ * @example Read certificate information
+ * ```js
+ * const info = await acme.forge.readCertificateInfo(certificate);
+ * const { commonName, altNames } = info.domains;
+ *
+ * console.log(`Not after: ${info.notAfter}`);
+ * console.log(`Not before: ${info.notBefore}`);
+ *
+ * console.log(`Common name: ${commonName}`);
+ * console.log('Alt names: ${altNames.join(', ')}`);
+ * ```
  */
 
 exports.readCertificateInfo = async function(cert) {
@@ -272,6 +321,43 @@ function formatCsrAltNames(altNames) {
  * @param {string} [data.emailAddress]
  * @param {buffer|string} [key] CSR private key
  * @returns {Promise<buffer[]>} [privateKey, certificateSigningRequest]
+ *
+ * @example Create a Certificate Signing Request
+ * ```js
+ * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+ *     commonName: 'test.example.com'
+ * });
+ * ```
+ *
+ * @example Certificate Signing Request with both common and alternative names
+ * ```js
+ * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+ *     keySize: 4096,
+ *     commonName: 'test.example.com',
+ *     altNames: ['foo.example.com', 'bar.example.com']
+ * });
+ * ```
+ *
+ * @example Certificate Signing Request with additional information
+ * ```js
+ * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+ *     commonName: 'test.example.com',
+ *     country: 'US',
+ *     state: 'California',
+ *     locality: 'Los Angeles',
+ *     organization: 'The Company Inc.',
+ *     organizationUnit: 'IT Department',
+ *     emailAddress: 'contact@example.com'
+ * });
+ * ```
+ *
+ * @example Certificate Signing Request with predefined private key
+ * ```js
+ * const certificateKey = await acme.forge.createPrivateKey();
+ *
+ * const [, certificateRequest] = await acme.forge.createCsr({
+ *     commonName: 'test.example.com'
+ * }, certificateKey);
  */
 
 exports.createCsr = async function(data, key = null) {
