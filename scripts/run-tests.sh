@@ -6,8 +6,8 @@ set -eu
 
 JOBS=("$@")
 
-CIRCLECI_CLI_URL="https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.5830/circleci-cli_0.1.5830_linux_amd64.tar.gz"
-CIRCLECI_CLI_SHASUM="40f0d5f4ee725d83864dc253c4fd17a34295e077e80d622a7e5253bfaf94612c"
+CIRCLECI_CLI_URL="https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.11458/circleci-cli_0.1.11458_linux_amd64.tar.gz"
+CIRCLECI_CLI_SHASUM="c94f15da54d69ea4d783d93213faf339d9ddec70a419b1f671bfd6f7a07bf252"
 CIRCLECI_CLI_PATH="/tmp/circleci-cli"
 CIRCLECI_CLI_BIN="${CIRCLECI_CLI_PATH}/circleci"
 
@@ -28,6 +28,9 @@ if [[ ! -f "${CIRCLECI_CLI_BIN}" ]]; then
     echo "${CIRCLECI_CLI_SHASUM} *${CIRCLECI_CLI_PATH}/circleci-cli.tar.gz" | sha256sum -c
     tar zxvf "${CIRCLECI_CLI_PATH}/circleci-cli.tar.gz" -C "${CIRCLECI_CLI_PATH}" --strip-components=1
 fi
+
+# Skip CircleCI update checks
+export CIRCLECI_CLI_SKIP_UPDATE_CHECK="true"
 
 # Run test suite
 echo "[-] Running test suite"
