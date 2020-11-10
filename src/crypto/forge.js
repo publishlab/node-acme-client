@@ -200,7 +200,7 @@ exports.getPublicExponent = async function(input) {
  * const { commonName, altNames } = await acme.forge.readCsrDomains(certificateRequest);
  *
  * console.log(`Common name: ${commonName}`);
- * console.log('Alt names: ${altNames.join(', ')}`);
+ * console.log(`Alt names: ${altNames.join(', ')}`);
  * ```
  */
 
@@ -229,7 +229,7 @@ exports.readCsrDomains = async function(csr) {
  * console.log(`Not before: ${info.notBefore}`);
  *
  * console.log(`Common name: ${commonName}`);
- * console.log('Alt names: ${altNames.join(', ')}`);
+ * console.log(`Alt names: ${altNames.join(', ')}`);
  * ```
  */
 

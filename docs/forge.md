@@ -133,7 +133,7 @@ Read Certificate Signing Request domains
 const { commonName, altNames } = await acme.forge.readCsrDomains(certificateRequest);
 
 console.log(`Common name: ${commonName}`);
-console.log('Alt names: ${altNames.join(', ')}`);
+console.log(`Alt names: ${altNames.join(', ')}`);
 ```
 <a name="readCertificateInfo"></a>
 
@@ -157,7 +157,7 @@ console.log(`Not after: ${info.notAfter}`);
 console.log(`Not before: ${info.notBefore}`);
 
 console.log(`Common name: ${commonName}`);
-console.log('Alt names: ${altNames.join(', ')}`);
+console.log(`Alt names: ${altNames.join(', ')}`);
 ```
 <a name="createCsr"></a>
 
