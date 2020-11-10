@@ -238,6 +238,35 @@ describe('client', () => {
 
 
     /**
+     * Get status of existing certificate order
+     */
+
+    it('should get existing order', async () => {
+        const testGetOrder = await testClient.getOrder({ url: testOrder.url });
+        const testGetOrderWildcard = await testClient.getOrder({ url: testOrderWildcard.url });
+
+        [
+            { createOrder: testOrder, getOrder: testGetOrder },
+            { createOrder: testOrderWildcard, getOrder: testGetOrderWildcard }
+        ].forEach(({ createOrder, getOrder }) => {
+            assert.isObject(getOrder);
+            assert.strictEqual(createOrder.status, getOrder.status);
+
+            assert.isArray(getOrder.identifiers);
+            assert.isArray(getOrder.authorizations);
+
+            assert.deepEqual(createOrder.identifiers.sort(), getOrder.identifiers.sort());
+            assert.deepEqual(createOrder.authorizations.sort(), getOrder.authorizations.sort());
+
+            assert.isString(getOrder.url);
+            assert.strictEqual(createOrder.url, getOrder.url);
+            assert.isString(getOrder.finalize);
+            assert.strictEqual(createOrder.finalize, getOrder.finalize);
+        });
+    });
+
+
+    /**
      * Get identifier authorization
      */
 

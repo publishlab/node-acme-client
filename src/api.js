@@ -152,6 +152,20 @@ class AcmeApi {
 
 
     /**
+     * Get order
+     *
+     * https://tools.ietf.org/html/rfc8555#section-7.4
+     *
+     * @param {string} url Order URL
+     * @returns {Promise<object>} HTTP response
+     */
+
+    getOrder(url) {
+        return this.apiRequest(url, null, [200]);
+    }
+
+
+    /**
      * Finalize order
      *
      * https://tools.ietf.org/html/rfc8555#section-7.4

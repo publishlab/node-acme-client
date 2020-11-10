@@ -212,6 +212,26 @@ class AcmeClient {
 
 
     /**
+     * Get status of order
+     *
+     * https://tools.ietf.org/html/rfc8555#section-7.4
+     *
+     * @param {object} order Order object
+     * @returns {Promise<object>} Order
+     */
+
+    async getOrder(order) {
+        if (!order.url) {
+            throw new Error('Unable to get order, URL not found');
+        }
+
+        const resp = await this.api.getOrder(order.url);
+        /* Add URL to response */
+        resp.data.url = order.url;
+        return resp.data;
+    }
+
+    /**
      * Finalize order
      *
      * https://tools.ietf.org/html/rfc8555#section-7.4

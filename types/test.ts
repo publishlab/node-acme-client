@@ -27,6 +27,7 @@ import * as acme from 'acme-client';
             { type: 'dns', value: '*.example.com' },
         ]
     });
+    await client.getOrder(order);
 
     /* Authorizations / Challenges */
     const authorizations = await client.getAuthorizations(order);
