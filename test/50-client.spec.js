@@ -5,6 +5,7 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
+const rfc8555 = require('./rfc8555');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
@@ -104,7 +105,7 @@ describe('client', () => {
             termsOfServiceAgreed: true
         });
 
-        assert.isObject(testAccount);
+        rfc8555.account(testAccount);
         assert.strictEqual(testAccount.status, 'valid');
     });
 
@@ -139,9 +140,9 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        assert.isObject(account);
+        rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
-        assert.deepEqual(account.key, testAccount.key);
+        assert.deepStrictEqual(account.key, testAccount.key);
     });
 
 
@@ -170,9 +171,9 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        assert.isObject(account);
+        rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
-        assert.deepEqual(account.key, testAccount.key);
+        assert.deepStrictEqual(account.key, testAccount.key);
     });
 
 
@@ -184,9 +185,9 @@ describe('client', () => {
         const data = { contact: [testContact] };
         const account = await testClient.updateAccount(data);
 
-        assert.isObject(account);
+        rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
-        assert.deepEqual(account.key, testAccount.key);
+        assert.deepStrictEqual(account.key, testAccount.key);
         assert.isArray(account.contact);
         assert.include(account.contact, testContact);
     });
@@ -207,7 +208,7 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        assert.isObject(account);
+        rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
         assert.notDeepEqual(account.key, testAccount.key);
     });
@@ -225,14 +226,8 @@ describe('client', () => {
         testOrderWildcard = await testClient.createOrder(data2);
 
         [testOrder, testOrderWildcard].forEach((item) => {
-            assert.isObject(item);
+            rfc8555.order(item);
             assert.strictEqual(item.status, 'pending');
-
-            assert.isArray(item.identifiers);
-            assert.isArray(item.authorizations);
-
-            assert.isString(item.url);
-            assert.isString(item.finalize);
         });
     });
 
@@ -242,26 +237,11 @@ describe('client', () => {
      */
 
     it('should get existing order', async () => {
-        const testGetOrder = await testClient.getOrder({ url: testOrder.url });
-        const testGetOrderWildcard = await testClient.getOrder({ url: testOrderWildcard.url });
+        await Promise.map([testOrder, testOrderWildcard], async (existing) => {
+            const result = await testClient.getOrder(existing);
 
-        [
-            { createOrder: testOrder, getOrder: testGetOrder },
-            { createOrder: testOrderWildcard, getOrder: testGetOrderWildcard }
-        ].forEach(({ createOrder, getOrder }) => {
-            assert.isObject(getOrder);
-            assert.strictEqual(createOrder.status, getOrder.status);
-
-            assert.isArray(getOrder.identifiers);
-            assert.isArray(getOrder.authorizations);
-
-            assert.deepEqual(createOrder.identifiers.sort(), getOrder.identifiers.sort());
-            assert.deepEqual(createOrder.authorizations.sort(), getOrder.authorizations.sort());
-
-            assert.isString(getOrder.url);
-            assert.strictEqual(createOrder.url, getOrder.url);
-            assert.isString(getOrder.finalize);
-            assert.strictEqual(createOrder.finalize, getOrder.finalize);
+            rfc8555.order(result);
+            assert.deepStrictEqual(existing, result);
         });
     });
 
@@ -271,31 +251,26 @@ describe('client', () => {
      */
 
     it('should get identifier authorization', async () => {
-        const authzArr1 = await testClient.getAuthorizations(testOrder);
-        const authzArr2 = await testClient.getAuthorizations(testOrderWildcard);
+        const orderAuthzCollection = await testClient.getAuthorizations(testOrder);
+        const wildcardAuthzCollection = await testClient.getAuthorizations(testOrderWildcard);
 
-        [authzArr1, authzArr2].forEach((item) => {
-            assert.isArray(item);
-            assert.isNotEmpty(item);
+        [orderAuthzCollection, wildcardAuthzCollection].forEach((collection) => {
+            assert.isArray(collection);
+            assert.isNotEmpty(collection);
+
+            collection.forEach((authz) => {
+                rfc8555.authorization(authz);
+                assert.strictEqual(authz.status, 'pending');
+            });
         });
 
-        testAuthz = authzArr1.pop();
-        testAuthzWildcard = authzArr2.pop();
-
-        [testAuthz, testAuthzWildcard].forEach((item) => {
-            assert.isObject(item);
-            assert.strictEqual(item.status, 'pending');
-
-            assert.isString(item.url);
-            assert.isArray(item.challenges);
-        });
-
+        testAuthz = orderAuthzCollection.pop();
+        testAuthzWildcard = wildcardAuthzCollection.pop();
         testChallenges = testAuthz.challenges.concat(testAuthzWildcard.challenges);
 
         testChallenges.forEach((item) => {
-            assert.isObject(item);
+            rfc8555.challenge(item);
             assert.strictEqual(item.status, 'pending');
-            assert.isString(item.url);
         });
     });
 
@@ -319,6 +294,8 @@ describe('client', () => {
     it('should deactivate identifier authorization', async () => {
         await Promise.map([testAuthz, testAuthzWildcard], async (item) => {
             const authz = await testClient.deactivateAuthorization(item);
+
+            rfc8555.authorization(authz);
             assert.strictEqual(authz.status, 'deactivated');
         });
     });
@@ -332,7 +309,7 @@ describe('client', () => {
         const data = { status: 'deactivated' };
         const account = await testClient.updateAccount(data);
 
-        assert.isObject(account);
+        rfc8555.account(account);
         assert.strictEqual(account.status, 'deactivated');
     });
 
