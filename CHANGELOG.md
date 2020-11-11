@@ -4,6 +4,7 @@
 
 * `added` New method `client.getOrder()` to refresh order from CA
 * `fixed` Upgrade `axios@0.21.0`
+* `fixed` Error when attempting to revoke a certificate chain
 * `fixed` Missing URL augmentation in `client.finalizeOrder()` and `client.deactivateAuthorization()`
 
 
