@@ -5,6 +5,7 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
+const cts = require('./challtestsrv');
 const rfc8555 = require('./rfc8555');
 const acme = require('./../');
 
@@ -23,11 +24,29 @@ describe('client', () => {
     let testOrderWildcard;
     let testAuthz;
     let testAuthzWildcard;
-    let testChallenges;
+    let testChallenge;
+    let testChallengeWildcard;
+    let testKeyAuthorization;
+    let testKeyAuthorizationWildcard;
+    let testCsr;
+    let testCsrWildcard;
+    let testCertificate;
+    let testCertificateWildcard;
 
-    const testDomain = 'example.com';
+    const testDomain = `${uuid()}.example.com`;
     const testDomainWildcard = `*.${testDomain}`;
     const testContact = `mailto:test-${uuid()}@nope.com`;
+
+
+    /**
+     * Pebble CTS required
+     */
+
+    before(function() {
+        if (!cts.isEnabled()) {
+            this.skip();
+        }
+    });
 
 
     /**
@@ -42,6 +61,11 @@ describe('client', () => {
     it('should create a second private key', async () => {
         testSecondaryPrivateKey = await acme.forge.createPrivateKey(2048);
         assert.isTrue(Buffer.isBuffer(testSecondaryPrivateKey));
+    });
+
+    it('should generate certificate signing request', async () => {
+        [, testCsr] = await acme.forge.createCsr({ commonName: testDomain });
+        [, testCsrWildcard] = await acme.forge.createCsr({ commonName: testDomainWildcard });
     });
 
 
@@ -266,9 +290,8 @@ describe('client', () => {
 
         testAuthz = orderAuthzCollection.pop();
         testAuthzWildcard = wildcardAuthzCollection.pop();
-        testChallenges = testAuthz.challenges.concat(testAuthzWildcard.challenges);
 
-        testChallenges.forEach((item) => {
+        testAuthz.challenges.concat(testAuthzWildcard.challenges).forEach((item) => {
             rfc8555.challenge(item);
             assert.strictEqual(item.status, 'pending');
         });
@@ -280,10 +303,13 @@ describe('client', () => {
      */
 
     it('should get challenge key authorization', async () => {
-        await Promise.map(testChallenges, async (item) => {
-            const keyAuth = await testClient.getChallengeKeyAuthorization(item);
-            assert.isString(keyAuth);
-        });
+        testChallenge = testAuthz.challenges.find((c) => (c.type === 'http-01'));
+        testChallengeWildcard = testAuthzWildcard.challenges.find((c) => (c.type === 'dns-01'));
+
+        testKeyAuthorization = await testClient.getChallengeKeyAuthorization(testChallenge);
+        testKeyAuthorizationWildcard = await testClient.getChallengeKeyAuthorization(testChallengeWildcard);
+
+        [testKeyAuthorization, testKeyAuthorizationWildcard].forEach((k) => assert.isString(k));
     });
 
 
@@ -292,9 +318,22 @@ describe('client', () => {
      */
 
     it('should deactivate identifier authorization', async () => {
-        await Promise.map([testAuthz, testAuthzWildcard], async (item) => {
-            const authz = await testClient.deactivateAuthorization(item);
+        const order = await testClient.createOrder({
+            identifiers: [
+                { type: 'dns', value: `${uuid()}.example.com` },
+                { type: 'dns', value: `${uuid()}.example.com` }
+            ]
+        });
 
+        const authzCollection = await testClient.getAuthorizations(order);
+
+        const results = await Promise.map(authzCollection, async (authz) => {
+            rfc8555.authorization(authz);
+            assert.strictEqual(authz.status, 'pending');
+            return testClient.deactivateAuthorization(authz);
+        });
+
+        results.forEach((authz) => {
             rfc8555.authorization(authz);
             assert.strictEqual(authz.status, 'deactivated');
         });
@@ -302,10 +341,100 @@ describe('client', () => {
 
 
     /**
+     * Verify satisfied challenge
+     */
+
+    it('should verify challenge', async () => {
+        await cts.assertHttpChallengeCreateFn(testAuthz, testChallenge, testKeyAuthorization);
+        await cts.assertDnsChallengeCreateFn(testAuthzWildcard, testChallengeWildcard, testKeyAuthorizationWildcard);
+
+        await testClient.verifyChallenge(testAuthz, testChallenge);
+        await testClient.verifyChallenge(testAuthzWildcard, testChallengeWildcard);
+    });
+
+
+    /**
+     * Complete challenge
+     */
+
+    it('should complete challenge', async () => {
+        await Promise.map([testChallenge, testChallengeWildcard], async (challenge) => {
+            const result = await testClient.completeChallenge(challenge);
+
+            rfc8555.challenge(result);
+            assert.strictEqual(challenge.url, result.url);
+        });
+    });
+
+
+    /**
+     * Wait for valid challenge
+     */
+
+    it('should wait for valid challenge status', async () => {
+        await Promise.map([testChallenge, testChallengeWildcard], async (c) => testClient.waitForValidStatus(c));
+    });
+
+
+    /**
+     * Finalize order
+     */
+
+    it('should finalize order', async () => {
+        const finalize = await testClient.finalizeOrder(testOrder, testCsr);
+        const finalizeWildcard = await testClient.finalizeOrder(testOrderWildcard, testCsrWildcard);
+
+        [finalize, finalizeWildcard].forEach((f) => rfc8555.order(f));
+
+        assert.strictEqual(testOrder.url, finalize.url);
+        assert.strictEqual(testOrderWildcard.url, finalizeWildcard.url);
+    });
+
+
+    /**
+     * Wait for valid order
+     */
+
+    it('should wait for valid order status', async () => {
+        await Promise.map([testOrder, testOrderWildcard], async (o) => testClient.waitForValidStatus(o));
+    });
+
+
+    /**
+     * Get certificate
+     */
+
+    it('should get certificate', async () => {
+        testCertificate = await testClient.getCertificate(testOrder);
+        testCertificateWildcard = await testClient.getCertificate(testOrderWildcard);
+
+        await Promise.map([testCertificate, testCertificateWildcard], async (cert) => {
+            assert.isString(cert);
+            return acme.forge.readCertificateInfo(cert);
+        });
+    });
+
+
+    /**
+     * Revoke certificate
+     */
+
+    it('should revoke certificate', async () => {
+        await testClient.revokeCertificate(testCertificate);
+        await testClient.revokeCertificate(testCertificateWildcard, { reason: 4 });
+    });
+
+    it('should not allow getting revoked certificate', async () => {
+        await assert.isRejected(testClient.getCertificate(testOrder));
+        await assert.isRejected(testClient.getCertificate(testOrderWildcard));
+    });
+
+
+    /**
      * Deactivate account
      */
 
-    it('should deactivate the test account', async () => {
+    it('should deactivate account', async () => {
         const data = { status: 'deactivated' };
         const account = await testClient.updateAccount(data);
 
@@ -318,7 +447,7 @@ describe('client', () => {
      * Verify that no new orders can be made
      */
 
-    it('should not allow new orders', async () => {
+    it('should not allow new orders from deactivated account', async () => {
         const data = {
             identifiers: [{ type: 'dns', value: 'nope.com' }]
         };
