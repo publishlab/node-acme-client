@@ -40,45 +40,6 @@ describe('client.auto', () => {
 
 
     /**
-     * Mock challenge response with Pebble CTS
-     */
-
-    async function assertHttpChallengeCreateFn(authz, challenge, keyAuthorization) {
-        assert.strictEqual(challenge.type, 'http-01');
-        return cts.addHttp01ChallengeResponse(challenge.token, keyAuthorization);
-    }
-
-    async function assertDnsChallengeCreateFn(authz, challenge, keyAuthorization) {
-        assert.strictEqual(challenge.type, 'dns-01');
-        return cts.addDns01ChallengeResponse(`_acme-challenge.${authz.identifier.value}.`, keyAuthorization);
-    }
-
-    async function challengeCreateFn(authz, challenge, keyAuthorization) {
-        if (challenge.type === 'http-01') {
-            return assertHttpChallengeCreateFn(authz, challenge, keyAuthorization);
-        }
-
-        if (challenge.type === 'dns-01') {
-            return assertDnsChallengeCreateFn(authz, challenge, keyAuthorization);
-        }
-
-        throw new Error(`Unsupported challenge type ${challenge.type}`);
-    }
-
-    async function challengeRemoveFn() {
-        return true;
-    }
-
-    async function challengeNoopFn() {
-        return true;
-    }
-
-    async function challengeThrowFn() {
-        throw new Error('oops');
-    }
-
-
-    /**
      * Initialize client
      */
 
@@ -106,8 +67,8 @@ describe('client.auto', () => {
         await assert.isRejected(testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn: challengeNoopFn,
-            challengeRemoveFn: challengeNoopFn
+            challengeCreateFn: cts.challengeNoopFn,
+            challengeRemoveFn: cts.challengeNoopFn
         }), /^authorization not found/i);
     });
 
@@ -120,8 +81,8 @@ describe('client.auto', () => {
             csr,
             termsOfServiceAgreed: true,
             skipChallengeVerification: true,
-            challengeCreateFn: challengeNoopFn,
-            challengeRemoveFn: challengeNoopFn
+            challengeCreateFn: cts.challengeNoopFn,
+            challengeRemoveFn: cts.challengeNoopFn
         }));
     });
 
@@ -138,8 +99,8 @@ describe('client.auto', () => {
         await assert.isRejected(testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn: challengeThrowFn,
-            challengeRemoveFn: challengeNoopFn
+            challengeCreateFn: cts.challengeThrowFn,
+            challengeRemoveFn: cts.challengeNoopFn
         }), /^oops$/);
     });
 
@@ -151,8 +112,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn,
-            challengeRemoveFn: challengeThrowFn
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeThrowFn
         });
 
         assert.isString(cert);
@@ -171,8 +132,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn,
-            challengeRemoveFn
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn
         });
 
         assert.isString(cert);
@@ -187,8 +148,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn: assertHttpChallengeCreateFn,
-            challengeRemoveFn,
+            challengeCreateFn: cts.assertHttpChallengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn,
             challengePriority: ['http-01']
         });
 
@@ -203,8 +164,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn: assertDnsChallengeCreateFn,
-            challengeRemoveFn,
+            challengeCreateFn: cts.assertDnsChallengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn,
             challengePriority: ['dns-01']
         });
 
@@ -220,8 +181,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn,
-            challengeRemoveFn
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn
         });
 
         assert.isString(cert);
@@ -237,8 +198,8 @@ describe('client.auto', () => {
         const cert = await testClient.auto({
             csr,
             termsOfServiceAgreed: true,
-            challengeCreateFn,
-            challengeRemoveFn
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn
         });
 
         assert.isString(cert);
@@ -254,8 +215,8 @@ describe('client.auto', () => {
             csr,
             termsOfServiceAgreed: true,
             skipChallengeVerification: true,
-            challengeCreateFn,
-            challengeRemoveFn
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn
         });
 
         assert.isString(cert);
