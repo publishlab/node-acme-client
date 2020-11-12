@@ -15,6 +15,13 @@
 <dt><a href="#createPublicKey">createPublicKey(key)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Create public key from a private RSA key</p>
 </dd>
+<dt><a href="#getPemBody">getPemBody(str)</a> ⇒ <code>string</code></dt>
+<dd><p>Parse body of PEM encoded object form buffer or string
+If multiple objects are chained, the first body will be returned</p>
+</dd>
+<dt><a href="#splitPemChain">splitPemChain(str)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
+<dd><p>Split chain of PEM encoded objects from buffer or string into array</p>
+</dd>
 <dt><a href="#getModulus">getModulus(input)</a> ⇒ <code>Promise.&lt;buffer&gt;</code></dt>
 <dd><p>Get modulus</p>
 </dd>
@@ -77,6 +84,31 @@ Create public key
 ```js
 const publicKey = await acme.forge.createPublicKey(privateKey);
 ```
+<a name="getPemBody"></a>
+
+## getPemBody(str) ⇒ <code>string</code>
+Parse body of PEM encoded object form buffer or string
+If multiple objects are chained, the first body will be returned
+
+**Kind**: global function  
+**Returns**: <code>string</code> - PEM body  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>buffer</code> \| <code>string</code> | PEM encoded buffer or string |
+
+<a name="splitPemChain"></a>
+
+## splitPemChain(str) ⇒ <code>Array.&lt;string&gt;</code>
+Split chain of PEM encoded objects from buffer or string into array
+
+**Kind**: global function  
+**Returns**: <code>Array.&lt;string&gt;</code> - Array of PEM bodies  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| str | <code>buffer</code> \| <code>string</code> | PEM encoded buffer or string |
+
 <a name="getModulus"></a>
 
 ## getModulus(input) ⇒ <code>Promise.&lt;buffer&gt;</code>

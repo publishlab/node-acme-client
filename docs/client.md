@@ -45,7 +45,7 @@ AcmeClient
     * [.verifyChallenge(authz, challenge)](#AcmeClient+verifyChallenge) ⇒ <code>Promise</code>
     * [.completeChallenge(challenge)](#AcmeClient+completeChallenge) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.waitForValidStatus(item)](#AcmeClient+waitForValidStatus) ⇒ <code>Promise.&lt;object&gt;</code>
-    * [.getCertificate(order)](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.getCertificate(order, [preferredChain])](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.revokeCertificate(cert, [data])](#AcmeClient+revokeCertificate) ⇒ <code>Promise</code>
     * [.auto(opts)](#AcmeClient+auto) ⇒ <code>Promise.&lt;string&gt;</code>
 
@@ -395,7 +395,7 @@ await client.waitForValidStatus(order);
 ```
 <a name="AcmeClient+getCertificate"></a>
 
-### acmeClient.getCertificate(order) ⇒ <code>Promise.&lt;string&gt;</code>
+### acmeClient.getCertificate(order, [preferredChain]) ⇒ <code>Promise.&lt;string&gt;</code>
 Get certificate from ACME order
 
 https://tools.ietf.org/html/rfc8555#section-7.4.2
@@ -403,15 +403,22 @@ https://tools.ietf.org/html/rfc8555#section-7.4.2
 **Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Certificate  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| order | <code>object</code> | Order object |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| order | <code>object</code> |  | Order object |
+| [preferredChain] | <code>string</code> | <code>null</code> | Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null` |
 
 **Example**  
 Get certificate
 ```js
 const order = { ... }; // Previously created order
 const certificate = await client.getCertificate(order);
+```
+**Example**  
+Get certificate with preferred chain
+```js
+const order = { ... }; // Previously created order
+const certificate = await client.getCertificate(order, 'DST Root CA X3');
 ```
 <a name="AcmeClient+revokeCertificate"></a>
 
@@ -459,6 +466,7 @@ Auto mode
 | [opts.termsOfServiceAgreed] | <code>boolean</code> | Agree to Terms of Service, default: `false` |
 | [opts.skipChallengeVerification] | <code>boolean</code> | Skip internal challenge verification before notifying ACME provider, default: `false` |
 | [opts.challengePriority] | <code>Array.&lt;string&gt;</code> | Array defining challenge type priority, default: `['http-01', 'dns-01']` |
+| [opts.preferredChain] | <code>string</code> | Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null` |
 
 **Example**  
 Order a certificate using auto mode
@@ -477,6 +485,22 @@ const certificate = await client.auto({
     challengeRemoveFn: async (authz, challenge, keyAuthorization) => {
         // Clean up challenge here
     }
+});
+```
+**Example**  
+Order a certificate using auto mode with preferred chain
+```js
+const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+    commonName: 'test.example.com'
+});
+
+const certificate = await client.auto({
+    csr: certificateRequest,
+    email: 'test@example.com',
+    termsOfServiceAgreed: true,
+    preferredChain: 'DST Root CA X3',
+    challengeCreateFn: async () => {},
+    challengeRemoveFn: async () => {}
 });
 ```
 <a name="Client"></a>

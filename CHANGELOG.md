@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.1.0
+## v4.1.0 (2020-11-12)
 
 * `added` Option `preferredChain` added to `client.getCertificate()` and `client.auto()` to indicate which certificate chain is preferred if a CA offers multiple
     * Related: [https://community.letsencrypt.org/t/transition-to-isrgs-root-delayed-until-jan-11-2021/125516](https://community.letsencrypt.org/t/transition-to-isrgs-root-delayed-until-jan-11-2021/125516)
