@@ -6,7 +6,7 @@ const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
 const cts = require('./challtestsrv');
-const rfc8555 = require('./rfc8555');
+const spec = require('./spec');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
@@ -129,7 +129,7 @@ describe('client', () => {
             termsOfServiceAgreed: true
         });
 
-        rfc8555.account(testAccount);
+        spec.rfc8555.account(testAccount);
         assert.strictEqual(testAccount.status, 'valid');
     });
 
@@ -164,7 +164,7 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        rfc8555.account(account);
+        spec.rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
         assert.deepStrictEqual(account.key, testAccount.key);
     });
@@ -195,7 +195,7 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        rfc8555.account(account);
+        spec.rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
         assert.deepStrictEqual(account.key, testAccount.key);
     });
@@ -209,7 +209,7 @@ describe('client', () => {
         const data = { contact: [testContact] };
         const account = await testClient.updateAccount(data);
 
-        rfc8555.account(account);
+        spec.rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
         assert.deepStrictEqual(account.key, testAccount.key);
         assert.isArray(account.contact);
@@ -232,7 +232,7 @@ describe('client', () => {
             onlyReturnExisting: true
         });
 
-        rfc8555.account(account);
+        spec.rfc8555.account(account);
         assert.strictEqual(account.status, 'valid');
         assert.notDeepEqual(account.key, testAccount.key);
     });
@@ -250,7 +250,7 @@ describe('client', () => {
         testOrderWildcard = await testClient.createOrder(data2);
 
         [testOrder, testOrderWildcard].forEach((item) => {
-            rfc8555.order(item);
+            spec.rfc8555.order(item);
             assert.strictEqual(item.status, 'pending');
         });
     });
@@ -264,7 +264,7 @@ describe('client', () => {
         await Promise.map([testOrder, testOrderWildcard], async (existing) => {
             const result = await testClient.getOrder(existing);
 
-            rfc8555.order(result);
+            spec.rfc8555.order(result);
             assert.deepStrictEqual(existing, result);
         });
     });
@@ -283,7 +283,7 @@ describe('client', () => {
             assert.isNotEmpty(collection);
 
             collection.forEach((authz) => {
-                rfc8555.authorization(authz);
+                spec.rfc8555.authorization(authz);
                 assert.strictEqual(authz.status, 'pending');
             });
         });
@@ -292,7 +292,7 @@ describe('client', () => {
         testAuthzWildcard = wildcardAuthzCollection.pop();
 
         testAuthz.challenges.concat(testAuthzWildcard.challenges).forEach((item) => {
-            rfc8555.challenge(item);
+            spec.rfc8555.challenge(item);
             assert.strictEqual(item.status, 'pending');
         });
     });
@@ -328,13 +328,13 @@ describe('client', () => {
         const authzCollection = await testClient.getAuthorizations(order);
 
         const results = await Promise.map(authzCollection, async (authz) => {
-            rfc8555.authorization(authz);
+            spec.rfc8555.authorization(authz);
             assert.strictEqual(authz.status, 'pending');
             return testClient.deactivateAuthorization(authz);
         });
 
         results.forEach((authz) => {
-            rfc8555.authorization(authz);
+            spec.rfc8555.authorization(authz);
             assert.strictEqual(authz.status, 'deactivated');
         });
     });
@@ -361,7 +361,7 @@ describe('client', () => {
         await Promise.map([testChallenge, testChallengeWildcard], async (challenge) => {
             const result = await testClient.completeChallenge(challenge);
 
-            rfc8555.challenge(result);
+            spec.rfc8555.challenge(result);
             assert.strictEqual(challenge.url, result.url);
         });
     });
@@ -384,7 +384,7 @@ describe('client', () => {
         const finalize = await testClient.finalizeOrder(testOrder, testCsr);
         const finalizeWildcard = await testClient.finalizeOrder(testOrderWildcard, testCsrWildcard);
 
-        [finalize, finalizeWildcard].forEach((f) => rfc8555.order(f));
+        [finalize, finalizeWildcard].forEach((f) => spec.rfc8555.order(f));
 
         assert.strictEqual(testOrder.url, finalize.url);
         assert.strictEqual(testOrderWildcard.url, finalizeWildcard.url);
@@ -438,7 +438,7 @@ describe('client', () => {
         const data = { status: 'deactivated' };
         const account = await testClient.updateAccount(data);
 
-        rfc8555.account(account);
+        spec.rfc8555.account(account);
         assert.strictEqual(account.status, 'deactivated');
     });
 

@@ -90,13 +90,18 @@ export const directory: {
  * Crypto
  */
 
-export interface CsrDomains {
+export interface CertificateDomains {
     commonName: string;
     altNames: string[];
 }
 
+export interface CertificateIssuer {
+    commonName: string;
+}
+
 export interface CertificateInfo {
-    domains: CsrDomains;
+    issuer: CertificateIssuer;
+    domains: CertificateDomains;
     notAfter: Date;
     notBefore: Date;
 }
@@ -120,7 +125,7 @@ export interface CryptoInterface {
     splitPemChain(str: string): string[];
     getModulus(input: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString | CertificateBuffer | CertificateString | CsrBuffer | CsrString): Promise<Buffer>;
     getPublicExponent(input: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString | CertificateBuffer | CertificateString | CsrBuffer | CsrString): Promise<Buffer>;
-    readCsrDomains(csr: CsrBuffer | CsrString): Promise<CsrDomains>;
+    readCsrDomains(csr: CsrBuffer | CsrString): Promise<CertificateDomains>;
     readCertificateInfo(cert: CertificateBuffer | CertificateString): Promise<CertificateInfo>;
     createCsr(data: CsrOptions, key?: PrivateKeyBuffer | PrivateKeyString): Promise<[PrivateKeyBuffer, CsrBuffer]>;
 }

@@ -263,8 +263,12 @@ exports.readCertificateInfo = async function(cert) {
     }
 
     const obj = forge.pki.certificateFromPem(cert);
+    const issuerCn = (obj.issuer.attributes || []).find((a) => a.name === 'commonName');
 
     return {
+        issuer: {
+            commonName: issuerCn ? issuerCn.value : null
+        },
         domains: parseDomains(obj),
         notAfter: obj.validity.notAfter,
         notBefore: obj.validity.notBefore

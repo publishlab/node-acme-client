@@ -5,6 +5,7 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const cts = require('./challtestsrv');
+const spec = require('./spec');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
@@ -230,45 +231,24 @@ describe('client.auto', () => {
     it('should read certificate info', async () => {
         const info = await acme.forge.readCertificateInfo(testCertificate);
 
-        assert.isObject(info);
-
-        assert.isObject(info.domains);
-        assert.isString(info.domains.commonName);
-        assert.isArray(info.domains.altNames);
+        spec.crypto.certificateInfo(info);
         assert.strictEqual(info.domains.commonName, testDomain);
         assert.deepStrictEqual(info.domains.altNames, [testDomain]);
-
-        assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
-        assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
     });
 
     it('should read SAN certificate info', async () => {
         const info = await acme.forge.readCertificateInfo(testSanCertificate);
 
-        assert.isObject(info);
-
-        assert.isObject(info.domains);
-        assert.isString(info.domains.commonName);
-        assert.isArray(info.domains.altNames);
+        spec.crypto.certificateInfo(info);
         assert.strictEqual(info.domains.commonName, testSanDomains[0]);
         assert.deepStrictEqual(info.domains.altNames, testSanDomains);
-
-        assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
-        assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
     });
 
     it('should read wildcard certificate info', async () => {
         const info = await acme.forge.readCertificateInfo(testWildcardCertificate);
 
-        assert.isObject(info);
-
-        assert.isObject(info.domains);
-        assert.isString(info.domains.commonName);
-        assert.isArray(info.domains.altNames);
+        spec.crypto.certificateInfo(info);
         assert.strictEqual(info.domains.commonName, testWildcardDomain);
         assert.deepStrictEqual(info.domains.altNames, [testWildcardDomain, `*.${testWildcardDomain}`]);
-
-        assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
-        assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
     });
 });

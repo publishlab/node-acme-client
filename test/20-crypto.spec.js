@@ -6,6 +6,7 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const path = require('path');
 const { assert } = require('chai');
+const spec = require('./spec');
 const forge = require('./../src/crypto/forge');
 
 const cryptoEngines = {
@@ -138,9 +139,7 @@ describe('crypto', () => {
             it('should resolve domains from CSR', async () => {
                 const result = await engine.readCsrDomains(testCsr);
 
-                assert.isObject(result);
-                assert.isString(result.commonName);
-                assert.isArray(result.altNames);
+                spec.crypto.csrDomains(result);
                 assert.strictEqual(result.commonName, testCsrDomain);
                 assert.deepStrictEqual(result.altNames, [testCsrDomain]);
             });
@@ -148,9 +147,7 @@ describe('crypto', () => {
             it('should resolve domains from SAN CSR', async () => {
                 const result = await engine.readCsrDomains(testSanCsr);
 
-                assert.isObject(result);
-                assert.isString(result.commonName);
-                assert.isArray(result.altNames);
+                spec.crypto.csrDomains(result);
                 assert.strictEqual(result.commonName, testSanCsrDomains[0]);
                 assert.deepStrictEqual(result.altNames, testSanCsrDomains);
             });
@@ -158,18 +155,15 @@ describe('crypto', () => {
             it('should resolve domains from SAN without common name', async () => {
                 const result = await engine.readCsrDomains(testNonCnCsr);
 
-                assert.isObject(result);
+                spec.crypto.csrDomains(result);
                 assert.isNull(result.commonName);
-                assert.isArray(result.altNames);
                 assert.deepStrictEqual(result.altNames, testSanCsrDomains);
             });
 
             it('should resolve domains from non-ASCII CSR', async () => {
                 const result = await engine.readCsrDomains(testNonAsciiCsr);
 
-                assert.isObject(result);
-                assert.isString(result.commonName);
-                assert.isArray(result.altNames);
+                spec.crypto.csrDomains(result);
                 assert.strictEqual(result.commonName, testCsrDomain);
                 assert.deepStrictEqual(result.altNames, [testCsrDomain]);
             });
@@ -182,31 +176,17 @@ describe('crypto', () => {
             it('should read info from certificate', async () => {
                 const info = await engine.readCertificateInfo(testCert);
 
-                assert.isObject(info);
-
-                assert.isObject(info.domains);
-                assert.isString(info.domains.commonName);
-                assert.isArray(info.domains.altNames);
+                spec.crypto.certificateInfo(info);
                 assert.strictEqual(info.domains.commonName, testCsrDomain);
                 assert.strictEqual(info.domains.altNames.length, 0);
-
-                assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
-                assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
             });
 
             it('should read info from SAN certificate', async () => {
                 const info = await engine.readCertificateInfo(testSanCert);
 
-                assert.isObject(info);
-
-                assert.isObject(info.domains);
-                assert.isString(info.domains.commonName);
-                assert.isArray(info.domains.altNames);
+                spec.crypto.certificateInfo(info);
                 assert.strictEqual(info.domains.commonName, testSanCsrDomains[0]);
                 assert.deepEqual(info.domains.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
-
-                assert.strictEqual(Object.prototype.toString.call(info.notBefore), '[object Date]');
-                assert.strictEqual(Object.prototype.toString.call(info.notAfter), '[object Date]');
             });
 
 

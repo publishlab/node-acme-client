@@ -6,6 +6,7 @@
 * `fixed` Upgrade `axios@0.21.0`
 * `fixed` Error when attempting to revoke a certificate chain
 * `fixed` Missing URL augmentation in `client.finalizeOrder()` and `client.deactivateAuthorization()`
+* `fixed` Add certificate issuer to response from `forge.readCertificateInfo()`
 
 
 ## v4.0.2 (2020-10-09)

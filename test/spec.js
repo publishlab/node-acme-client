@@ -1,5 +1,5 @@
 /**
- * ACME assertions
+ * Assertions
  */
 
 const { assert } = require('chai');
@@ -9,10 +9,12 @@ module.exports = spec;
 
 
 /**
- * Account
+ * ACME
  */
 
-spec.account = (obj) => {
+spec.rfc8555 = {};
+
+spec.rfc8555.account = (obj) => {
     assert.isObject(obj);
 
     assert.isString(obj.status);
@@ -34,19 +36,14 @@ spec.account = (obj) => {
     }
 };
 
-
-/**
- * Order
- */
-
-spec.order = (obj) => {
+spec.rfc8555.order = (obj) => {
     assert.isObject(obj);
 
     assert.isString(obj.status);
     assert.include(['pending', 'ready', 'processing', 'valid', 'invalid'], obj.status);
 
     assert.isArray(obj.identifiers);
-    obj.identifiers.forEach((i) => spec.identifier(i));
+    obj.identifiers.forEach((i) => spec.rfc8555.identifier(i));
 
     assert.isArray(obj.authorizations);
     obj.authorizations.forEach((a) => assert.isString(a));
@@ -77,21 +74,16 @@ spec.order = (obj) => {
     assert.isString(obj.url);
 };
 
-
-/**
- * Authorization
- */
-
-spec.authorization = (obj) => {
+spec.rfc8555.authorization = (obj) => {
     assert.isObject(obj);
 
-    spec.identifier(obj.identifier);
+    spec.rfc8555.identifier(obj.identifier);
 
     assert.isString(obj.status);
     assert.include(['pending', 'valid', 'invalid', 'deactivated', 'expires', 'revoked'], obj.status);
 
     assert.isArray(obj.challenges);
-    obj.challenges.forEach((c) => spec.challenge(c));
+    obj.challenges.forEach((c) => spec.rfc8555.challenge(c));
 
     if ('expires' in obj) {
         assert.isString(obj.expires);
@@ -105,23 +97,13 @@ spec.authorization = (obj) => {
     assert.isString(obj.url);
 };
 
-
-/**
- * Identifier
- */
-
-spec.identifier = (obj) => {
+spec.rfc8555.identifier = (obj) => {
     assert.isObject(obj);
     assert.isString(obj.type);
     assert.isString(obj.value);
 };
 
-
-/**
- * Challenge
- */
-
-spec.challenge = (obj) => {
+spec.rfc8555.challenge = (obj) => {
     assert.isObject(obj);
     assert.isString(obj.type);
     assert.isString(obj.url);
@@ -136,4 +118,34 @@ spec.challenge = (obj) => {
     if ('error' in obj) {
         assert.isObject(obj.error);
     }
+};
+
+
+/**
+ * Crypto
+ */
+
+spec.crypto = {};
+
+spec.crypto.csrDomains = (obj) => {
+    assert.isObject(obj);
+
+    assert.isDefined(obj.commonName);
+    assert.isArray(obj.altNames);
+    obj.altNames.forEach((a) => assert.isString(a));
+};
+
+spec.crypto.certificateInfo = (obj) => {
+    assert.isObject(obj);
+
+    assert.isObject(obj.issuer);
+    assert.isDefined(obj.issuer.commonName);
+
+    assert.isObject(obj.domains);
+    assert.isDefined(obj.domains.commonName);
+    assert.isArray(obj.domains.altNames);
+    obj.domains.altNames.forEach((a) => assert.isString(a));
+
+    assert.strictEqual(Object.prototype.toString.call(obj.notBefore), '[object Date]');
+    assert.strictEqual(Object.prototype.toString.call(obj.notAfter), '[object Date]');
 };
