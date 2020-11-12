@@ -82,41 +82,6 @@ function b64encode(str) {
 
 
 /**
- * Split chain of PEM encoded objects from buffer or string into array
- *
- * @param {buffer|string} str PEM encoded buffer or string
- * @returns {array} Array of PEM bodies
- */
-
-function splitPemChain(str) {
-    const pemStr = Buffer.isBuffer(str) ? str.toString() : str;
-
-    return pemStr.split(/\s*-----(?:BEGIN|END) [A-Z0-9- ]+-----/g)
-        .filter((p) => p)
-        .map((p) => p.replace(/\r|\n/g, ''));
-}
-
-
-/**
- * Parse body of PEM encoded object from buffer or string
- * If multiple objects are chained, the first body will be returned
- *
- * @param {buffer|string} str PEM encoded buffer or string
- * @returns {string} PEM body
- */
-
-function getPemBody(str) {
-    const chain = splitPemChain(str);
-
-    if (!chain.length) {
-        throw new Error('Unable to parse PEM body from string');
-    }
-
-    return chain[0];
-}
-
-
-/**
  * Find and format error in response object
  *
  * @param {object} resp HTTP response
@@ -142,7 +107,5 @@ module.exports = {
     retry,
     b64escape,
     b64encode,
-    splitPemChain,
-    getPemBody,
     formatResponseError
 };

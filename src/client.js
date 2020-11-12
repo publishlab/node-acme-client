@@ -12,6 +12,7 @@ const AcmeApi = require('./api');
 const verify = require('./verify');
 const util = require('./util');
 const auto = require('./auto');
+const forge = require('./crypto/forge');
 
 
 /**
@@ -342,7 +343,7 @@ class AcmeClient {
             csr = Buffer.from(csr);
         }
 
-        const body = util.getPemBody(csr);
+        const body = forge.getPemBody(csr);
         const data = { csr: util.b64escape(body) };
 
         const resp = await this.api.finalizeOrder(order.finalize, data);
@@ -627,7 +628,7 @@ class AcmeClient {
      */
 
     async revokeCertificate(cert, data = {}) {
-        const body = util.getPemBody(cert);
+        const body = forge.getPemBody(cert);
         data.certificate = util.b64escape(body);
 
         const resp = await this.api.revokeCert(data);

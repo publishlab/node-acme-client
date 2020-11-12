@@ -142,6 +142,30 @@ exports.createPublicKey = async function(key) {
 
 
 /**
+ * Parse body of PEM encoded object form buffer or string
+ * If multiple objects are chained, the first body will be returned
+ *
+ * @param {buffer|string} str PEM encoded buffer or string
+ * @returns {string} PEM body
+ */
+
+exports.getPemBody = (str) => {
+    const msg = forge.pem.decode(str)[0];
+    return forge.util.encode64(msg.body, 64);
+};
+
+
+/**
+ * Split chain of PEM encoded objects from buffer or string into array
+ *
+ * @param {buffer|string} str PEM encoded buffer or string
+ * @returns {string[]} Array of PEM bodies
+ */
+
+exports.splitPemChain = (str) => forge.pem.decode(str).map(forge.pem.encode);
+
+
+/**
  * Get modulus
  *
  * @param {buffer|string} input PEM encoded private key, certificate or CSR

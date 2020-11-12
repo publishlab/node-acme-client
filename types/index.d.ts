@@ -116,6 +116,8 @@ export interface CsrOptions {
 export interface CryptoInterface {
     createPrivateKey(size?: number): Promise<PrivateKeyBuffer>;
     createPublicKey(key: PrivateKeyBuffer | PrivateKeyString): Promise<PublicKeyBuffer>;
+    getPemBody(str: string): string;
+    splitPemChain(str: string): string[];
     getModulus(input: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString | CertificateBuffer | CertificateString | CsrBuffer | CsrString): Promise<Buffer>;
     getPublicExponent(input: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString | CertificateBuffer | CertificateString | CsrBuffer | CsrString): Promise<Buffer>;
     readCsrDomains(csr: CsrBuffer | CsrString): Promise<CsrDomains>;
