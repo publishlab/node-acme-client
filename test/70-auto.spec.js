@@ -4,14 +4,18 @@
 
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
+const Promise = require('bluebird');
 const cts = require('./challtestsrv');
+const getCertIssuers = require('./get-cert-issuers');
 const spec = require('./spec');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
 
 
 describe('client.auto', () => {
+    let testIssuers;
     let testClient;
     let testCertificate;
     let testSanCertificate;
@@ -37,6 +41,27 @@ describe('client.auto', () => {
         if (!cts.isEnabled()) {
             this.skip();
         }
+    });
+
+
+    /**
+     * Fixtures
+     */
+
+    it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        testIssuers = await getCertIssuers();
+
+        assert.isArray(testIssuers);
+        assert.isTrue(testIssuers.length > 1);
+
+        testIssuers.forEach((i) => {
+            assert.isString(i);
+            assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
+        });
     });
 
 
@@ -221,6 +246,54 @@ describe('client.auto', () => {
         });
 
         assert.isString(cert);
+    });
+
+    it('should order alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        await Promise.map(testIssuers, async (issuer) => {
+            const [, csr] = await acme.forge.createCsr({
+                commonName: `${uuid()}.example.com`
+            });
+
+            const cert = await testClient.auto({
+                csr,
+                termsOfServiceAgreed: true,
+                preferredChain: issuer,
+                challengeCreateFn: cts.challengeCreateFn,
+                challengeRemoveFn: cts.challengeRemoveFn
+            });
+
+            const rootCert = acme.forge.splitPemChain(cert).pop();
+            const info = await acme.forge.readCertificateInfo(rootCert);
+
+            assert.strictEqual(issuer, info.issuer.commonName);
+        });
+    });
+
+    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        const [, csr] = await acme.forge.createCsr({
+            commonName: `${uuid()}.example.com`
+        });
+
+        const cert = await testClient.auto({
+            csr,
+            termsOfServiceAgreed: true,
+            preferredChain: uuid(),
+            challengeCreateFn: cts.challengeCreateFn,
+            challengeRemoveFn: cts.challengeRemoveFn
+        });
+
+        const rootCert = acme.forge.splitPemChain(cert).pop();
+        const info = await acme.forge.readCertificateInfo(rootCert);
+
+        assert.strictEqual(testIssuers[0], info.issuer.commonName);
     });
 
 

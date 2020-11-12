@@ -6,15 +6,18 @@ const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const Promise = require('bluebird');
 const cts = require('./challtestsrv');
+const getCertIssuers = require('./get-cert-issuers');
 const spec = require('./spec');
 const acme = require('./../');
 
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
+const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
 
 
 describe('client', () => {
+    let testIssuers;
     let testPrivateKey;
     let testSecondaryPrivateKey;
     let testClient;
@@ -66,6 +69,22 @@ describe('client', () => {
     it('should generate certificate signing request', async () => {
         [, testCsr] = await acme.forge.createCsr({ commonName: testDomain });
         [, testCsrWildcard] = await acme.forge.createCsr({ commonName: testDomainWildcard });
+    });
+
+    it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        testIssuers = await getCertIssuers();
+
+        assert.isArray(testIssuers);
+        assert.isTrue(testIssuers.length > 1);
+
+        testIssuers.forEach((i) => {
+            assert.isString(i);
+            assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
+        });
     });
 
 
@@ -412,6 +431,32 @@ describe('client', () => {
             assert.isString(cert);
             return acme.forge.readCertificateInfo(cert);
         });
+    });
+
+    it('should get alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        await Promise.map(testIssuers, async (issuer) => {
+            const cert = await testClient.getCertificate(testOrder, issuer);
+            const rootCert = acme.forge.splitPemChain(cert).pop();
+            const info = await acme.forge.readCertificateInfo(rootCert);
+
+            assert.strictEqual(issuer, info.issuer.commonName);
+        });
+    });
+
+    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async () => {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        const cert = await testClient.getCertificate(testOrder, uuid());
+        const rootCert = acme.forge.splitPemChain(cert).pop();
+        const info = await acme.forge.readCertificateInfo(rootCert);
+
+        assert.strictEqual(testIssuers[0], info.issuer.commonName);
     });
 
 

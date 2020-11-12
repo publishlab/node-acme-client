@@ -580,6 +580,7 @@ class AcmeClient {
      * https://tools.ietf.org/html/rfc8555#section-7.4.2
      *
      * @param {object} order Order object
+     * @param {string} [preferredChain] Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null`
      * @returns {Promise<string>} Certificate
      *
      * @example Get certificate
@@ -587,9 +588,15 @@ class AcmeClient {
      * const order = { ... }; // Previously created order
      * const certificate = await client.getCertificate(order);
      * ```
+     *
+     * @example Get certificate with preferred chain
+     * ```js
+     * const order = { ... }; // Previously created order
+     * const certificate = await client.getCertificate(order, 'DST Root CA X3');
+     * ```
      */
 
-    async getCertificate(order) {
+    async getCertificate(order, preferredChain = null) {
         if (order.status !== 'valid') {
             order = await this.waitForValidStatus(order);
         }
@@ -599,6 +606,17 @@ class AcmeClient {
         }
 
         const resp = await this.api.apiRequest(order.certificate, null, [200]);
+
+        /* Handle alternate certificate chains */
+        if (preferredChain && resp.headers.link) {
+            const alternateLinks = util.parseLinkHeader(resp.headers.link);
+            const alternates = await Promise.map(alternateLinks, async (link) => this.api.apiRequest(link, null, [200]));
+            const certificates = [resp].concat(alternates).map((c) => c.data);
+
+            return util.findCertificateChainForIssuer(certificates, preferredChain);
+        }
+
+        /* Return default certificate chain */
         return resp.data;
     }
 
@@ -647,6 +665,7 @@ class AcmeClient {
      * @param {boolean} [opts.termsOfServiceAgreed] Agree to Terms of Service, default: `false`
      * @param {boolean} [opts.skipChallengeVerification] Skip internal challenge verification before notifying ACME provider, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
+     * @param {string} [opts.preferredChain] Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null`
      * @returns {Promise<string>} Certificate
      *
      * @example Order a certificate using auto mode
@@ -665,6 +684,22 @@ class AcmeClient {
      *     challengeRemoveFn: async (authz, challenge, keyAuthorization) => {
      *         // Clean up challenge here
      *     }
+     * });
+     * ```
+     *
+     * @example Order a certificate using auto mode with preferred chain
+     * ```js
+     * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+     *     commonName: 'test.example.com'
+     * });
+     *
+     * const certificate = await client.auto({
+     *     csr: certificateRequest,
+     *     email: 'test@example.com',
+     *     termsOfServiceAgreed: true,
+     *     preferredChain: 'DST Root CA X3',
+     *     challengeCreateFn: async () => {},
+     *     challengeRemoveFn: async () => {}
      * });
      * ```
      */

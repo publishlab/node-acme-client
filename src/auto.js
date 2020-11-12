@@ -9,6 +9,7 @@ const forge = require('./crypto/forge');
 const defaultOpts = {
     csr: null,
     email: null,
+    preferredChain: null,
     termsOfServiceAgreed: false,
     skipChallengeVerification: false,
     challengePriority: ['http-01', 'dns-01'],
@@ -110,7 +111,7 @@ module.exports = async function(client, userOpts) {
             await opts.challengeCreateFn(authz, challenge, keyAuthorization);
 
             /* Challenge verification */
-            if (userOpts.skipChallengeVerification === true) {
+            if (opts.skipChallengeVerification === true) {
                 debug(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
             }
             else {
@@ -146,5 +147,5 @@ module.exports = async function(client, userOpts) {
 
     debug('[auto] Finalizing order and downloading certificate');
     await client.finalizeOrder(order, opts.csr);
-    return client.getCertificate(order);
+    return client.getCertificate(order, opts.preferredChain);
 };

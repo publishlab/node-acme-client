@@ -5,6 +5,7 @@
 const Promise = require('bluebird');
 const Backoff = require('backo2');
 const debug = require('debug')('acme-client');
+const forge = require('./crypto/forge');
 
 
 /**
@@ -82,6 +83,62 @@ function b64encode(str) {
 
 
 /**
+ * Parse URLs from link header
+ *
+ * @param {string} header Link header contents
+ * @param {string} rel Link relation, default: `alternate`
+ * @returns {array} Array of URLs
+ */
+
+function parseLinkHeader(header, rel = 'alternate') {
+    const relRe = new RegExp(`\\s*rel\\s*=\\s*"?${rel}"?`, 'i');
+
+    const results = (header || '').split(/,\s*</).map((link) => {
+        const [, linkUrl, linkParts] = link.match(/<?([^>]*)>;(.*)/) || [];
+        return (linkUrl && linkParts && linkParts.match(relRe)) ? linkUrl : null;
+    });
+
+    return results.filter((r) => r);
+}
+
+
+/**
+ * Find certificate chain with preferred issuer
+ * If issuer can not be located, the first certificate will be returned
+ *
+ * @param {array} certificates Array of PEM encoded certificate chains
+ * @param {string} issuer Preferred certificate issuer
+ * @returns {Promise<string>} PEM encoded certificate chain
+ */
+
+async function findCertificateChainForIssuer(chains, issuer) {
+    try {
+        return await Promise.any(chains.map(async (chain) => {
+            /* Look up all issuers */
+            const certs = forge.splitPemChain(chain);
+            const infoCollection = await Promise.map(certs, forge.readCertificateInfo);
+            const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
+
+            /* Found match, return it */
+            if (issuerCollection.includes(issuer)) {
+                debug(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+                return chain;
+            }
+
+            /* No match, throw error */
+            debug(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+            throw new Error('Certificate issuer mismatch');
+        }));
+    }
+    catch (e) {
+        /* No certificates matched, return default */
+        debug(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
+        return chains[0];
+    }
+}
+
+
+/**
  * Find and format error in response object
  *
  * @param {object} resp HTTP response
@@ -107,5 +164,7 @@ module.exports = {
     retry,
     b64escape,
     b64encode,
+    parseLinkHeader,
+    findCertificateChainForIssuer,
     formatResponseError
 };

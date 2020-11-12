@@ -43,6 +43,7 @@ commands:
             echo 'export NODE_EXTRA_CA_CERTS="/tmp/ca.cert.pem"' >> $BASH_ENV
             echo 'export ACME_CA_CERT_PATH="/tmp/ca.cert.pem"' >> $BASH_ENV
             echo 'export ACME_DIRECTORY_URL="https://127.0.0.1:14000/dir"' >> $BASH_ENV
+            echo 'export ACME_PEBBLE_MANAGEMENT_URL="https://127.0.0.1:15000"' >> $BASH_ENV
 
       - run:
           name: Wait for Pebble
@@ -71,6 +72,7 @@ commands:
 
             echo 'export ACME_CAP_META_TOS_FIELD=0' >> $BASH_ENV
             echo 'export ACME_CAP_UPDATE_ACCOUNT_KEY=0' >> $BASH_ENV
+            echo 'export ACME_CAP_ALTERNATE_CERT_ROOTS=0' >> $BASH_ENV
 
       - run:
           name: Wait for Step CA
