@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.1.1
+## v4.1.1 (2020-11-13)
 
 * `fixed` Missing TypeScript definitions
 
