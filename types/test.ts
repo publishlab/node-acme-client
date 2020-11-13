@@ -48,6 +48,7 @@ import * as acme from 'acme-client';
 
     await client.finalizeOrder(order, certCsr);
     await client.getCertificate(order);
+    await client.getCertificate(order, 'DST Root CA X3');
 
     /* Auto */
     await client.auto({

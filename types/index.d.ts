@@ -68,7 +68,7 @@ export class Client {
     verifyChallenge(authz: Authorization, challenge: rfc8555.Challenge): Promise<boolean>;
     completeChallenge(challenge: rfc8555.Challenge): Promise<rfc8555.Challenge>;
     waitForValidStatus<T = Order | Authorization | rfc8555.Challenge>(item: T): Promise<T>;
-    getCertificate(order: Order): Promise<string>;
+    getCertificate(order: Order, preferredChain?: string | null): Promise<string>;
     revokeCertificate(cert: CertificateBuffer | CertificateString, data?: rfc8555.CertificateRevocationRequest): Promise<void>;
     auto(opts: ClientAutoOptions): Promise<string>;
 }
