@@ -50,6 +50,7 @@ export interface ClientAutoOptions {
     termsOfServiceAgreed?: boolean;
     skipChallengeVerification?: boolean;
     challengePriority?: string[];
+    preferredChain?: string;
 }
 
 export class Client {

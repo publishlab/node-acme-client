@@ -56,4 +56,15 @@ import * as acme from 'acme-client';
         challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
         challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
     });
+
+    await client.auto({
+        csr: certCsr,
+        email: 'test@example.com',
+        termsOfServiceAgreed: false,
+        skipChallengeVerification: false,
+        challengePriority: ['http-01', 'dns-01'],
+        preferredChain: 'DST Root CA X3',
+        challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
+        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
+    });
 })();

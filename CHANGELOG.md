@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.1
+
+* `fixed` Missing TypeScript definitions
+
+
 ## v4.1.0 (2020-11-12)
 
 * `added` Option `preferredChain` added to `client.getCertificate()` and `client.auto()` to indicate which certificate chain is preferred if a CA offers multiple
