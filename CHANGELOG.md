@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.2 (2020-11-16)
+
+* `fixed` Bug when encoding PEM payloads, potentially causing malformed requests
+
+
 ## v4.1.1 (2020-11-13)
 
 * `fixed` Missing TypeScript definitions

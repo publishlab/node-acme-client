@@ -191,6 +191,32 @@ describe('crypto', () => {
 
 
             /**
+             * PEM utils
+             */
+
+            it('should get PEM body', () => {
+                [testPemKey, testCert, testSanCert].forEach((pem) => {
+                    const body = engine.getPemBody(pem);
+
+                    assert.isString(body);
+                    assert.notInclude(body, '\r');
+                    assert.notInclude(body, '\n');
+                    assert.notInclude(body, '\r\n');
+                });
+            });
+
+            it('should split PEM chain', () => {
+                [testPemKey, testCert, testSanCert].forEach((pem) => {
+                    const chain = engine.splitPemChain(pem);
+
+                    assert.isArray(chain);
+                    assert.isNotEmpty(chain);
+                    chain.forEach((c) => assert.isString(c));
+                });
+            });
+
+
+            /**
              * Modulus and exponent
              */
 
