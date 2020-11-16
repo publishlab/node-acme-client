@@ -151,7 +151,7 @@ exports.createPublicKey = async function(key) {
 
 exports.getPemBody = (str) => {
     const msg = forge.pem.decode(str)[0];
-    return forge.util.encode64(msg.body, 64);
+    return forge.util.encode64(msg.body);
 };
 
 
