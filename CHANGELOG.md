@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.3 (2021-02-22)
+
+* `fixed` Upgrade `axios@0.21.1` - [CVE-2020-28168](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28168)
+
+
 ## v4.1.2 (2020-11-16)
 
 * `fixed` Bug when encoding PEM payloads, potentially causing malformed requests

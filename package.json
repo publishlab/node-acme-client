@@ -2,7 +2,7 @@
     "name": "acme-client",
     "description": "Simple and unopinionated ACME client",
     "author": "nmorsman",
-    "version": "4.1.2",
+    "version": "4.1.3",
     "main": "src/index.js",
     "types": "types",
     "license": "MIT",
