@@ -562,7 +562,7 @@ class AcmeClient {
             else if (resp.data.status === 'pending') {
                 throw new Error('Operation is pending');
             }
-            else if (resp.data.status === 'valid') {
+            else if (resp.data.status === 'valid' || resp.data.status === 'ready') {
                 return resp.data;
             }
 
