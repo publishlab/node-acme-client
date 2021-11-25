@@ -71,14 +71,14 @@ async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '
         let results = [];
         let i = 0;
         while (results.indexOf(dnsChallenge) < 0 && i < RETRIES) {
-            // eslint-disable-next-line
+            /* eslint-disable no-await-in-loop */
             await sleep(RETRY_WAIT_MS);
 
-            // eslint-disable-next-line
             results = await resolver[myFunction](hostname);
             results = [].concat(...results);
             debug(`Found records ${results} by ${resolver.getServers()}`);
             i += 1;
+            /* eslint-enable no-await-in-loop */
         }
         return i !== RETRIES;
     }
