@@ -52,8 +52,19 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
  */
 
 async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '_acme-challenge.') {
-    debug(`Resolving DNS TXT records for ${authz.identifier.value}, prefix: ${prefix}`);
-    let challengeRecord = `${prefix}${authz.identifier.value}`;
+
+    const RETRIES = 10;
+    const RETRY_WAIT_MS = 1000;
+
+    const domain = authz.identifier.value;
+
+    debug(`Resolving DNS TXT records for ${domain}, prefix: ${prefix}`);
+    let challengeRecord = `${prefix}${domain}`;
+
+    // find name servers
+    const nameServers = await dns.resolveNsAsync(domain);
+    debug(`Obtained name servers ${nameServers} for domain ${DOMAIN}`)
+    const resolvers = await Promise.mapSeries(nameServers, buildResolver);
 
     try {
         /* Attempt CNAME record first */
@@ -70,17 +81,41 @@ async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '
     }
 
     /* Read TXT record */
-    const result = await dns.resolveTxtAsync(challengeRecord);
-    const records = [].concat(...result);
+    const results = await Promise.mapSeries(resolvers, verifyNameServer.bind(null, challengeRecord, keyAuthorization, 'resolveTxtAsync'))
+    const isFound = results.reduce((a,b) => a && b);
 
-    debug(`Query successful, found ${records.length} DNS TXT records`);
-
-    if (records.indexOf(keyAuthorization) === -1) {
-        throw new Error(`Authorization not found in DNS TXT records for ${authz.identifier.value}`);
+    if (! isFound) {
+        throw new Error(`Authorization not found in DNS TXT records for ${domain}`);
     }
 
-    debug(`Key authorization match for ${challenge.type}/${authz.identifier.value}, ACME challenge verified`);
+    debug(`Key authorization match for ${challenge.type}/${domain}, ACME challenge verified`);
     return true;
+
+    async function buildResolver(hostname) {
+        const ips = await dns.resolve4Async(hostname)
+        debug(`Building resolver for ${hostname} at ${ips}`)
+        const resolver = new dns.Resolver();
+        resolver.setServers(ips);
+        return resolver;
+    }
+    
+    async function verifyNameServer(hostname, challenge, myFunction, resolver) {
+        let results = [];
+        let i = 0;
+        while(results.indexOf(challenge) < 0 && i < RETRIES) {
+            await sleep(RETRY_WAIT_MS);
+    
+            results = await resolver[myFunction](hostname);
+            results = [].concat(...results)
+            debug(`Found records ${results} by ${resolver.getServers()}`);
+            i++;
+        }
+        return i !== RETRIES;
+    
+        function sleep(milliseconds) {
+            return new Promise((resolve) => setTimeout(resolve, milliseconds));
+        }
+    }
 }
 
 
