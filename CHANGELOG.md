@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.4
+
+* `fixed` Upgrade `axios@0.21.4` - [CVE-2021-3749](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3749)
+
+
 ## v4.1.3 (2021-02-22)
 
 * `fixed` Upgrade `axios@0.21.1` - [CVE-2020-28168](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28168)
