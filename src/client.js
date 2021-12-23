@@ -16,6 +16,15 @@ const forge = require('./crypto/forge');
 
 
 /**
+ * ACME states
+ */
+
+const validStates = ['ready', 'valid'];
+const pendingStates = ['pending', 'processing'];
+const invalidStates = ['invalid'];
+
+
+/**
  * Default options
  */
 
@@ -555,14 +564,14 @@ class AcmeClient {
             /* Verify status */
             debug(`Item has status: ${resp.data.status}`);
 
-            if (resp.data.status === 'invalid') {
+            if (invalidStates.includes(resp.data.status)) {
                 abort();
                 throw new Error(util.formatResponseError(resp));
             }
-            else if (resp.data.status === 'pending') {
-                throw new Error('Operation is pending');
+            else if (pendingStates.includes(resp.data.status)) {
+                throw new Error('Operation is pending or processing');
             }
-            else if (resp.data.status === 'valid') {
+            else if (validStates.includes(resp.data.status)) {
                 return resp.data;
             }
 
@@ -597,7 +606,7 @@ class AcmeClient {
      */
 
     async getCertificate(order, preferredChain = null) {
-        if (order.status !== 'valid') {
+        if (!validStates.includes(order.status)) {
             order = await this.waitForValidStatus(order);
         }
 
