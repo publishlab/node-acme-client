@@ -69,6 +69,15 @@ class HttpClient {
     async getDirectory() {
         if (!this.directory) {
             const resp = await this.request(this.directoryUrl, 'get');
+
+            if (resp.status >= 400) {
+                throw new Error(`Attempting to read ACME directory returned error ${resp.status}: ${this.directoryUrl}`);
+            }
+
+            if (!resp.data) {
+                throw new Error('Attempting to read ACME directory returned no data');
+            }
+
             this.directory = resp.data;
         }
     }
@@ -129,7 +138,7 @@ class HttpClient {
         await this.getDirectory();
 
         if (!this.directory[resource]) {
-            throw new Error(`Could not resolve URL for API resource: "${resource}"`);
+            throw new Error(`Unable to locate API resource URL in ACME directory: "${resource}"`);
         }
 
         return this.directory[resource];
