@@ -98,6 +98,7 @@ jobs:
   v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, test ]}
   v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, test ]}
   v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, test ]}
+  v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, test ]}
   # v12-step: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
 
 workflows:
@@ -106,4 +107,5 @@ workflows:
       - v10
       - v12
       - v14
+      - v16
       # - v12-step
