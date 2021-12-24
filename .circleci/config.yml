@@ -85,6 +85,20 @@ commands:
           name: Wait for Step CA
           command: /bin/bash ./scripts/test-suite-wait-for-ca.sh
 
+  install-coredns:
+    steps:
+      - run:
+          name: Install CoreDNS
+          command: sudo -E /bin/bash ./scripts/test-suite-install-coredns.sh
+          environment:
+            COREDNS_VERSION: 1.8.6
+            PEBBLECTS_DNS_PORT: 8053
+
+      - run:
+          name: Start CoreDNS
+          command: sudo coredns -p 53 -conf /etc/coredns/Corefile
+          background: true
+
   test:
     steps:
       - run: yarn
@@ -97,20 +111,20 @@ commands:
           environment:
             ACME_DOMAIN_NAME: test.example.com
             ACME_CHALLTESTSRV_URL: http://127.0.0.1:8055
-            ACME_DNS_RESOLVER: 127.0.0.1:8053
+            ACME_DNS_RESOLVER: 127.0.0.1
             ACME_TLSALPN_PORT: 5001
             ACME_HTTP_PORT: 5002
             ACME_HTTPS_PORT: 5003
 
 jobs:
-  v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, test ]}
-  v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, test ]}
-  v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, test ]}
-  v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, test ]}
-  eab-v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
-  eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
-  eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
-  eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
+  v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  eab-v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   # step-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
 
 workflows:
