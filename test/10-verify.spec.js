@@ -7,18 +7,20 @@ const { v4: uuid } = require('uuid');
 const cts = require('./challtestsrv');
 const verify = require('./../src/verify');
 
+const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
+
 
 describe('verify', () => {
     const challengeTypes = ['http-01', 'dns-01'];
 
-    const testHttp01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com` } };
+    const testHttp01Authz = { identifier: { type: 'dns', value: `${uuid()}.${domainName}` } };
     const testHttp01Challenge = { type: 'http-01', status: 'pending', token: uuid() };
     const testHttp01Key = uuid();
 
-    const testDns01Authz = { identifier: { type: 'dns', value: `${uuid()}.example.com` } };
+    const testDns01Authz = { identifier: { type: 'dns', value: `${uuid()}.${domainName}` } };
     const testDns01Challenge = { type: 'dns-01', status: 'pending', token: uuid() };
     const testDns01Key = uuid();
-    const testDns01Cname = `${uuid()}.example.com`;
+    const testDns01Cname = `${uuid()}.${domainName}`;
 
 
     /**

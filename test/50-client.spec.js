@@ -10,6 +10,7 @@ const getCertIssuers = require('./get-cert-issuers');
 const spec = require('./spec');
 const acme = require('./../');
 
+const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
@@ -36,7 +37,7 @@ describe('client', () => {
     let testCertificate;
     let testCertificateWildcard;
 
-    const testDomain = `${uuid()}.example.com`;
+    const testDomain = `${uuid()}.${domainName}`;
     const testDomainWildcard = `*.${testDomain}`;
     const testContact = `mailto:test-${uuid()}@nope.com`;
 
@@ -339,8 +340,8 @@ describe('client', () => {
     it('should deactivate identifier authorization', async () => {
         const order = await testClient.createOrder({
             identifiers: [
-                { type: 'dns', value: `${uuid()}.example.com` },
-                { type: 'dns', value: `${uuid()}.example.com` }
+                { type: 'dns', value: `${uuid()}.${domainName}` },
+                { type: 'dns', value: `${uuid()}.${domainName}` }
             ]
         });
 

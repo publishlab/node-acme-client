@@ -10,6 +10,7 @@ const getCertIssuers = require('./get-cert-issuers');
 const spec = require('./spec');
 const acme = require('./../');
 
+const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
 const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
 
@@ -21,15 +22,15 @@ describe('client.auto', () => {
     let testSanCertificate;
     let testWildcardCertificate;
 
-    const testDomain = `${uuid()}.example.com`;
-    const testHttpDomain = `${uuid()}.example.com`;
-    const testDnsDomain = `${uuid()}.example.com`;
-    const testWildcardDomain = `${uuid()}.example.com`;
+    const testDomain = `${uuid()}.${domainName}`;
+    const testHttpDomain = `${uuid()}.${domainName}`;
+    const testDnsDomain = `${uuid()}.${domainName}`;
+    const testWildcardDomain = `${uuid()}.${domainName}`;
 
     const testSanDomains = [
-        `${uuid()}.example.com`,
-        `${uuid()}.example.com`,
-        `${uuid()}.example.com`
+        `${uuid()}.${domainName}`,
+        `${uuid()}.${domainName}`,
+        `${uuid()}.${domainName}`
     ];
 
 
@@ -87,7 +88,7 @@ describe('client.auto', () => {
 
     it('should throw on invalid challenge response', async () => {
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         await assert.isRejected(testClient.auto({
@@ -100,7 +101,7 @@ describe('client.auto', () => {
 
     it('should throw on invalid challenge response with opts.skipChallengeVerification=true', async () => {
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         await assert.isRejected(testClient.auto({
@@ -119,7 +120,7 @@ describe('client.auto', () => {
 
     it('should throw on challengeCreate exception', async () => {
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         await assert.isRejected(testClient.auto({
@@ -132,7 +133,7 @@ describe('client.auto', () => {
 
     it('should not throw on challengeRemove exception', async () => {
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         const cert = await testClient.auto({
@@ -234,7 +235,7 @@ describe('client.auto', () => {
 
     it('should order certificate with opts.skipChallengeVerification=true', async () => {
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         const cert = await testClient.auto({
@@ -255,7 +256,7 @@ describe('client.auto', () => {
 
         await Promise.map(testIssuers, async (issuer) => {
             const [, csr] = await acme.forge.createCsr({
-                commonName: `${uuid()}.example.com`
+                commonName: `${uuid()}.${domainName}`
             });
 
             const cert = await testClient.auto({
@@ -279,7 +280,7 @@ describe('client.auto', () => {
         }
 
         const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.example.com`
+            commonName: `${uuid()}.${domainName}`
         });
 
         const cert = await testClient.auto({
