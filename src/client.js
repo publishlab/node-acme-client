@@ -32,7 +32,7 @@ const defaultOpts = {
     directoryUrl: undefined,
     accountKey: undefined,
     accountUrl: null,
-    backoffAttempts: 5,
+    backoffAttempts: 10,
     backoffMin: 5000,
     backoffMax: 30000
 };
@@ -46,7 +46,7 @@ const defaultOpts = {
  * @param {string} opts.directoryUrl ACME directory URL
  * @param {buffer|string} opts.accountKey PEM encoded account private key
  * @param {string} [opts.accountUrl] Account URL, default: `null`
- * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `5`
+ * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `10`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
  *
@@ -64,7 +64,7 @@ const defaultOpts = {
  *     directoryUrl: acme.directory.letsencrypt.staging,
  *     accountKey: 'Private key goes here',
  *     accountUrl: 'Optional account URL goes here',
- *     backoffAttempts: 5,
+ *     backoffAttempts: 10,
  *     backoffMin: 5000,
  *     backoffMax: 30000
  * });
