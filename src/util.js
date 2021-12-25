@@ -3,6 +3,7 @@
  */
 
 const Promise = require('bluebird');
+const dns = Promise.promisifyAll(require('dns'));
 const Backoff = require('backo2');
 const debug = require('debug')('acme-client');
 const forge = require('./crypto/forge');
@@ -159,12 +160,83 @@ function formatResponseError(resp) {
 }
 
 
-/* Export utils */
+/**
+ * Resolve root domain name by looking for SOA record
+ *
+ * @param {string} recordName DNS record name
+ * @returns {Promise<string>} Root domain name
+ */
+
+async function resolveDomainBySoaRecord(recordName) {
+    try {
+        await dns.resolveSoaAsync(recordName);
+        debug(`Found SOA record, considering domain to be: ${recordName}`);
+        return recordName;
+    }
+    catch (e) {
+        debug(`Unable to locate SOA record for name: ${recordName}`);
+        const parentRecordName = recordName.split('.').slice(1).join('.');
+
+        if (!parentRecordName.includes('.')) {
+            throw new Error('Unable to resolve domain by SOA record');
+        }
+
+        return resolveDomainBySoaRecord(parentRecordName);
+    }
+}
+
+
+/**
+ * Get DNS resolver using domains authoritative NS records
+ *
+ * @param {string} recordName DNS record name
+ * @returns {Promise<dns.Resolver>} DNS resolver
+ */
+
+async function getAuthoritativeDnsResolver(recordName) {
+    debug(`Locating authoritative NS records for name: ${recordName}`);
+    const resolver = new dns.Resolver();
+
+    try {
+        /* Resolve root domain by SOA */
+        const domain = await resolveDomainBySoaRecord(recordName);
+
+        /* Resolve authoritative NS addresses */
+        debug(`Looking up authoritative NS records for domain: ${domain}`);
+        const nsRecords = await dns.resolveNsAsync(domain);
+        const nsAddrArray = await Promise.map(nsRecords, async (r) => dns.resolve4Async(r));
+        const nsAddresses = [].concat(...nsAddrArray).filter((a) => a);
+
+        if (!nsAddresses.length) {
+            throw new Error(`Unable to locate any valid authoritative NS addresses for domain: ${domain}`);
+        }
+
+        /* Authoritative NS success */
+        debug(`Found ${nsAddresses.length} authoritative NS addresses for domain: ${domain}`);
+        resolver.setServers(nsAddresses);
+    }
+    catch (e) {
+        debug(`Authoritative NS lookup error: ${e.message}`);
+    }
+
+    /* Return resolver */
+    const addresses = resolver.getServers();
+    debug(`DNS resolver addresses: ${addresses.join(', ')}`);
+
+    return resolver;
+}
+
+
+/**
+ * Export utils
+ */
+
 module.exports = {
     retry,
     b64escape,
     b64encode,
     parseLinkHeader,
     findCertificateChainForIssuer,
-    formatResponseError
+    formatResponseError,
+    getAuthoritativeDnsResolver
 };

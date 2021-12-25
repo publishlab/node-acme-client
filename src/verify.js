@@ -6,6 +6,7 @@ const Promise = require('bluebird');
 const dns = Promise.promisifyAll(require('dns'));
 const debug = require('debug')('acme-client');
 const axios = require('./axios');
+const util = require('./util');
 
 
 /**
@@ -40,6 +41,59 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
 
 
 /**
+ * Walk DNS until TXT records are found
+ */
+
+async function walkDnsChallengeRecord(recordName) {
+    /* Attempt CNAME record first */
+    try {
+        debug(`Checking name for CNAME records: ${recordName}`);
+        const cnameRecords = await dns.resolveCnameAsync(recordName);
+
+        if (cnameRecords.length) {
+            debug(`CNAME record found at ${recordName}, new challenge record name: ${cnameRecords[0]}`);
+            return walkDnsChallengeRecord(cnameRecords[0]);
+        }
+    }
+    catch (e) {
+        debug(`No CNAME records found for name: ${recordName}`);
+    }
+
+    /* TXT using default resolver */
+    try {
+        debug(`Checking name for TXT records: ${recordName}`);
+        const txtRecords = await dns.resolveTxtAsync(recordName);
+
+        if (txtRecords.length) {
+            debug(`Found ${txtRecords.length} TXT records at ${recordName}`);
+            return [].concat(...txtRecords);
+        }
+    }
+    catch (e) {
+        debug(`No TXT records found for name: ${recordName}`);
+    }
+
+    /* TXT using authoritative NS */
+    try {
+        debug(`Checking name for TXT records using authoritative NS: ${recordName}`);
+        const resolver = await util.getAuthoritativeDnsResolver(recordName);
+        const txtRecords = await resolver.resolveTxtAsync(recordName);
+
+        if (txtRecords.length) {
+            debug(`Found ${txtRecords.length} TXT records using authoritative NS at ${recordName}`);
+            return [].concat(...txtRecords);
+        }
+    }
+    catch (e) {
+        debug(`No TXT records found using authoritative NS for name: ${recordName}`);
+    }
+
+    /* Found nothing */
+    throw new Error(`No TXT records found for name: ${recordName}`);
+}
+
+
+/**
  * Verify ACME DNS challenge
  *
  * https://tools.ietf.org/html/rfc8555#section-8.4
@@ -52,34 +106,17 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
  */
 
 async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '_acme-challenge.') {
-    debug(`Resolving DNS TXT records for ${authz.identifier.value}, prefix: ${prefix}`);
-    let challengeRecord = `${prefix}${authz.identifier.value}`;
+    const recordName = `${prefix}${authz.identifier.value}`;
+    debug(`Resolving DNS TXT from record: ${recordName}`);
 
-    try {
-        /* Attempt CNAME record first */
-        debug(`Checking CNAME for record ${challengeRecord}`);
-        const cnameRecords = await dns.resolveCnameAsync(challengeRecord);
+    const recordValues = await walkDnsChallengeRecord(recordName);
+    debug(`DNS query finished successfully, found ${recordValues.length} TXT records`);
 
-        if (cnameRecords.length) {
-            debug(`CNAME found at ${challengeRecord}, new challenge record: ${cnameRecords[0]}`);
-            challengeRecord = cnameRecords[0];
-        }
-    }
-    catch (e) {
-        debug(`No CNAME found for record ${challengeRecord}`);
+    if (!recordValues.includes(keyAuthorization)) {
+        throw new Error(`Authorization not found in DNS TXT record: ${recordName}`);
     }
 
-    /* Read TXT record */
-    const result = await dns.resolveTxtAsync(challengeRecord);
-    const records = [].concat(...result);
-
-    debug(`Query successful, found ${records.length} DNS TXT records`);
-
-    if (records.indexOf(keyAuthorization) === -1) {
-        throw new Error(`Authorization not found in DNS TXT records for ${authz.identifier.value}`);
-    }
-
-    debug(`Key authorization match for ${challenge.type}/${authz.identifier.value}, ACME challenge verified`);
+    debug(`Key authorization match for ${challenge.type}/${recordName}, ACME challenge verified`);
     return true;
 }
 

@@ -5,6 +5,7 @@
 * `added` Support for external account binding [RFC 8555 Section 7.3.4](https://tools.ietf.org/html/rfc8555#section-7.3.4)
 * `changed` Increase default `backoffAttempts` to 10
 * `fixed` Deactivate authorizations where challenges can not be completed
+* `fixed` Attempt authoritative name servers when verifying `dns-01` challenges
 * `fixed` Error verbosity when failing to read ACME directory
 * `fixed` Correctly recognize `ready` and `processing` states - [RFC 8555 Section 7.1.6](https://tools.ietf.org/html/rfc8555#section-7.1.6)
 
