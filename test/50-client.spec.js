@@ -16,6 +16,13 @@ const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
 const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
 
+const clientOpts = {
+    directoryUrl,
+    backoffAttempts: 5,
+    backoffMin: 1000,
+    backoffMax: 5000
+};
+
 
 describe('client', () => {
     let testIssuers;
@@ -95,7 +102,7 @@ describe('client', () => {
 
     it('should initialize client', () => {
         testClient = new acme.Client({
-            directoryUrl,
+            ...clientOpts,
             accountKey: testPrivateKey
         });
     });
@@ -165,7 +172,7 @@ describe('client', () => {
 
     it('should throw when trying to find account using invalid account key', async () => {
         const client = new acme.Client({
-            directoryUrl,
+            ...clientOpts,
             accountKey: testSecondaryPrivateKey
         });
 
@@ -176,7 +183,7 @@ describe('client', () => {
 
     it('should find existing account using account key', async () => {
         const client = new acme.Client({
-            directoryUrl,
+            ...clientOpts,
             accountKey: testPrivateKey
         });
 
@@ -196,7 +203,7 @@ describe('client', () => {
 
     it('should refuse invalid account URL', async () => {
         const client = new acme.Client({
-            directoryUrl,
+            ...clientOpts,
             accountKey: testPrivateKey,
             accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
         });
@@ -206,7 +213,7 @@ describe('client', () => {
 
     it('should find existing account using account URL', async () => {
         const client = new acme.Client({
-            directoryUrl,
+            ...clientOpts,
             accountKey: testPrivateKey,
             accountUrl: testAccountUrl
         });

@@ -40,7 +40,7 @@
         "lint": "eslint .",
         "lint-types": "dtslint types",
         "prepublishOnly": "npm run build-docs",
-        "test": "mocha -b -t 60000 \"test/setup.js\" \"test/**/*.spec.js\"",
+        "test": "mocha -t 60000 \"test/setup.js\" \"test/**/*.spec.js\"",
         "test-local": "/bin/bash scripts/run-tests.sh"
     },
     "repository": {

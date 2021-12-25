@@ -76,6 +76,7 @@ describe('client.auto', () => {
         testClient = new acme.Client({
             directoryUrl,
             accountKey,
+            backoffAttempts: 5,
             backoffMin: 1000,
             backoffMax: 5000
         });
