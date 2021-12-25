@@ -78,42 +78,60 @@ module.exports = async function() {
     const authorizations = await client.getAuthorizations(order);
 
     const promises = authorizations.map(async (authz) => {
-        /**
-         * challenges / authz.challenges
-         * An array of all available challenge types for a single DNS name.
-         * One of these challenges needs to be satisfied.
-         */
-
-        const { challenges } = authz;
-
-        /* Just select any challenge */
-        const challenge = challenges.pop();
-        const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
+        let challengeCompleted = false;
 
         try {
-            /* Satisfy challenge */
-            await challengeCreateFn(authz, challenge, keyAuthorization);
+            /**
+             * challenges / authz.challenges
+             * An array of all available challenge types for a single DNS name.
+             * One of these challenges needs to be satisfied.
+             */
 
-            /* Verify that challenge is satisfied */
-            await client.verifyChallenge(authz, challenge);
+            const { challenges } = authz;
 
-            /* Notify ACME provider that challenge is satisfied */
-            await client.completeChallenge(challenge);
+            /* Just select any challenge */
+            const challenge = challenges.pop();
+            const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
-            /* Wait for ACME provider to respond with valid status */
-            await client.waitForValidStatus(challenge);
-        }
-        finally {
-            /* Clean up challenge response */
             try {
-                await challengeRemoveFn(authz, challenge, keyAuthorization);
+                /* Satisfy challenge */
+                await challengeCreateFn(authz, challenge, keyAuthorization);
+
+                /* Verify that challenge is satisfied */
+                await client.verifyChallenge(authz, challenge);
+
+                /* Notify ACME provider that challenge is satisfied */
+                await client.completeChallenge(challenge);
+                challengeCompleted = true;
+
+                /* Wait for ACME provider to respond with valid status */
+                await client.waitForValidStatus(challenge);
             }
-            catch (e) {
-                /**
-                 * Catch errors thrown by challengeRemoveFn() so the order can
-                 * be finalized, even though something went wrong during cleanup
-                 */
+            finally {
+                /* Clean up challenge response */
+                try {
+                    await challengeRemoveFn(authz, challenge, keyAuthorization);
+                }
+                catch (e) {
+                    /**
+                     * Catch errors thrown by challengeRemoveFn() so the order can
+                     * be finalized, even though something went wrong during cleanup
+                     */
+                }
             }
+        }
+        catch (e) {
+            /* Deactivate pending authz when unable to complete challenge */
+            if (!challengeCompleted) {
+                try {
+                    await client.deactivateAuthorization(authz);
+                }
+                catch (f) {
+                    /* Catch and suppress deactivateAuthorization() errors */
+                }
+            }
+
+            throw e;
         }
     });
 

@@ -3,6 +3,7 @@
 ## next
 
 * `changed` Increase default `backoffAttempts` to 10
+* `fixed` Deactivate authorizations where challenges can not be completed
 * `fixed` Error verbosity when failing to read ACME directory
 * `fixed` Correctly recognize `ready` and `processing` states - [RFC 8555 Section 7.1.6](https://tools.ietf.org/html/rfc8555#section-7.1.6)
 

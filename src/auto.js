@@ -86,54 +86,76 @@ module.exports = async function(client, userOpts) {
 
     const challengePromises = authorizations.map(async (authz) => {
         const d = authz.identifier.value;
-
-        /* Select challenge based on priority */
-        const challenge = authz.challenges.sort((a, b) => {
-            const aidx = opts.challengePriority.indexOf(a.type);
-            const bidx = opts.challengePriority.indexOf(b.type);
-
-            if (aidx === -1) return 1;
-            if (bidx === -1) return -1;
-            return aidx - bidx;
-        }).slice(0, 1)[0];
-
-        if (!challenge) {
-            throw new Error(`Unable to select challenge for ${d}, no challenge found`);
-        }
-
-        debug(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
-
-        /* Trigger challengeCreateFn() */
-        debug(`[auto] [${d}] Trigger challengeCreateFn()`);
-        const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
+        let challengeCompleted = false;
 
         try {
-            await opts.challengeCreateFn(authz, challenge, keyAuthorization);
+            /* Select challenge based on priority */
+            const challenge = authz.challenges.sort((a, b) => {
+                const aidx = opts.challengePriority.indexOf(a.type);
+                const bidx = opts.challengePriority.indexOf(b.type);
 
-            /* Challenge verification */
-            if (opts.skipChallengeVerification === true) {
-                debug(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
-            }
-            else {
-                debug(`[auto] [${d}] Running challenge verification`);
-                await client.verifyChallenge(authz, challenge);
+                if (aidx === -1) return 1;
+                if (bidx === -1) return -1;
+                return aidx - bidx;
+            }).slice(0, 1)[0];
+
+            if (!challenge) {
+                throw new Error(`Unable to select challenge for ${d}, no challenge found`);
             }
 
-            /* Complete challenge and wait for valid status */
-            debug(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
-            await client.completeChallenge(challenge);
-            await client.waitForValidStatus(challenge);
-        }
-        finally {
-            /* Trigger challengeRemoveFn(), suppress errors */
-            debug(`[auto] [${d}] Trigger challengeRemoveFn()`);
+            debug(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
+
+            /* Trigger challengeCreateFn() */
+            debug(`[auto] [${d}] Trigger challengeCreateFn()`);
+            const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
             try {
-                await opts.challengeRemoveFn(authz, challenge, keyAuthorization);
+                await opts.challengeCreateFn(authz, challenge, keyAuthorization);
+
+                /* Challenge verification */
+                if (opts.skipChallengeVerification === true) {
+                    debug(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
+                }
+                else {
+                    debug(`[auto] [${d}] Running challenge verification`);
+                    await client.verifyChallenge(authz, challenge);
+                }
+
+                /* Complete challenge and wait for valid status */
+                debug(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
+                await client.completeChallenge(challenge);
+                challengeCompleted = true;
+
+                await client.waitForValidStatus(challenge);
             }
-            catch (e) {
-                debug(`[auto] [${d}] challengeRemoveFn threw error: ${e.message}`);
+            finally {
+                /* Trigger challengeRemoveFn(), suppress errors */
+                debug(`[auto] [${d}] Trigger challengeRemoveFn()`);
+
+                try {
+                    await opts.challengeRemoveFn(authz, challenge, keyAuthorization);
+                }
+                catch (e) {
+                    debug(`[auto] [${d}] challengeRemoveFn threw error: ${e.message}`);
+                }
             }
+        }
+        catch (e) {
+            /* Deactivate pending authz when unable to complete challenge */
+            if (!challengeCompleted) {
+                debug(`[auto] [${d}] Unable to complete challenge: ${e.message}`);
+
+                try {
+                    debug(`[auto] [${d}] Deactivating failed authorization`);
+                    await client.deactivateAuthorization(authz);
+                }
+                catch (f) {
+                    /* Suppress deactivateAuthorization() errors */
+                    debug(`[auto] [${d}] Authorization deactivation threw error: ${f.message}`);
+                }
+            }
+
+            throw e;
         }
     });
 
