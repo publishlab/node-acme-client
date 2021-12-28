@@ -9,6 +9,13 @@ commands:
       - run: yarn --version
       - checkout
 
+  enable-eab:
+    steps:
+      - run:
+          name: Enable EAB through environment
+          command: |
+            echo 'export ACME_CAP_EAB_ENABLED=1' >> $BASH_ENV
+
   install-cts:
     steps:
       - run:
@@ -100,7 +107,11 @@ jobs:
   v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, test ]}
   v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, test ]}
   v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, test ]}
-  # v12-step: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
+  eab-v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
+  eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
+  eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
+  eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, test ]}
+  # step-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
 
 workflows:
   test-suite:
@@ -109,4 +120,8 @@ workflows:
       - v12
       - v14
       - v16
-      # - v12-step
+      - eab-v10
+      - eab-v12
+      - eab-v14
+      - eab-v16
+      # - step-v12
