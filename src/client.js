@@ -17,6 +17,8 @@ const forge = require('./crypto/forge');
 
 /**
  * ACME states
+ *
+ * @private
  */
 
 const validStates = ['ready', 'valid'];
@@ -26,6 +28,8 @@ const invalidStates = ['invalid'];
 
 /**
  * Default options
+ *
+ * @private
  */
 
 const defaultOpts = {

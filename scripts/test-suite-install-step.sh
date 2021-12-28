@@ -4,7 +4,6 @@
 #
 set -eu
 
-
 # Download and install
 wget -nv "https://github.com/smallstep/certificates/releases/download/v${STEPCA_VERSION}/step-certificates_${STEPCA_VERSION}_amd64.deb" -O /tmp/step-ca.deb
 wget -nv "https://github.com/smallstep/cli/releases/download/v${STEPCLI_VERSION}/step-cli_${STEPCLI_VERSION}_amd64.deb" -O /tmp/step-cli.deb

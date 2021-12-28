@@ -14,7 +14,6 @@ CIRCLECI_CLI_BIN="${CIRCLECI_CLI_PATH}/circleci"
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && cd .. && pwd )"
 CONFIG_PATH="${PROJECT_DIR}/.circleci/.temp.yml"
 
-
 # Run all jobs by default
 if [[ ${#JOBS[@]} -eq 0 ]]; then
     JOBS=("v10" "v12" "v14" "v16")
