@@ -12,7 +12,22 @@ const acme = require('./../');
 
 const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+const capEabEnabled = (('ACME_CAP_EAB_ENABLED' in process.env) && (process.env.ACME_CAP_EAB_ENABLED === '1'));
 const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
+
+const clientOpts = {
+    directoryUrl,
+    backoffAttempts: 5,
+    backoffMin: 1000,
+    backoffMax: 5000
+};
+
+if (capEabEnabled && process.env.ACME_EAB_KID && process.env.ACME_EAB_HMAC_KEY) {
+    clientOpts.externalAccountBinding = {
+        kid: process.env.ACME_EAB_KID,
+        hmacKey: process.env.ACME_EAB_HMAC_KEY
+    };
+}
 
 
 describe('client.auto', () => {
@@ -74,11 +89,8 @@ describe('client.auto', () => {
         const accountKey = await acme.forge.createPrivateKey();
 
         testClient = new acme.Client({
-            directoryUrl,
-            accountKey,
-            backoffAttempts: 5,
-            backoffMin: 1000,
-            backoffMax: 5000
+            ...clientOpts,
+            accountKey
         });
     });
 

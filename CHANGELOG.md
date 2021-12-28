@@ -2,6 +2,7 @@
 
 ## next
 
+* `added` Support for external account binding
 * `changed` Increase default `backoffAttempts` to 10
 * `fixed` Deactivate authorizations where challenges can not be completed
 * `fixed` Error verbosity when failing to read ACME directory
@@ -93,12 +94,12 @@
 ## v3.1.0 (2019-08-21)
 
 * `added` UTF-8 support when generating a CSR subject using forge - [RFC 5280](https://tools.ietf.org/html/rfc5280)
-* `fixed` Implemented `POST-as-GET` for all ACME API requests - [RFC 8555 Section 6.3](https://tools.ietf.org/html/rfc8555#section-6.3)
+* `fixed` Implement `POST-as-GET` for all ACME API requests - [RFC 8555 Section 6.3](https://tools.ietf.org/html/rfc8555#section-6.3)
 
 
 ## v2.3.0 (2019-08-21)
 
-* `backport` Implemented `POST-as-GET` for all ACME API requests
+* `backport` Implement `POST-as-GET` for all ACME API requests
 
 
 ## v3.0.0 (2019-07-13)

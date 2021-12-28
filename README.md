@@ -61,6 +61,22 @@ acme.directory.letsencrypt.production;
 ```
 
 
+### External account binding
+
+To enable external account binding when creating your ACME account, provide your KID and HMAC key to the client constructor.
+
+```js
+const client = new acme.Client({
+    directoryUrl: acme.directory.letsencrypt.staging,
+    accountKey: accountPrivateKey,
+    externalAccountBinding: {
+        kid: 'YOUR-EAB-KID',
+        hmacKey: 'YOUR-EAB-HMAC-KEY'
+    }
+})
+```
+
+
 ## Cryptography
 
 For key pair generation and Certificate Signing Requests, `acme-client` uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.

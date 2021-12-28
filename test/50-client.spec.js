@@ -12,6 +12,7 @@ const acme = require('./../');
 
 const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
 const directoryUrl = process.env.ACME_DIRECTORY_URL || acme.directory.letsencrypt.staging;
+const capEabEnabled = (('ACME_CAP_EAB_ENABLED' in process.env) && (process.env.ACME_CAP_EAB_ENABLED === '1'));
 const capMetaTosField = !(('ACME_CAP_META_TOS_FIELD' in process.env) && (process.env.ACME_CAP_META_TOS_FIELD === '0'));
 const capUpdateAccountKey = !(('ACME_CAP_UPDATE_ACCOUNT_KEY' in process.env) && (process.env.ACME_CAP_UPDATE_ACCOUNT_KEY === '0'));
 const capAlternateCertRoots = !(('ACME_CAP_ALTERNATE_CERT_ROOTS' in process.env) && (process.env.ACME_CAP_ALTERNATE_CERT_ROOTS === '0'));
@@ -22,6 +23,13 @@ const clientOpts = {
     backoffMin: 1000,
     backoffMax: 5000
 };
+
+if (capEabEnabled && process.env.ACME_EAB_KID && process.env.ACME_EAB_HMAC_KEY) {
+    clientOpts.externalAccountBinding = {
+        kid: process.env.ACME_EAB_KID,
+        hmacKey: process.env.ACME_EAB_HMAC_KEY
+    };
+}
 
 
 describe('client', () => {
@@ -149,6 +157,22 @@ describe('client', () => {
         }
 
         await assert.isRejected(testClient.createAccount());
+    });
+
+    it('should refuse account creation without EAB [ACME_CAP_EAB_ENABLED]', async function() {
+        if (!capEabEnabled) {
+            this.skip();
+        }
+
+        const client = new acme.Client({
+            ...clientOpts,
+            accountKey: testPrivateKey,
+            externalAccountBinding: null
+        });
+
+        await assert.isRejected(client.createAccount({
+            termsOfServiceAgreed: true
+        }));
     });
 
     it('should create an account', async () => {

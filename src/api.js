@@ -42,13 +42,15 @@ class AcmeApi {
      * @param {string} url Request URL
      * @param {object} [payload] Request payload, default: `null`
      * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
-     * @param {boolean} [jwsKid] Use KID in JWS header, default: `true`
+     * @param {object} [opts]
+     * @param {boolean} [opts.includeJwsKid] Include KID instead of JWK in JWS header, default: `true`
+     * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request, default: `false`
      * @returns {Promise<object>} HTTP response
      */
 
-    async apiRequest(url, payload = null, validStatusCodes = [], jwsKid = true) {
-        const kid = jwsKid ? this.getAccountUrl() : null;
-        const resp = await this.http.signedRequest(url, payload, kid);
+    async apiRequest(url, payload = null, validStatusCodes = [], { includeJwsKid = true, includeExternalAccountBinding = false } = {}) {
+        const kid = includeJwsKid ? this.getAccountUrl() : null;
+        const resp = await this.http.signedRequest(url, payload, { kid, includeExternalAccountBinding });
 
         if (validStatusCodes.length && (validStatusCodes.indexOf(resp.status) === -1)) {
             throw new Error(util.formatResponseError(resp));
@@ -65,13 +67,15 @@ class AcmeApi {
      * @param {string} resource Request resource name
      * @param {object} [payload] Request payload, default: `null`
      * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
-     * @param {boolean} [jwsKid] Use KID in JWS header, default: `true`
+     * @param {object} [opts]
+     * @param {boolean} [opts.includeJwsKid] Include KID instead of JWK in JWS header, default: `true`
+     * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request, default: `false`
      * @returns {Promise<object>} HTTP response
      */
 
-    async apiResourceRequest(resource, payload = null, validStatusCodes = [], jwsKid = true) {
+    async apiResourceRequest(resource, payload = null, validStatusCodes = [], { includeJwsKid = true, includeExternalAccountBinding = false } = {}) {
         const resourceUrl = await this.http.getResourceUrl(resource);
-        return this.apiRequest(resourceUrl, payload, validStatusCodes, jwsKid);
+        return this.apiRequest(resourceUrl, payload, validStatusCodes, { includeJwsKid, includeExternalAccountBinding });
     }
 
 
@@ -98,7 +102,10 @@ class AcmeApi {
      */
 
     async createAccount(data) {
-        const resp = await this.apiResourceRequest('newAccount', data, [200, 201], false);
+        const resp = await this.apiResourceRequest('newAccount', data, [200, 201], {
+            includeJwsKid: false,
+            includeExternalAccountBinding: (data.onlyReturnExisting !== true)
+        });
 
         /* Set account URL */
         if (resp.headers.location) {

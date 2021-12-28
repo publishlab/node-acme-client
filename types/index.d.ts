@@ -37,9 +37,15 @@ export interface ClientOptions {
     directoryUrl: string;
     accountKey: PrivateKeyBuffer | PrivateKeyString;
     accountUrl?: string;
+    externalAccountBinding?: ClientExternalAccountBindingOptions;
     backoffAttempts?: number;
     backoffMin?: number;
     backoffMax?: number;
+}
+
+export interface ClientExternalAccountBindingOptions {
+    kid: string;
+    hmacKey: string;
 }
 
 export interface ClientAutoOptions {

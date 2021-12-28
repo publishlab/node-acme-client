@@ -15,12 +15,16 @@ const forge = require('./crypto/forge');
  * @class
  * @param {string} directoryUrl ACME directory URL
  * @param {buffer} accountKey PEM encoded account private key
+ * @param {object} [opts.externalAccountBinding]
+ * @param {string} [opts.externalAccountBinding.kid] External account binding KID
+ * @param {string} [opts.externalAccountBinding.hmacKey] External account binding HMAC key
  */
 
 class HttpClient {
-    constructor(directoryUrl, accountKey) {
+    constructor(directoryUrl, accountKey, externalAccountBinding = {}) {
         this.directoryUrl = directoryUrl;
         this.accountKey = accountKey;
+        this.externalAccountBinding = externalAccountBinding;
 
         this.maxBadNonceRetries = 5;
         this.directory = null;
@@ -164,22 +168,21 @@ class HttpClient {
 
 
     /**
-     * Create signed HTTP request body
+     * Prepare HTTP request body for signature
      *
+     * @param {string} alg JWS algorithm
      * @param {string} url Request URL
-     * @param {object} payload Request payload
-     * @param {string} [nonce] Request nonce
-     * @param {string} [kid] Request KID
+     * @param {object} [payload] Request payload
+     * @param {object} [opts]
+     * @param {string} [opts.nonce] JWS anti-replay nonce
+     * @param {string} [opts.kid] JWS KID
      * @returns {Promise<object>} Signed HTTP request body
      */
 
-    async createSignedBody(url, payload = null, nonce = null, kid = null) {
-        /* JWS header */
-        const header = {
-            url,
-            alg: 'RS256'
-        };
+    async prepareSignedBody(alg, url, payload = null, { nonce = null, kid = null } = {}) {
+        const header = { alg, url };
 
+        /* Nonce */
         if (nonce) {
             debug(`Using nonce: ${nonce}`);
             header.nonce = nonce;
@@ -193,11 +196,50 @@ class HttpClient {
             header.jwk = await this.getJwk();
         }
 
-        /* Request payload */
-        const result = {
+        /* Body */
+        return {
             payload: payload ? util.b64encode(JSON.stringify(payload)) : '',
             protected: util.b64encode(JSON.stringify(header))
         };
+    }
+
+
+    /**
+     * Create signed HMAC HTTP request body
+     *
+     * @param {string} hmacKey HMAC key
+     * @param {string} url Request URL
+     * @param {object} [payload] Request payload
+     * @param {object} [opts]
+     * @param {string} [opts.nonce] JWS anti-replay nonce
+     * @param {string} [opts.kid] JWS KID
+     * @returns {Promise<object>} Signed HMAC request body
+     */
+
+    async createSignedHmacBody(hmacKey, url, payload = null, { nonce = null, kid = null } = {}) {
+        const result = await this.prepareSignedBody('HS256', url, payload, { nonce, kid });
+
+        /* Signature */
+        const signer = crypto.createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
+        result.signature = util.b64encode(signer.digest());
+
+        return result;
+    }
+
+
+    /**
+     * Create signed RSA HTTP request body
+     *
+     * @param {string} url Request URL
+     * @param {object} [payload] Request payload
+     * @param {object} [opts]
+     * @param {string} [opts.nonce] JWS nonce
+     * @param {string} [opts.kid] JWS KID
+     * @returns {Promise<object>} Signed RSA request body
+     */
+
+    async createSignedRsaBody(url, payload = null, { nonce = null, kid = null } = {}) {
+        const result = await this.prepareSignedBody('RS256', url, payload, { nonce, kid });
 
         /* Signature */
         const signer = crypto.createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
@@ -214,28 +256,41 @@ class HttpClient {
      *
      * @param {string} url Request URL
      * @param {object} payload Request payload
-     * @param {string} [kid] Request KID
-     * @param {string} [nonce] Request anti-replay nonce
+     * @param {object} [opts]
+     * @param {string} [opts.kid] JWS KID
+     * @param {string} [opts.nonce] JWS anti-replay nonce
+     * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request
      * @param {number} [attempts] Request attempt counter
      * @returns {Promise<object>} HTTP response
      */
 
-    async signedRequest(url, payload, kid = null, nonce = null, attempts = 0) {
+    async signedRequest(url, payload, { kid = null, nonce = null, includeExternalAccountBinding = false } = {}, attempts = 0) {
         if (!nonce) {
             nonce = await this.getNonce();
         }
 
+        /* External account binding */
+        if (includeExternalAccountBinding && this.externalAccountBinding) {
+            if (this.externalAccountBinding.kid && this.externalAccountBinding.hmacKey) {
+                const jwk = await this.getJwk();
+                const eabKid = this.externalAccountBinding.kid;
+                const eabHmacKey = this.externalAccountBinding.hmacKey;
+
+                payload.externalAccountBinding = await this.createSignedHmacBody(eabHmacKey, url, jwk, { kid: eabKid });
+            }
+        }
+
         /* Sign body and send request */
-        const data = await this.createSignedBody(url, payload, nonce, kid);
+        const data = await this.createSignedRsaBody(url, payload, { nonce, kid });
         const resp = await this.request(url, 'post', { data });
 
         /* Retry on bad nonce - https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-6.4 */
         if (resp.data && resp.data.type && (resp.status === 400) && (resp.data.type === 'urn:ietf:params:acme:error:badNonce') && (attempts < this.maxBadNonceRetries)) {
-            const newNonce = resp.headers['replay-nonce'] || null;
+            nonce = resp.headers['replay-nonce'] || null;
             attempts += 1;
 
             debug(`Caught invalid nonce error, retrying (${attempts}/${this.maxBadNonceRetries}) signed request to: ${url}`);
-            return this.signedRequest(url, payload, kid, newNonce, attempts);
+            return this.signedRequest(url, payload, { kid, nonce, includeExternalAccountBinding }, attempts);
         }
 
         /* Return response */

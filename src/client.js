@@ -36,6 +36,7 @@ const defaultOpts = {
     directoryUrl: undefined,
     accountKey: undefined,
     accountUrl: null,
+    externalAccountBinding: {},
     backoffAttempts: 10,
     backoffMin: 5000,
     backoffMax: 30000
@@ -50,6 +51,9 @@ const defaultOpts = {
  * @param {string} opts.directoryUrl ACME directory URL
  * @param {buffer|string} opts.accountKey PEM encoded account private key
  * @param {string} [opts.accountUrl] Account URL, default: `null`
+ * @param {object} [opts.externalAccountBinding]
+ * @param {string} [opts.externalAccountBinding.kid] External account binding KID
+ * @param {string} [opts.externalAccountBinding.hmacKey] External account binding HMAC key
  * @param {number} [opts.backoffAttempts] Maximum number of backoff attempts, default: `10`
  * @param {number} [opts.backoffMin] Minimum backoff attempt delay in milliseconds, default: `5000`
  * @param {number} [opts.backoffMax] Maximum backoff attempt delay in milliseconds, default: `30000`
@@ -73,6 +77,18 @@ const defaultOpts = {
  *     backoffMax: 30000
  * });
  * ```
+ *
+ * @example Create ACME client with external account binding
+ * ```js
+ * const client = new acme.Client({
+ *     directoryUrl: acme.directory.letsencrypt.staging,
+ *     accountKey: 'Private key goes here',
+ *     externalAccountBinding: {
+ *         kid: 'YOUR-EAB-KID',
+ *         hmacKey: 'YOUR-EAB-HMAC-KEY'
+ *     }
+ * });
+ * ```
  */
 
 class AcmeClient {
@@ -89,7 +105,7 @@ class AcmeClient {
             max: this.opts.backoffMax
         };
 
-        this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey);
+        this.http = new HttpClient(this.opts.directoryUrl, this.opts.accountKey, this.opts.externalAccountBinding);
         this.api = new AcmeApi(this.http, this.opts.accountUrl);
     }
 
@@ -258,7 +274,7 @@ class AcmeClient {
 
         /* Get signed request body from new client */
         const url = await newHttpClient.getResourceUrl('keyChange');
-        const body = await newHttpClient.createSignedBody(url, data);
+        const body = await newHttpClient.createSignedRsaBody(url, data);
 
         /* Change key using old client */
         const resp = await this.api.updateAccountKey(body);
