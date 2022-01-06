@@ -14,14 +14,6 @@
 </dd>
 </dl>
 
-## Constants
-
-<dl>
-<dt><a href="#defaultOpts">defaultOpts</a></dt>
-<dd><p>Default options</p>
-</dd>
-</dl>
-
 <a name="AcmeClient"></a>
 
 ## AcmeClient
@@ -59,7 +51,10 @@ AcmeClient
 | opts.directoryUrl | <code>string</code> | ACME directory URL |
 | opts.accountKey | <code>buffer</code> \| <code>string</code> | PEM encoded account private key |
 | [opts.accountUrl] | <code>string</code> | Account URL, default: `null` |
-| [opts.backoffAttempts] | <code>number</code> | Maximum number of backoff attempts, default: `5` |
+| [opts.externalAccountBinding] | <code>object</code> |  |
+| [opts.externalAccountBinding.kid] | <code>string</code> | External account binding KID |
+| [opts.externalAccountBinding.hmacKey] | <code>string</code> | External account binding HMAC key |
+| [opts.backoffAttempts] | <code>number</code> | Maximum number of backoff attempts, default: `10` |
 | [opts.backoffMin] | <code>number</code> | Minimum backoff attempt delay in milliseconds, default: `5000` |
 | [opts.backoffMax] | <code>number</code> | Maximum backoff attempt delay in milliseconds, default: `30000` |
 
@@ -78,9 +73,21 @@ const client = new acme.Client({
     directoryUrl: acme.directory.letsencrypt.staging,
     accountKey: 'Private key goes here',
     accountUrl: 'Optional account URL goes here',
-    backoffAttempts: 5,
+    backoffAttempts: 10,
     backoffMin: 5000,
     backoffMax: 30000
+});
+```
+**Example**  
+Create ACME client with external account binding
+```js
+const client = new acme.Client({
+    directoryUrl: 'https://acme-provider.example.com/directory-url',
+    accountKey: 'Private key goes here',
+    externalAccountBinding: {
+        kid: 'YOUR-EAB-KID',
+        hmacKey: 'YOUR-EAB-HMAC-KEY'
+    }
 });
 ```
 <a name="AcmeClient+getTermsOfServiceUrl"></a>
@@ -509,9 +516,3 @@ const certificate = await client.auto({
 ACME client
 
 **Kind**: global namespace  
-<a name="defaultOpts"></a>
-
-## defaultOpts
-Default options
-
-**Kind**: global constant  
