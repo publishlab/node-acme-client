@@ -63,17 +63,38 @@ acme.directory.letsencrypt.production;
 
 ### External account binding
 
-To enable external account binding when creating your ACME account, provide your KID and HMAC key to the client constructor.
+To enable [external account binding](https://tools.ietf.org/html/rfc8555#section-7.3.4) when creating your ACME account, provide your KID and HMAC key to the client constructor.
 
 ```js
 const client = new acme.Client({
-    directoryUrl: acme.directory.letsencrypt.staging,
+    directoryUrl: 'https://acme-provider.example.com/directory-url',
     accountKey: accountPrivateKey,
     externalAccountBinding: {
         kid: 'YOUR-EAB-KID',
         hmacKey: 'YOUR-EAB-HMAC-KEY'
     }
 })
+```
+
+
+### Specifying the account URL
+
+During the ACME account creation process, the server will check the supplied account key and either create a new account if the key is unused, or return the existing ACME account bound to that key.
+
+In some cases, for example with some EAB providers, this account creation step may be prohibited and might require you to manually specify the account URL beforehand. This can be done through `accountUrl` in the client constructor.
+
+```js
+const client = new acme.Client({
+    directoryUrl: acme.directory.letsencrypt.staging,
+    accountKey: accountPrivateKey,
+    accountUrl: 'https://acme-v02.api.letsencrypt.org/acme/acct/12345678'
+})
+```
+
+You can fetch the clients current account URL, either after creating an account or supplying it through the constructor, using `getAccountUrl()`:
+
+```js
+const myAccountUrl = client.getAccountUrl();
 ```
 
 

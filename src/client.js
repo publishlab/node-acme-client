@@ -81,7 +81,7 @@ const defaultOpts = {
  * @example Create ACME client with external account binding
  * ```js
  * const client = new acme.Client({
- *     directoryUrl: acme.directory.letsencrypt.staging,
+ *     directoryUrl: 'https://acme-provider.example.com/directory-url',
  *     accountKey: 'Private key goes here',
  *     externalAccountBinding: {
  *         kid: 'YOUR-EAB-KID',
