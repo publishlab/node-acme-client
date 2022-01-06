@@ -44,11 +44,11 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
  * Walk DNS until TXT records are found
  */
 
-async function walkDnsChallengeRecord(recordName) {
-    /* Attempt CNAME record first */
+async function walkDnsChallengeRecord(recordName, resolver = dns) {
+    /* Resolve CNAME record first */
     try {
         log(`Checking name for CNAME records: ${recordName}`);
-        const cnameRecords = await dns.resolveCnameAsync(recordName);
+        const cnameRecords = await resolver.resolveCnameAsync(recordName);
 
         if (cnameRecords.length) {
             log(`CNAME record found at ${recordName}, new challenge record name: ${cnameRecords[0]}`);
@@ -59,10 +59,10 @@ async function walkDnsChallengeRecord(recordName) {
         log(`No CNAME records found for name: ${recordName}`);
     }
 
-    /* TXT using default resolver */
+    /* Resolve TXT records */
     try {
         log(`Checking name for TXT records: ${recordName}`);
-        const txtRecords = await dns.resolveTxtAsync(recordName);
+        const txtRecords = await resolver.resolveTxtAsync(recordName);
 
         if (txtRecords.length) {
             log(`Found ${txtRecords.length} TXT records at ${recordName}`);
@@ -71,21 +71,6 @@ async function walkDnsChallengeRecord(recordName) {
     }
     catch (e) {
         log(`No TXT records found for name: ${recordName}`);
-    }
-
-    /* TXT using authoritative NS */
-    try {
-        log(`Checking name for TXT records using authoritative NS: ${recordName}`);
-        const resolver = await util.getAuthoritativeDnsResolver(recordName);
-        const txtRecords = await resolver.resolveTxtAsync(recordName);
-
-        if (txtRecords.length) {
-            log(`Found ${txtRecords.length} TXT records using authoritative NS at ${recordName}`);
-            return [].concat(...txtRecords);
-        }
-    }
-    catch (e) {
-        log(`No TXT records found using authoritative NS for name: ${recordName}`);
     }
 
     /* Found nothing */
@@ -106,13 +91,25 @@ async function walkDnsChallengeRecord(recordName) {
  */
 
 async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '_acme-challenge.') {
+    let recordValues = [];
     const recordName = `${prefix}${authz.identifier.value}`;
     log(`Resolving DNS TXT from record: ${recordName}`);
 
-    const recordValues = await walkDnsChallengeRecord(recordName);
+    try {
+        /* Default DNS resolver first */
+        log('Attempting to resolve TXT with default DNS resolver first');
+        recordValues = await walkDnsChallengeRecord(recordName);
+    }
+    catch (e) {
+        /* Authoritative DNS resolver */
+        log(`Error using default resolver, attempting to resolve TXT with authoritative NS: ${e.message}`);
+        const authoritativeResolver = await util.getAuthoritativeDnsResolver(recordName);
+        recordValues = await walkDnsChallengeRecord(recordName, authoritativeResolver);
+    }
+
     log(`DNS query finished successfully, found ${recordValues.length} TXT records`);
 
-    if (!recordValues.includes(keyAuthorization)) {
+    if (!recordValues.length || !recordValues.includes(keyAuthorization)) {
         throw new Error(`Authorization not found in DNS TXT record: ${recordName}`);
     }
 
