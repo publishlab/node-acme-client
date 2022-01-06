@@ -29,3 +29,10 @@ exports.forge = require('./crypto/forge');
  */
 
 exports.axios = require('./axios');
+
+
+/**
+ * Logger
+ */
+
+exports.setLogger = require('./logger').setLogger;

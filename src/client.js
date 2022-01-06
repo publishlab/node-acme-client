@@ -5,8 +5,8 @@
  */
 
 const crypto = require('crypto');
-const debug = require('debug')('acme-client');
 const Promise = require('bluebird');
+const { log } = require('./logger');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
 const verify = require('./verify');
@@ -181,7 +181,7 @@ class AcmeClient {
             this.getAccountUrl();
 
             /* Account URL exists */
-            debug('Account URL exists, returning updateAccount()');
+            log('Account URL exists, returning updateAccount()');
             return this.updateAccount(data);
         }
         catch (e) {
@@ -189,7 +189,7 @@ class AcmeClient {
 
             /* HTTP 200: Account exists */
             if (resp.status === 200) {
-                debug('Account already exists (HTTP 200), returning updateAccount()');
+                log('Account already exists (HTTP 200), returning updateAccount()');
                 return this.updateAccount(data);
             }
 
@@ -219,7 +219,7 @@ class AcmeClient {
             this.api.getAccountUrl();
         }
         catch (e) {
-            debug('No account URL found, returning createAccount()');
+            log('No account URL found, returning createAccount()');
             return this.createAccount(data);
         }
 
@@ -520,7 +520,7 @@ class AcmeClient {
             await verify[challenge.type](authz, challenge, keyAuthorization);
         };
 
-        debug('Waiting for ACME challenge verification', this.backoffOpts);
+        log('Waiting for ACME challenge verification', this.backoffOpts);
         return util.retry(verifyFn, this.backoffOpts);
     }
 
@@ -582,7 +582,7 @@ class AcmeClient {
             const resp = await this.api.apiRequest(item.url, null, [200]);
 
             /* Verify status */
-            debug(`Item has status: ${resp.data.status}`);
+            log(`Item has status: ${resp.data.status}`);
 
             if (invalidStates.includes(resp.data.status)) {
                 abort();
@@ -598,7 +598,7 @@ class AcmeClient {
             throw new Error(`Unexpected item status: ${resp.data.status}`);
         };
 
-        debug(`Waiting for valid status from: ${item.url}`, this.backoffOpts);
+        log(`Waiting for valid status from: ${item.url}`, this.backoffOpts);
         return util.retry(verifyFn, this.backoffOpts);
     }
 

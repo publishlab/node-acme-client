@@ -145,3 +145,10 @@ export const forge: CryptoInterface;
  */
 
 export const axios: AxiosInstance;
+
+
+/**
+ * Logger
+ */
+
+export function setLogger(fn: (msg: string) => void): void;

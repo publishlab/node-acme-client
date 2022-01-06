@@ -3,6 +3,7 @@
 ## next
 
 * `added` Support for external account binding [RFC 8555 Section 7.3.4](https://tools.ietf.org/html/rfc8555#section-7.3.4)
+* `added` Ability to pass through custom logger function
 * `changed` Increase default `backoffAttempts` to 10
 * `fixed` Deactivate authorizations where challenges can not be completed
 * `fixed` Attempt authoritative name servers when verifying `dns-01` challenges

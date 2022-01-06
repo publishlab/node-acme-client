@@ -3,7 +3,7 @@
  */
 
 const crypto = require('crypto');
-const debug = require('debug')('acme-client');
+const { log } = require('./logger');
 const axios = require('./axios');
 const util = require('./util');
 const forge = require('./crypto/forge');
@@ -54,10 +54,10 @@ class HttpClient {
         opts.headers['Content-Type'] = 'application/jose+json';
 
         /* Request */
-        debug(`HTTP request: ${method} ${url}`);
+        log(`HTTP request: ${method} ${url}`);
         const resp = await axios.request(opts);
 
-        debug(`RESP ${resp.status} ${method} ${url}`);
+        log(`RESP ${resp.status} ${method} ${url}`);
         return resp;
     }
 
@@ -184,7 +184,7 @@ class HttpClient {
 
         /* Nonce */
         if (nonce) {
-            debug(`Using nonce: ${nonce}`);
+            log(`Using nonce: ${nonce}`);
             header.nonce = nonce;
         }
 
@@ -289,7 +289,7 @@ class HttpClient {
             nonce = resp.headers['replay-nonce'] || null;
             attempts += 1;
 
-            debug(`Caught invalid nonce error, retrying (${attempts}/${this.maxBadNonceRetries}) signed request to: ${url}`);
+            log(`Caught invalid nonce error, retrying (${attempts}/${this.maxBadNonceRetries}) signed request to: ${url}`);
             return this.signedRequest(url, payload, { kid, nonce, includeExternalAccountBinding }, attempts);
         }
 

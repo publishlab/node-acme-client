@@ -5,7 +5,7 @@
 const Promise = require('bluebird');
 const dns = Promise.promisifyAll(require('dns'));
 const Backoff = require('backo2');
-const debug = require('debug')('acme-client');
+const { log } = require('./logger');
 const forge = require('./crypto/forge');
 
 
@@ -31,7 +31,7 @@ async function retryPromise(fn, attempts, backoff) {
         }
 
         const duration = backoff.duration();
-        debug(`Promise rejected attempt #${backoff.attempts}, retrying in ${duration}ms: ${e.message}`);
+        log(`Promise rejected attempt #${backoff.attempts}, retrying in ${duration}ms: ${e.message}`);
 
         await Promise.delay(duration);
         return retryPromise(fn, attempts, backoff);
@@ -122,18 +122,18 @@ async function findCertificateChainForIssuer(chains, issuer) {
 
             /* Found match, return it */
             if (issuerCollection.includes(issuer)) {
-                debug(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+                log(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
                 return chain;
             }
 
             /* No match, throw error */
-            debug(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+            log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
             throw new Error('Certificate issuer mismatch');
         }));
     }
     catch (e) {
         /* No certificates matched, return default */
-        debug(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
+        log(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
         return chains[0];
     }
 }
@@ -170,11 +170,11 @@ function formatResponseError(resp) {
 async function resolveDomainBySoaRecord(recordName) {
     try {
         await dns.resolveSoaAsync(recordName);
-        debug(`Found SOA record, considering domain to be: ${recordName}`);
+        log(`Found SOA record, considering domain to be: ${recordName}`);
         return recordName;
     }
     catch (e) {
-        debug(`Unable to locate SOA record for name: ${recordName}`);
+        log(`Unable to locate SOA record for name: ${recordName}`);
         const parentRecordName = recordName.split('.').slice(1).join('.');
 
         if (!parentRecordName.includes('.')) {
@@ -194,7 +194,7 @@ async function resolveDomainBySoaRecord(recordName) {
  */
 
 async function getAuthoritativeDnsResolver(recordName) {
-    debug(`Locating authoritative NS records for name: ${recordName}`);
+    log(`Locating authoritative NS records for name: ${recordName}`);
     const resolver = new dns.Resolver();
 
     try {
@@ -202,7 +202,7 @@ async function getAuthoritativeDnsResolver(recordName) {
         const domain = await resolveDomainBySoaRecord(recordName);
 
         /* Resolve authoritative NS addresses */
-        debug(`Looking up authoritative NS records for domain: ${domain}`);
+        log(`Looking up authoritative NS records for domain: ${domain}`);
         const nsRecords = await dns.resolveNsAsync(domain);
         const nsAddrArray = await Promise.map(nsRecords, async (r) => dns.resolve4Async(r));
         const nsAddresses = [].concat(...nsAddrArray).filter((a) => a);
@@ -212,16 +212,16 @@ async function getAuthoritativeDnsResolver(recordName) {
         }
 
         /* Authoritative NS success */
-        debug(`Found ${nsAddresses.length} authoritative NS addresses for domain: ${domain}`);
+        log(`Found ${nsAddresses.length} authoritative NS addresses for domain: ${domain}`);
         resolver.setServers(nsAddresses);
     }
     catch (e) {
-        debug(`Authoritative NS lookup error: ${e.message}`);
+        log(`Authoritative NS lookup error: ${e.message}`);
     }
 
     /* Return resolver */
     const addresses = resolver.getServers();
-    debug(`DNS resolver addresses: ${addresses.join(', ')}`);
+    log(`DNS resolver addresses: ${addresses.join(', ')}`);
 
     return resolver;
 }

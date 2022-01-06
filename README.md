@@ -224,7 +224,17 @@ A complete list of axios options and documentation can be found at:
 
 ## Debugging
 
-`acme-client` uses [debug](https://www.npmjs.com/package/debug) for debugging which can be enabled by running
+To get a better grasp of what `acme-client` is doing behind the scenes, you can either pass it a logger function, or enable debugging through an environment variable.
+
+Setting a logger function may for example be useful for passing messages on to another logging system, or just dumping them to the console.
+
+```js
+acme.setLogger((message) => {
+    console.log(message);
+});
+```
+
+Debugging to the console can also be enabled through [debug](https://www.npmjs.com/package/debug) by setting an environment variable.
 
 ```bash
 DEBUG=acme-client node index.js

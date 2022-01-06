@@ -3,7 +3,7 @@
  */
 
 const Promise = require('bluebird');
-const debug = require('debug')('acme-client');
+const { log } = require('./logger');
 const forge = require('./crypto/forge');
 
 const defaultOpts = {
@@ -43,14 +43,14 @@ module.exports = async function(client, userOpts) {
      * Register account
      */
 
-    debug('[auto] Checking account');
+    log('[auto] Checking account');
 
     try {
         client.getAccountUrl();
-        debug('[auto] Account URL already exists, skipping account registration');
+        log('[auto] Account URL already exists, skipping account registration');
     }
     catch (e) {
-        debug('[auto] Registering account');
+        log('[auto] Registering account');
         await client.createAccount(accountPayload);
     }
 
@@ -59,30 +59,30 @@ module.exports = async function(client, userOpts) {
      * Parse domains from CSR
      */
 
-    debug('[auto] Parsing domains from Certificate Signing Request');
+    log('[auto] Parsing domains from Certificate Signing Request');
     const csrDomains = await forge.readCsrDomains(opts.csr);
     const domains = [csrDomains.commonName].concat(csrDomains.altNames);
 
-    debug(`[auto] Resolved ${domains.length} domains from parsing the Certificate Signing Request`);
+    log(`[auto] Resolved ${domains.length} domains from parsing the Certificate Signing Request`);
 
 
     /**
      * Place order
      */
 
-    debug('[auto] Placing new certificate order with ACME provider');
+    log('[auto] Placing new certificate order with ACME provider');
     const orderPayload = { identifiers: domains.map((d) => ({ type: 'dns', value: d })) };
     const order = await client.createOrder(orderPayload);
     const authorizations = await client.getAuthorizations(order);
 
-    debug(`[auto] Placed certificate order successfully, received ${authorizations.length} identity authorizations`);
+    log(`[auto] Placed certificate order successfully, received ${authorizations.length} identity authorizations`);
 
 
     /**
      * Resolve and satisfy challenges
      */
 
-    debug('[auto] Resolving and satisfying authorization challenges');
+    log('[auto] Resolving and satisfying authorization challenges');
 
     const challengePromises = authorizations.map(async (authz) => {
         const d = authz.identifier.value;
@@ -103,10 +103,10 @@ module.exports = async function(client, userOpts) {
                 throw new Error(`Unable to select challenge for ${d}, no challenge found`);
             }
 
-            debug(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
+            log(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
 
             /* Trigger challengeCreateFn() */
-            debug(`[auto] [${d}] Trigger challengeCreateFn()`);
+            log(`[auto] [${d}] Trigger challengeCreateFn()`);
             const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
             try {
@@ -114,15 +114,15 @@ module.exports = async function(client, userOpts) {
 
                 /* Challenge verification */
                 if (opts.skipChallengeVerification === true) {
-                    debug(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
+                    log(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
                 }
                 else {
-                    debug(`[auto] [${d}] Running challenge verification`);
+                    log(`[auto] [${d}] Running challenge verification`);
                     await client.verifyChallenge(authz, challenge);
                 }
 
                 /* Complete challenge and wait for valid status */
-                debug(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
+                log(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
                 await client.completeChallenge(challenge);
                 challengeCompleted = true;
 
@@ -130,28 +130,28 @@ module.exports = async function(client, userOpts) {
             }
             finally {
                 /* Trigger challengeRemoveFn(), suppress errors */
-                debug(`[auto] [${d}] Trigger challengeRemoveFn()`);
+                log(`[auto] [${d}] Trigger challengeRemoveFn()`);
 
                 try {
                     await opts.challengeRemoveFn(authz, challenge, keyAuthorization);
                 }
                 catch (e) {
-                    debug(`[auto] [${d}] challengeRemoveFn threw error: ${e.message}`);
+                    log(`[auto] [${d}] challengeRemoveFn threw error: ${e.message}`);
                 }
             }
         }
         catch (e) {
             /* Deactivate pending authz when unable to complete challenge */
             if (!challengeCompleted) {
-                debug(`[auto] [${d}] Unable to complete challenge: ${e.message}`);
+                log(`[auto] [${d}] Unable to complete challenge: ${e.message}`);
 
                 try {
-                    debug(`[auto] [${d}] Deactivating failed authorization`);
+                    log(`[auto] [${d}] Deactivating failed authorization`);
                     await client.deactivateAuthorization(authz);
                 }
                 catch (f) {
                     /* Suppress deactivateAuthorization() errors */
-                    debug(`[auto] [${d}] Authorization deactivation threw error: ${f.message}`);
+                    log(`[auto] [${d}] Authorization deactivation threw error: ${f.message}`);
                 }
             }
 
@@ -159,7 +159,7 @@ module.exports = async function(client, userOpts) {
         }
     });
 
-    debug('[auto] Waiting for challenge valid status');
+    log('[auto] Waiting for challenge valid status');
     await Promise.all(challengePromises);
 
 
@@ -167,7 +167,7 @@ module.exports = async function(client, userOpts) {
      * Finalize order and download certificate
      */
 
-    debug('[auto] Finalizing order and downloading certificate');
+    log('[auto] Finalizing order and downloading certificate');
     await client.finalizeOrder(order, opts.csr);
     return client.getCertificate(order, opts.preferredChain);
 };
