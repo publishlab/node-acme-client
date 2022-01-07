@@ -73,7 +73,7 @@ const client = new acme.Client({
         kid: 'YOUR-EAB-KID',
         hmacKey: 'YOUR-EAB-HMAC-KEY'
     }
-})
+});
 ```
 
 
@@ -88,7 +88,7 @@ const client = new acme.Client({
     directoryUrl: acme.directory.letsencrypt.staging,
     accountKey: accountPrivateKey,
     accountUrl: 'https://acme-v02.api.letsencrypt.org/acme/acct/12345678'
-})
+});
 ```
 
 You can fetch the clients current account URL, either after creating an account or supplying it through the constructor, using `getAccountUrl()`:
