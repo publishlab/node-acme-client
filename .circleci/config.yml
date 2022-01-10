@@ -39,7 +39,7 @@ commands:
 
       - run:
           name: Start Pebble
-          command: pebble -strict -config /etc/pebble/pebble.json -dnsserver "127.0.0.1:8053"
+          command: pebble -strict -config /etc/pebble/pebble.json -dnsserver "127.0.0.1:53"
           background: true
           environment:
             PEBBLE_ALTERNATE_ROOTS: 2
@@ -62,12 +62,12 @@ commands:
           name: Install Step Certificates
           command: /bin/bash ./scripts/test-suite-install-step.sh
           environment:
-            STEPCA_VERSION: 0.14.4
-            STEPCLI_VERSION: 0.14.4
+            STEPCA_VERSION: 0.18.0
+            STEPCLI_VERSION: 0.18.0
 
       - run:
           name: Start Step CA
-          command: /usr/bin/step-ca --resolver="127.0.0.1:8053" --password-file="/tmp/password" ~/.step/config/ca.json
+          command: /usr/bin/step-ca --resolver="127.0.0.1:53" --password-file="/tmp/password" ~/.step/config/ca.json
           background: true
 
       - run:
@@ -125,7 +125,7 @@ jobs:
   eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  # step-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, test ]}
+  # step-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, install-coredns, test ]}
 
 workflows:
   test-suite:

@@ -58,8 +58,10 @@ const client = new acme.Client({
 ```js
 acme.directory.buypass.staging;
 acme.directory.buypass.production;
+
 acme.directory.letsencrypt.staging;
 acme.directory.letsencrypt.production;
+
 acme.directory.zerossl.production;
 ```
 

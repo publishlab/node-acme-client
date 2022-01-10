@@ -479,7 +479,7 @@ describe('client', () => {
         });
     });
 
-    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async () => {
+    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
         if (!capAlternateCertRoots) {
             this.skip();
         }
