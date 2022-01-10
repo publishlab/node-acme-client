@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.1
+
+* `fixed` ZeroSSL `duplicate_domains_in_array` error when using `client.auto()`
+
+
 ## v4.2.0 (2022-01-06)
 
 * `added` Support for external account binding [RFC 8555 Section 7.3.4](https://tools.ietf.org/html/rfc8555#section-7.3.4)
