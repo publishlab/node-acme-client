@@ -144,8 +144,8 @@ module.exports = async function() {
         altNames: ['example.com']
     });
 
-    await client.finalizeOrder(order, csr);
-    const cert = await client.getCertificate(order);
+    const finalized = await client.finalizeOrder(order, csr);
+    const cert = await client.getCertificate(finalized);
 
     /* Done */
     log(`CSR:\n${csr.toString()}`);

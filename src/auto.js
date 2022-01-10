@@ -169,6 +169,6 @@ module.exports = async function(client, userOpts) {
      */
 
     log('[auto] Finalizing order and downloading certificate');
-    await client.finalizeOrder(order, opts.csr);
-    return client.getCertificate(order, opts.preferredChain);
+    const finalized = await client.finalizeOrder(order, opts.csr);
+    return client.getCertificate(finalized, opts.preferredChain);
 };
