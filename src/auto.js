@@ -89,6 +89,12 @@ module.exports = async function(client, userOpts) {
         const d = authz.identifier.value;
         let challengeCompleted = false;
 
+        /* Skip authz that already has valid status */
+        if (authz.status === 'valid') {
+            log(`[auto] [${d}] Authorization already has valid status, no need to complete challenges`);
+            return;
+        }
+
         try {
             /* Select challenge based on priority */
             const challenge = authz.challenges.sort((a, b) => {

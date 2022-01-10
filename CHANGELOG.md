@@ -3,6 +3,7 @@
 ## v4.2.3
 
 * `added` Directory URLs for ACME providers [Buypass](https://www.buypass.com) and [ZeroSSL](https://zerossl.com)
+* `fixed` Skip already valid authorizations when using `client.auto()`
 
 
 ## v4.2.2 (2022-01-10)
