@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.2.1
+## v4.2.1 (2022-01-10)
 
 * `fixed` ZeroSSL `duplicate_domains_in_array` error when using `client.auto()`
 
