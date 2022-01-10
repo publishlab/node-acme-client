@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.2.2
+## v4.2.2 (2022-01-10)
 
 * `fixed` Upgrade `node-forge@1.2.0`
 
