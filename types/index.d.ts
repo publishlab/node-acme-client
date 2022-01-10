@@ -86,8 +86,15 @@ export class Client {
  */
 
 export const directory: {
+    buypass: {
+        staging: string,
+        production: string
+    },
     letsencrypt: {
         staging: string,
+        production: string
+    },
+    zerossl: {
         production: string
     }
 };

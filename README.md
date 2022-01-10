@@ -56,8 +56,11 @@ const client = new acme.Client({
 ### Directory URLs
 
 ```js
+acme.directory.buypass.staging;
+acme.directory.buypass.production;
 acme.directory.letsencrypt.staging;
 acme.directory.letsencrypt.production;
+acme.directory.zerossl.production;
 ```
 
 

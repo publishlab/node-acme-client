@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.3
+
+* `added` Directory URLs for ACME providers [Buypass](https://www.buypass.com) and [ZeroSSL](https://zerossl.com)
+
+
 ## v4.2.2 (2022-01-10)
 
 * `fixed` Upgrade `node-forge@1.2.0`
