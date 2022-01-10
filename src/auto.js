@@ -62,6 +62,7 @@ module.exports = async function(client, userOpts) {
     log('[auto] Parsing domains from Certificate Signing Request');
     const csrDomains = await forge.readCsrDomains(opts.csr);
     const domains = [csrDomains.commonName].concat(csrDomains.altNames);
+    const uniqueDomains = Array.from(new Set(domains));
 
     log(`[auto] Resolved ${domains.length} domains from parsing the Certificate Signing Request`);
 
@@ -71,7 +72,7 @@ module.exports = async function(client, userOpts) {
      */
 
     log('[auto] Placing new certificate order with ACME provider');
-    const orderPayload = { identifiers: domains.map((d) => ({ type: 'dns', value: d })) };
+    const orderPayload = { identifiers: uniqueDomains.map((d) => ({ type: 'dns', value: d })) };
     const order = await client.createOrder(orderPayload);
     const authorizations = await client.getAuthorizations(order);
 
