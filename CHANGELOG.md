@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.2
+
+* `fixed` Upgrade `node-forge@1.2.0`
+
+
 ## v4.2.1 (2022-01-10)
 
 * `fixed` ZeroSSL `duplicate_domains_in_array` error when using `client.auto()`
