@@ -22,6 +22,9 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 
 * [Installation](#installation)
 * [Usage](#usage)
+    * [Directory URLs](#directory-urls)
+    * [External account binding](#external-account-binding)
+    * [Specifying the account URL](#specifying-the-account-url)
 * [Cryptography](#cryptography)
 * [Auto mode](#auto-mode)
     * [Challenge priority](#challenge-priority)
