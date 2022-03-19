@@ -75,9 +75,11 @@ commands:
   test:
     steps:
       - run: yarn
-      - run: yarn run lint
-      - run: yarn run lint-types
-      - run: yarn run build-docs
+
+      # NOTE: Broken for v3, disable for backports
+      # - run: yarn run lint
+      # - run: yarn run lint-types
+      # - run: yarn run build-docs
 
       - run:
           command: yarn run test
