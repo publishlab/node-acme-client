@@ -436,8 +436,8 @@ exports.createCsr = async function(data, key = null) {
         }]);
     }
 
-    /* Sign CSR */
-    csr.sign(privateKey);
+    /* Sign CSR using SHA-256 */
+    csr.sign(privateKey, forge.md.sha256.create());
 
     /* Done */
     const pemCsr = forge.pki.certificationRequestToPem(csr);
