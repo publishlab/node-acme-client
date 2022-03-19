@@ -6,8 +6,8 @@ set -eu
 
 JOBS=("$@")
 
-CIRCLECI_CLI_URL="https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.16535/circleci-cli_0.1.16535_linux_amd64.tar.gz"
-CIRCLECI_CLI_SHASUM="f5f0abcb01bf41b792e4e8e945fc7b165e351323ae1ee1e625eeea947094d022"
+CIRCLECI_CLI_URL="https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.16947/circleci-cli_0.1.16947_linux_amd64.tar.gz"
+CIRCLECI_CLI_SHASUM="c6f9a3276445c69ae40439acfed07e2c53502216a96bfacc4556e1d862d1019a"
 CIRCLECI_CLI_PATH="/tmp/circleci-cli"
 CIRCLECI_CLI_BIN="${CIRCLECI_CLI_PATH}/circleci"
 
