@@ -1,8 +1,13 @@
 # Changelog
 
-## 4.2.4
+## 4.2.4 (2022-03-19)
 
 * `fixed` Use SHA-256 when signing CSRs
+
+
+## v3.3.2 (2022-03-19)
+
+* `backport` Use SHA-256 when signing CSRs
 
 
 ## v4.2.3 (2022-01-11)
