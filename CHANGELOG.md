@@ -1,4 +1,6 @@
-**Notice:** [On November 1st, 2020 Let's Encrypt will remove support for unauthenticated GETs from the v2 API](https://community.letsencrypt.org/t/acme-v2-scheduled-deprecation-of-unauthenticated-resource-gets/74380). Please update to `acme-client >= v3.2.0` or `>= v2.3.1` before this date to avoid being affected by this API change.
+## v3.3.2 (2022-03-19)
+
+* `backport` Use SHA-256 when signing CSRs
 
 
 ## v3.3.1 (2020-01-07)
