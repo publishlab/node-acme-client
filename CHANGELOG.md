@@ -1,6 +1,6 @@
 # Changelog
 
-## v4.2.5
+## v4.2.5 (2022-03-21)
 
 * `fixed` Upgrade `axios@0.26.1`
 * `fixed` Upgrade `node-forge@1.3.0` - [CVE-2022-24771](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-24771), [CVE-2022-24772](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-24772), [CVE-2022-24773](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-24773)
