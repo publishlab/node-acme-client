@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.2.5
+
+* `fixed` Upgrade `axios@0.26.1`
+
+
 ## 4.2.4 (2022-03-19)
 
 * `fixed` Use SHA-256 when signing CSRs
@@ -28,7 +33,7 @@
 
 ## v4.2.0 (2022-01-06)
 
-* `added` Support for external account binding [RFC 8555 Section 7.3.4](https://tools.ietf.org/html/rfc8555#section-7.3.4)
+* `added` Support for external account binding - [RFC 8555 Section 7.3.4](https://tools.ietf.org/html/rfc8555#section-7.3.4)
 * `added` Ability to pass through custom logger function
 * `changed` Increase default `backoffAttempts` to 10
 * `fixed` Deactivate authorizations where challenges can not be completed
