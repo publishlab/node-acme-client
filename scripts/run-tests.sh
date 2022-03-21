@@ -17,11 +17,9 @@ CONFIG_PATH="${PROJECT_DIR}/.circleci/.temp.yml"
 # Run all jobs by default
 if [[ ${#JOBS[@]} -eq 0 ]]; then
     JOBS=(
-        "v10"
         "v12"
         "v14"
         "v16"
-        "eab-v10"
         "eab-v12"
         "eab-v14"
         "eab-v16"

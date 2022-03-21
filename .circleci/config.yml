@@ -117,11 +117,9 @@ commands:
             ACME_HTTPS_PORT: 5003
 
 jobs:
-  v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
   v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
   v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
   v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  eab-v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
@@ -130,11 +128,9 @@ jobs:
 workflows:
   test-suite:
     jobs:
-      - v10
       - v12
       - v14
       - v16
-      - eab-v10
       - eab-v12
       - eab-v14
       - eab-v16

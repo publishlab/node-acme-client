@@ -1,5 +1,10 @@
 # Changelog
 
+## v5.0.0
+
+* `breaking` Remove support for Node v10
+
+
 ## v4.2.5 (2022-03-21)
 
 * `fixed` Upgrade `axios@0.26.1`
