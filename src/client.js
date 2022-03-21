@@ -5,7 +5,6 @@
  */
 
 const crypto = require('crypto');
-const Promise = require('bluebird');
 const { log } = require('./logger');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
@@ -403,13 +402,13 @@ class AcmeClient {
      */
 
     async getAuthorizations(order) {
-        return Promise.map((order.authorizations || []), async (url) => {
+        return Promise.all((order.authorizations || []).map(async (url) => {
             const resp = await this.api.getAuthorization(url);
 
             /* Add URL to response */
             resp.data.url = url;
             return resp.data;
-        });
+        }));
     }
 
 
@@ -639,7 +638,7 @@ class AcmeClient {
         /* Handle alternate certificate chains */
         if (preferredChain && resp.headers.link) {
             const alternateLinks = util.parseLinkHeader(resp.headers.link);
-            const alternates = await Promise.map(alternateLinks, async (link) => this.api.apiRequest(link, null, [200]));
+            const alternates = await Promise.all(alternateLinks.map(async (link) => this.api.apiRequest(link, null, [200])));
             const certificates = [resp].concat(alternates).map((c) => c.data);
 
             return util.findCertificateChainForIssuer(certificates, preferredChain);

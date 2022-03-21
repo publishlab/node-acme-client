@@ -2,7 +2,6 @@
  * Example of acme.Client API
  */
 
-const Promise = require('bluebird');
 const acme = require('./../');
 
 

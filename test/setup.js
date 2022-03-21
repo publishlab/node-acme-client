@@ -4,9 +4,8 @@
 
 const url = require('url');
 const net = require('net');
-const Promise = require('bluebird');
-const dns = Promise.promisifyAll(require('dns'));
-const fs = Promise.promisifyAll(require('fs'));
+const fs = require('fs');
+const dns = require('dns').promises;
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const axios = require('./../src/axios');
@@ -67,7 +66,7 @@ if (process.env.ACME_DNS_RESOLVER) {
         }
 
         /* Lookup hostname */
-        const result = await dns.resolve4Async(urlObj.hostname);
+        const result = await dns.resolve4(urlObj.hostname);
 
         if (!result.length) {
             throw new Error(`Unable to lookup address: ${urlObj.hostname}`);

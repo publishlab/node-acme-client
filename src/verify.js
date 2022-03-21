@@ -2,8 +2,7 @@
  * ACME challenge verification
  */
 
-const Promise = require('bluebird');
-const dns = Promise.promisifyAll(require('dns'));
+const dns = require('dns').promises;
 const { log } = require('./logger');
 const axios = require('./axios');
 const util = require('./util');
@@ -48,7 +47,7 @@ async function walkDnsChallengeRecord(recordName, resolver = dns) {
     /* Resolve CNAME record first */
     try {
         log(`Checking name for CNAME records: ${recordName}`);
-        const cnameRecords = await resolver.resolveCnameAsync(recordName);
+        const cnameRecords = await resolver.resolveCname(recordName);
 
         if (cnameRecords.length) {
             log(`CNAME record found at ${recordName}, new challenge record name: ${cnameRecords[0]}`);
@@ -62,7 +61,7 @@ async function walkDnsChallengeRecord(recordName, resolver = dns) {
     /* Resolve TXT records */
     try {
         log(`Checking name for TXT records: ${recordName}`);
-        const txtRecords = await resolver.resolveTxtAsync(recordName);
+        const txtRecords = await resolver.resolveTxt(recordName);
 
         if (txtRecords.length) {
             log(`Found ${txtRecords.length} TXT records at ${recordName}`);

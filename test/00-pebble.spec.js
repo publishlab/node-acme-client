@@ -2,8 +2,7 @@
  * Pebble Challenge Test Server tests
  */
 
-const Promise = require('bluebird');
-const dns = Promise.promisifyAll(require('dns'));
+const dns = require('dns').promises;
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const cts = require('./challtestsrv');
@@ -43,7 +42,7 @@ describe('pebble', () => {
 
     describe('dns', () => {
         it('should not locate a records', async () => {
-            const resp = await dns.resolve4Async(testAHost);
+            const resp = await dns.resolve4(testAHost);
 
             assert.isArray(resp);
             assert.notDeepEqual(resp, testARecords);
@@ -55,14 +54,14 @@ describe('pebble', () => {
         });
 
         it('should locate a records', async () => {
-            const resp = await dns.resolve4Async(testAHost);
+            const resp = await dns.resolve4(testAHost);
 
             assert.isArray(resp);
             assert.deepStrictEqual(resp, testARecords);
         });
 
         it('should not locate cname records', async () => {
-            await assert.isRejected(dns.resolveCnameAsync(testCnameHost));
+            await assert.isRejected(dns.resolveCname(testCnameHost));
         });
 
         it('should set dns cname record', async () => {
@@ -71,7 +70,7 @@ describe('pebble', () => {
         });
 
         it('should locate cname record', async () => {
-            const resp = await dns.resolveCnameAsync(testCnameHost);
+            const resp = await dns.resolveCname(testCnameHost);
 
             assert.isArray(resp);
             assert.deepStrictEqual(resp, [testCnameRecord]);
@@ -104,7 +103,7 @@ describe('pebble', () => {
         });
 
         it('should not locate dns-01 challenge response', async () => {
-            await assert.isRejected(dns.resolveTxtAsync(testDns01ChallengeHost));
+            await assert.isRejected(dns.resolveTxt(testDns01ChallengeHost));
         });
 
         it('should add dns-01 challenge response', async () => {
@@ -113,7 +112,7 @@ describe('pebble', () => {
         });
 
         it('should locate dns-01 challenge response', async () => {
-            const resp = await dns.resolveTxtAsync(testDns01ChallengeHost);
+            const resp = await dns.resolveTxt(testDns01ChallengeHost);
 
             assert.isArray(resp);
             assert.deepStrictEqual(resp, [[testDns01ChallengeValue]]);

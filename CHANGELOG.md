@@ -2,6 +2,7 @@
 
 ## v5.0.0
 
+* `changed` Replace `bluebird` dependency with native promise APIs
 * `breaking` Remove support for Node v10
 
 
@@ -91,10 +92,10 @@
 
 ## v4.0.0 (2020-05-29)
 
-* `fixed` Incorrect TypeScript `CertificateInfo` definitions
-* `fixed` Allow trailing whitespace character in `http-01` challenge response
 * `breaking` Remove support for Node v8
 * `breaking` Remove deprecated `openssl` crypto module
+* `fixed` Incorrect TypeScript `CertificateInfo` definitions
+* `fixed` Allow trailing whitespace character in `http-01` challenge response
 
 
 ## v3.3.1 (2020-01-07)

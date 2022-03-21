@@ -2,8 +2,7 @@
  * Crypto tests
  */
 
-const Promise = require('bluebird');
-const fs = Promise.promisifyAll(require('fs'));
+const fs = require('fs').promises;
 const path = require('path');
 const { assert } = require('chai');
 const spec = require('./spec');
@@ -36,17 +35,17 @@ describe('crypto', () => {
 
     describe('fixtures', () => {
         it('should read private key fixture', async () => {
-            testPemKey = await fs.readFileAsync(testKeyPath);
+            testPemKey = await fs.readFile(testKeyPath);
             assert.isTrue(Buffer.isBuffer(testPemKey));
         });
 
         it('should read certificate fixture', async () => {
-            testCert = await fs.readFileAsync(testCertPath);
+            testCert = await fs.readFile(testCertPath);
             assert.isTrue(Buffer.isBuffer(testCert));
         });
 
         it('should read SAN certificate fixture', async () => {
-            testSanCert = await fs.readFileAsync(testSanCertPath);
+            testSanCert = await fs.readFile(testSanCertPath);
             assert.isTrue(Buffer.isBuffer(testSanCert));
         });
     });

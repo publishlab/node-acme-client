@@ -2,7 +2,6 @@
  * ACME auto helper
  */
 
-const Promise = require('bluebird');
 const { log } = require('./logger');
 const forge = require('./crypto/forge');
 

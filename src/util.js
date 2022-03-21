@@ -2,8 +2,7 @@
  * Utility methods
  */
 
-const Promise = require('bluebird');
-const dns = Promise.promisifyAll(require('dns'));
+const dns = require('dns').promises;
 const Backoff = require('backo2');
 const { log } = require('./logger');
 const forge = require('./crypto/forge');
@@ -33,7 +32,7 @@ async function retryPromise(fn, attempts, backoff) {
         const duration = backoff.duration();
         log(`Promise rejected attempt #${backoff.attempts}, retrying in ${duration}ms: ${e.message}`);
 
-        await Promise.delay(duration);
+        await new Promise((resolve) => { setTimeout(resolve, duration); });
         return retryPromise(fn, attempts, backoff);
     }
 }
@@ -113,29 +112,33 @@ function parseLinkHeader(header, rel = 'alternate') {
  */
 
 async function findCertificateChainForIssuer(chains, issuer) {
-    try {
-        return await Promise.any(chains.map(async (chain) => {
-            /* Look up all issuers */
-            const certs = forge.splitPemChain(chain);
-            const infoCollection = await Promise.map(certs, forge.readCertificateInfo);
-            const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
+    const matches = await Promise.all(chains.map(async (chain) => {
+        /* Look up all issuers */
+        const certs = forge.splitPemChain(chain);
+        const infoCollection = await Promise.all(certs.map(async (c) => forge.readCertificateInfo(c)));
+        const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
 
-            /* Found match, return it */
-            if (issuerCollection.includes(issuer)) {
-                log(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
-                return chain;
-            }
+        /* Found match, return chain */
+        if (issuerCollection.includes(issuer)) {
+            log(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+            return chain;
+        }
 
-            /* No match, throw error */
-            log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
-            throw new Error('Certificate issuer mismatch');
-        }));
+        /* No match, return nothing */
+        log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+        return null;
+    }));
+
+    /* Select first non-null and return it */
+    const result = matches.filter((r) => r).shift();
+
+    if (result) {
+        return result;
     }
-    catch (e) {
-        /* No certificates matched, return default */
-        log(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
-        return chains[0];
-    }
+
+    /* No certificates matched, return default */
+    log(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
+    return chains[0];
 }
 
 
@@ -169,7 +172,7 @@ function formatResponseError(resp) {
 
 async function resolveDomainBySoaRecord(recordName) {
     try {
-        await dns.resolveSoaAsync(recordName);
+        await dns.resolveSoa(recordName);
         log(`Found SOA record, considering domain to be: ${recordName}`);
         return recordName;
     }
@@ -203,8 +206,8 @@ async function getAuthoritativeDnsResolver(recordName) {
 
         /* Resolve authoritative NS addresses */
         log(`Looking up authoritative NS records for domain: ${domain}`);
-        const nsRecords = await dns.resolveNsAsync(domain);
-        const nsAddrArray = await Promise.map(nsRecords, async (r) => dns.resolve4Async(r));
+        const nsRecords = await dns.resolveNs(domain);
+        const nsAddrArray = await Promise.all(nsRecords.map(async (r) => dns.resolve4(r)));
         const nsAddresses = [].concat(...nsAddrArray).filter((a) => a);
 
         if (!nsAddresses.length) {

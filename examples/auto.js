@@ -2,10 +2,8 @@
  * Example of acme.Client.auto()
  */
 
+// const fs = require('fs').promises;
 const acme = require('./../');
-
-// const Promise = require('bluebird');
-// const fs = Promise.promisifyAll(require('fs'));
 
 
 function log(m) {
@@ -34,7 +32,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would write "${fileContents}" to path "${filePath}"`);
-        // await fs.writeFileAsync(filePath, fileContents);
+        // await fs.writeFile(filePath, fileContents);
     }
 
     /* dns-01 */
@@ -71,7 +69,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would remove file on path "${filePath}"`);
-        // await fs.unlinkAsync(filePath);
+        // await fs.unlink(filePath);
     }
 
     /* dns-01 */
