@@ -8,6 +8,13 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 * Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
 
 
+## Important upgrade notice
+
+On September 15, 2022, Let's Encrypt will stop accepting Certificate Signing Requests signed using the obsolete SHA-1 hash. This change affects all `node-acme-client` versions lower than `3.3.2` and `4.2.4`. Please upgrade ASAP to ensure that your certificates can still be issued following this date.
+
+A more detailed explanation can be found [at the Let's Encrypt forums](https://community.letsencrypt.org/t/rejecting-sha-1-csrs-and-validation-using-tls-1-0-1-1-urls/175144).
+
+
 ### Compatibility
 
 | acme-client   | API       | Style     | Node.js |
