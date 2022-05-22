@@ -181,6 +181,18 @@ await client.auto({
     skipChallengeVerification: true
 });
 ```
+### Alternate Chain Selection
+
+There are two ways to select an alternate chain (should one be available). The default way (and only way prior to v4.3.0) is to pass a string to match against the issuer. This searches each chain in order and returns the first chain in which the issuer of any of the certs in the chain `String.contains()` the string passed, or the default chain is no match is found.
+```js
+//following order finalisation
+const certificate = await client.getCertificate(order, issuer);
+```
+However this does not provide a way of unambiguously selecting an alternate chain when the same issuer string is in more than one of the chains (as is the case with the RSA chains in Lets Encrypt Staging at time of writing - 15/03/2022). To deal with this there is an option to select only by looking at the issuer of the root certificate of each chain = by passing a `preferByRoot = true`. If no match is foound the default chain is returned.
+```js
+//following order finalisation
+const certificate = await client.getCertificate(order, issuer, true);
+```
 
 
 ## API

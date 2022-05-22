@@ -610,6 +610,7 @@ class AcmeClient {
      *
      * @param {object} order Order object
      * @param {string} [preferredChain] Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null`
+     * @param {boolean} [preferByRoot=false] If prefferedChain is not null and this is true then match issuer against root to select chain
      * @returns {Promise<string>} Certificate
      *
      * @example Get certificate
@@ -625,7 +626,7 @@ class AcmeClient {
      * ```
      */
 
-    async getCertificate(order, preferredChain = null) {
+    async getCertificate(order, preferredChain = null, preferByRoot = false) {
         if (!validStates.includes(order.status)) {
             order = await this.waitForValidStatus(order);
         }
@@ -642,7 +643,7 @@ class AcmeClient {
             const alternates = await Promise.map(alternateLinks, async (link) => this.api.apiRequest(link, null, [200]));
             const certificates = [resp].concat(alternates).map((c) => c.data);
 
-            return util.findCertificateChainForIssuer(certificates, preferredChain);
+            return util.findCertificateChainForIssuer(certificates, preferredChain, preferByRoot);
         }
 
         /* Return default certificate chain */

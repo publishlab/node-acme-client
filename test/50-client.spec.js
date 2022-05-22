@@ -491,6 +491,21 @@ describe('client', () => {
         assert.strictEqual(testIssuers[0], info.issuer.commonName);
     });
 
+    it('should get alternate certificate chain when comparing only the root issuer [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+        if (!capAlternateCertRoots) {
+            this.skip();
+        }
+
+        await Promise.map(testIssuers, async (issuer) => {
+            // set preferByRoot = true
+            const cert = await testClient.getCertificate(testOrder, issuer, true);
+            const rootCert = acme.forge.splitPemChain(cert).pop();
+            const info = await acme.forge.readCertificateInfo(rootCert);
+
+            assert.strictEqual(issuer, info.issuer.commonName);
+        });
+    });
+
 
     /**
      * Revoke certificate

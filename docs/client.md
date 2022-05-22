@@ -37,7 +37,7 @@ AcmeClient
     * [.verifyChallenge(authz, challenge)](#AcmeClient+verifyChallenge) ⇒ <code>Promise</code>
     * [.completeChallenge(challenge)](#AcmeClient+completeChallenge) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.waitForValidStatus(item)](#AcmeClient+waitForValidStatus) ⇒ <code>Promise.&lt;object&gt;</code>
-    * [.getCertificate(order, [preferredChain])](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.getCertificate(order, [preferredChain], [preferByRoot])](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.revokeCertificate(cert, [data])](#AcmeClient+revokeCertificate) ⇒ <code>Promise</code>
     * [.auto(opts)](#AcmeClient+auto) ⇒ <code>Promise.&lt;string&gt;</code>
 
@@ -402,7 +402,7 @@ await client.waitForValidStatus(order);
 ```
 <a name="AcmeClient+getCertificate"></a>
 
-### acmeClient.getCertificate(order, [preferredChain]) ⇒ <code>Promise.&lt;string&gt;</code>
+### acmeClient.getCertificate(order, [preferredChain], [preferByRoot]) ⇒ <code>Promise.&lt;string&gt;</code>
 Get certificate from ACME order
 
 https://tools.ietf.org/html/rfc8555#section-7.4.2
@@ -414,6 +414,7 @@ https://tools.ietf.org/html/rfc8555#section-7.4.2
 | --- | --- | --- | --- |
 | order | <code>object</code> |  | Order object |
 | [preferredChain] | <code>string</code> | <code>null</code> | Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null` |
+| [preferByRoot] | <code>boolean</code> | <code>false</code> | If prefferedChain is not null and this is true then match issuer against root to select chain |
 
 **Example**  
 Get certificate

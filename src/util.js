@@ -109,10 +109,11 @@ function parseLinkHeader(header, rel = 'alternate') {
  *
  * @param {array} certificates Array of PEM encoded certificate chains
  * @param {string} issuer Preferred certificate issuer
+ * @param {boolean} [preferByRoot=false] If true then only match issuer against root of chain
  * @returns {Promise<string>} PEM encoded certificate chain
  */
 
-async function findCertificateChainForIssuer(chains, issuer) {
+async function findCertificateChainForIssuer(chains, issuer, preferByRoot = false) {
     try {
         return await Promise.any(chains.map(async (chain) => {
             /* Look up all issuers */
@@ -120,8 +121,18 @@ async function findCertificateChainForIssuer(chains, issuer) {
             const infoCollection = await Promise.map(certs, forge.readCertificateInfo);
             const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
 
-            /* Found match, return it */
-            if (issuerCollection.includes(issuer)) {
+            /*
+                if preferByRoot We only care about the issuer CNs of the root cert in the chain.
+                This allows for correct selection when one chain is a subset of another but signed by a different CA Cert
+                chains - as in https://community.letsencrypt.org/t/staging-doctored-durian-root-ca-x3-is-expired-breaks-test-environment/145689/10
+            */
+            if (preferByRoot) {
+                if (issuerCollection.pop().includes(issuer)) {
+                    log(`Found matching certificate for preferred issuer="${issuer}" at root of the chain`);
+                    return chain;
+                }
+            }
+            else if (issuerCollection.includes(issuer)) {
                 log(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
                 return chain;
             }
