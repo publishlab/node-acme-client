@@ -132,7 +132,7 @@ export interface CsrOptions {
     emailAddress?: string;
 }
 
-export interface CryptoInterface {
+export interface CryptoLegacyInterface {
     createPrivateKey(size?: number): Promise<PrivateKeyBuffer>;
     createPublicKey(key: PrivateKeyBuffer | PrivateKeyString): Promise<PublicKeyBuffer>;
     getPemBody(str: string): string;
@@ -144,7 +144,7 @@ export interface CryptoInterface {
     createCsr(data: CsrOptions, key?: PrivateKeyBuffer | PrivateKeyString): Promise<[PrivateKeyBuffer, CsrBuffer]>;
 }
 
-export const forge: CryptoInterface;
+export const forge: CryptoLegacyInterface;
 
 
 /**

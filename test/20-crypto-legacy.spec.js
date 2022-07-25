@@ -1,5 +1,5 @@
 /**
- * Crypto tests
+ * Legacy crypto tests
  */
 
 const fs = require('fs').promises;
@@ -13,7 +13,7 @@ const cryptoEngines = {
 };
 
 
-describe('crypto', () => {
+describe('crypto-legacy', () => {
     let testPemKey;
     let testCert;
     let testSanCert;

@@ -1,5 +1,8 @@
 /**
- * node-forge crypto engine
+ * Legacy node-forge crypto engine
+ *
+ * DEPRECATION WARNING: This crypto engine is deprecated and will be removed from acme-client in a future
+ * major release. Please migrate to the new `acme.crypto` interface at your earliest convenience.
  *
  * @namespace forge
  */
@@ -142,7 +145,7 @@ exports.createPublicKey = async function(key) {
 
 
 /**
- * Parse body of PEM encoded object form buffer or string
+ * Parse body of PEM encoded object from buffer or string
  * If multiple objects are chained, the first body will be returned
  *
  * @param {buffer|string} str PEM encoded buffer or string
