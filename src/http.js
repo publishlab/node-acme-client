@@ -2,7 +2,7 @@
  * ACME HTTP client
  */
 
-const crypto = require('crypto');
+const { createHmac, createSign } = require('crypto');
 const { log } = require('./logger');
 const axios = require('./axios');
 const util = require('./util');
@@ -220,7 +220,7 @@ class HttpClient {
         const result = await this.prepareSignedBody('HS256', url, payload, { nonce, kid });
 
         /* Signature */
-        const signer = crypto.createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
+        const signer = createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
         result.signature = util.b64encode(signer.digest());
 
         return result;
@@ -242,7 +242,7 @@ class HttpClient {
         const result = await this.prepareSignedBody('RS256', url, payload, { nonce, kid });
 
         /* Signature */
-        const signer = crypto.createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
+        const signer = createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
         result.signature = util.b64escape(signer.sign(this.accountKey, 'base64'));
 
         return result;

@@ -4,7 +4,7 @@
  * @namespace Client
  */
 
-const crypto = require('crypto');
+const { createHash } = require('crypto');
 const { log } = require('./logger');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
@@ -463,7 +463,7 @@ class AcmeClient {
 
     async getChallengeKeyAuthorization(challenge) {
         const jwk = await this.http.getJwk();
-        const keysum = crypto.createHash('sha256').update(JSON.stringify(jwk));
+        const keysum = createHash('sha256').update(JSON.stringify(jwk));
         const thumbprint = util.b64escape(keysum.digest('base64'));
         const result = `${challenge.token}.${thumbprint}`;
 
@@ -481,7 +481,7 @@ class AcmeClient {
          */
 
         if ((challenge.type === 'dns-01') || (challenge.type === 'tls-alpn-01')) {
-            const shasum = crypto.createHash('sha256').update(result);
+            const shasum = createHash('sha256').update(result);
             return util.b64escape(shasum.digest('base64'));
         }
 
