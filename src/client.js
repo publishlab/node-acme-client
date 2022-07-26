@@ -273,7 +273,7 @@ class AcmeClient {
 
         /* Get signed request body from new client */
         const url = await newHttpClient.getResourceUrl('keyChange');
-        const body = newHttpClient.createSignedRsaBody(url, data);
+        const body = newHttpClient.createSignedBody(url, data);
 
         /* Change key using old client */
         const resp = await this.api.updateAccountKey(body);

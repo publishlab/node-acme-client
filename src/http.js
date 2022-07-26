@@ -2,7 +2,7 @@
  * ACME HTTP client
  */
 
-const { createHmac, createSign } = require('crypto');
+const { createHmac, createSign, constants: { RSA_PKCS1_PADDING } } = require('crypto');
 const { getJwk } = require('./crypto');
 const { log } = require('./logger');
 const axios = require('./axios');
@@ -219,22 +219,33 @@ class HttpClient {
 
 
     /**
-     * Create signed RSA HTTP request body
+     * Create JWS HTTP request body using RS256 or ES256
+     *
+     * https://datatracker.ietf.org/doc/html/rfc7515
+     * https://stackoverflow.com/questions/39554165
      *
      * @param {string} url Request URL
      * @param {object} [payload] Request payload
      * @param {object} [opts]
      * @param {string} [opts.nonce] JWS nonce
      * @param {string} [opts.kid] JWS KID
-     * @returns {object} Signed RSA request body
+     * @returns {object} JWS request body
      */
 
-    createSignedRsaBody(url, payload = null, { nonce = null, kid = null } = {}) {
-        const result = this.prepareSignedBody('RS256', url, payload, { nonce, kid });
+    createSignedBody(url, payload = null, { nonce = null, kid = null } = {}) {
+        const jwk = this.getJwk();
+        const alg = (jwk.kty === 'EC') ? 'ES256' : 'RS256';
+
+        /* Prepare body and signer */
+        const result = this.prepareSignedBody(alg, url, payload, { nonce, kid });
+        const signer = createSign('SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
 
         /* Signature */
-        const signer = createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
-        result.signature = util.b64escape(signer.sign(this.accountKey, 'base64'));
+        result.signature = util.b64encode(signer.sign({
+            key: this.accountKey,
+            padding: RSA_PKCS1_PADDING,
+            dsaEncoding: 'ieee-p1363'
+        }));
 
         return result;
     }
@@ -272,7 +283,7 @@ class HttpClient {
         }
 
         /* Sign body and send request */
-        const data = this.createSignedRsaBody(url, payload, { nonce, kid });
+        const data = this.createSignedBody(url, payload, { nonce, kid });
         const resp = await this.request(url, 'post', { data });
 
         /* Retry on bad nonce - https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-6.4 */
