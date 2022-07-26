@@ -101,13 +101,13 @@ commands:
 
   test:
     steps:
-      - run: yarn
-      - run: yarn run lint
+      - run: yarn --color
+      - run: yarn run lint --color
       - run: yarn run lint-types
       - run: yarn run build-docs
 
       - run:
-          command: yarn run test
+          command: yarn run test --color
           environment:
             ACME_DOMAIN_NAME: test.example.com
             ACME_CHALLTESTSRV_URL: http://127.0.0.1:8055
@@ -117,15 +117,15 @@ commands:
             ACME_HTTPS_PORT: 5003
 
 jobs:
-  v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  eab-v10: { docker: [{ image: circleci/node:10 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  eab-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  eab-v14: { docker: [{ image: circleci/node:14 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  eab-v16: { docker: [{ image: circleci/node:16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  # step-v12: { docker: [{ image: circleci/node:12 }], steps: [ pre, install-cts, install-step, install-coredns, test ]}
+  v10: { docker: [{ image: cimg/node:10.24 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v14: { docker: [{ image: cimg/node:14.19 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  v16: { docker: [{ image: cimg/node:16.16 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
+  eab-v10: { docker: [{ image: cimg/node:10.24 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v14: { docker: [{ image: cimg/node:14.19 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v16: { docker: [{ image: cimg/node:16.16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  # step-v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, install-cts, install-step, install-coredns, test ]}
 
 workflows:
   test-suite:
