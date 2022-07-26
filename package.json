@@ -8,7 +8,7 @@
     "license": "MIT",
     "homepage": "https://github.com/publishlab/node-acme-client",
     "engines": {
-        "node": ">= 12"
+        "node": ">= 16"
     },
     "files": [
         "src",

@@ -117,21 +117,17 @@ commands:
             ACME_HTTPS_PORT: 5003
 
 jobs:
-  v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  v14: { docker: [{ image: cimg/node:14.19 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
   v16: { docker: [{ image: cimg/node:16.16 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
-  eab-v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
-  eab-v14: { docker: [{ image: cimg/node:14.19 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  v18: { docker: [{ image: cimg/node:18.4 }], steps: [ pre, install-cts, install-pebble, install-coredns, test ]}
   eab-v16: { docker: [{ image: cimg/node:16.16 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
+  eab-v18: { docker: [{ image: cimg/node:18.4 }], steps: [ pre, enable-eab, install-cts, install-pebble, install-coredns, test ]}
   # step-v12: { docker: [{ image: cimg/node:12.22 }], steps: [ pre, install-cts, install-step, install-coredns, test ]}
 
 workflows:
   test-suite:
     jobs:
-      - v12
-      - v14
       - v16
-      - eab-v12
-      - eab-v14
+      - v18
       - eab-v16
+      - eab-v18
       # - step-v12

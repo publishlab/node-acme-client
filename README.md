@@ -17,13 +17,13 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 ### Compatibility
 
-| acme-client   | API       | Style     | Node.js |
-| ------------- | --------- | --------- | ------- |
-| v5.x          | ACMEv2    | Promise   | >= v12  |
-| v4.x          | ACMEv2    | Promise   | >= v10  |
-| v3.x          | ACMEv2    | Promise   | >= v8   |
-| v2.x          | ACMEv2    | Promise   | >= v4   |
-| v1.x          | ACMEv1    | callback  | >= v4   |
+| acme-client   | Node.js   |                                       |
+| ------------- | --------- | ------------------------------------- |
+| v5.x          | >= v16    | [Upgrade guide](docs/upgrade-v5.md)   |
+| v4.x          | >= v10    |                                       |
+| v3.x          | >= v8     |                                       |
+| v2.x          | >= v4     |                                       |
+| v1.x          | >= v4     |                                       |
 
 
 ### Table of contents
