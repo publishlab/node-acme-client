@@ -44,7 +44,7 @@ describe('crypto-legacy', () => {
             assert.isTrue(Buffer.isBuffer(testCert));
         });
 
-        it('should read SAN certificate fixture', async () => {
+        it('should read san certificate fixture', async () => {
             testSanCert = await fs.readFile(testSanCertPath);
             assert.isTrue(Buffer.isBuffer(testSanCert));
         });
@@ -88,7 +88,7 @@ describe('crypto-legacy', () => {
              * Certificate Signing Request
              */
 
-            it('should generate a CSR', async () => {
+            it('should generate a csr', async () => {
                 const [key, csr] = await engine.createCsr({
                     commonName: testCsrDomain
                 });
@@ -99,7 +99,7 @@ describe('crypto-legacy', () => {
                 testCsr = csr;
             });
 
-            it('should generate a SAN CSR', async () => {
+            it('should generate a san csr', async () => {
                 const [key, csr] = await engine.createCsr({
                     commonName: testSanCsrDomains[0],
                     altNames: testSanCsrDomains.slice(1, testSanCsrDomains.length)
@@ -111,7 +111,7 @@ describe('crypto-legacy', () => {
                 testSanCsr = csr;
             });
 
-            it('should generate a CSR without common name', async () => {
+            it('should generate a csr without common name', async () => {
                 const [key, csr] = await engine.createCsr({
                     altNames: testSanCsrDomains
                 });
@@ -122,7 +122,7 @@ describe('crypto-legacy', () => {
                 testNonCnCsr = csr;
             });
 
-            it('should generate a non-ASCII CSR', async () => {
+            it('should generate a non-ascii csr', async () => {
                 const [key, csr] = await engine.createCsr({
                     commonName: testCsrDomain,
                     organization: '大安區',
@@ -135,7 +135,7 @@ describe('crypto-legacy', () => {
                 testNonAsciiCsr = csr;
             });
 
-            it('should resolve domains from CSR', async () => {
+            it('should resolve domains from csr', async () => {
                 const result = await engine.readCsrDomains(testCsr);
 
                 spec.crypto.csrDomains(result);
@@ -143,7 +143,7 @@ describe('crypto-legacy', () => {
                 assert.deepStrictEqual(result.altNames, [testCsrDomain]);
             });
 
-            it('should resolve domains from SAN CSR', async () => {
+            it('should resolve domains from san csr', async () => {
                 const result = await engine.readCsrDomains(testSanCsr);
 
                 spec.crypto.csrDomains(result);
@@ -151,7 +151,7 @@ describe('crypto-legacy', () => {
                 assert.deepStrictEqual(result.altNames, testSanCsrDomains);
             });
 
-            it('should resolve domains from SAN without common name', async () => {
+            it('should resolve domains from san without common name', async () => {
                 const result = await engine.readCsrDomains(testNonCnCsr);
 
                 spec.crypto.csrDomains(result);
@@ -159,7 +159,7 @@ describe('crypto-legacy', () => {
                 assert.deepStrictEqual(result.altNames, testSanCsrDomains);
             });
 
-            it('should resolve domains from non-ASCII CSR', async () => {
+            it('should resolve domains from non-ascii csr', async () => {
                 const result = await engine.readCsrDomains(testNonAsciiCsr);
 
                 spec.crypto.csrDomains(result);
@@ -180,7 +180,7 @@ describe('crypto-legacy', () => {
                 assert.strictEqual(info.domains.altNames.length, 0);
             });
 
-            it('should read info from SAN certificate', async () => {
+            it('should read info from san certificate', async () => {
                 const info = await engine.readCertificateInfo(testSanCert);
 
                 spec.crypto.certificateInfo(info);
@@ -193,7 +193,7 @@ describe('crypto-legacy', () => {
              * PEM utils
              */
 
-            it('should get PEM body', () => {
+            it('should get pem body', () => {
                 [testPemKey, testCert, testSanCert].forEach((pem) => {
                     const body = engine.getPemBody(pem);
 
@@ -204,7 +204,7 @@ describe('crypto-legacy', () => {
                 });
             });
 
-            it('should split PEM chain', () => {
+            it('should split pem chain', () => {
                 [testPemKey, testCert, testSanCert].forEach((pem) => {
                     const chain = engine.splitPemChain(pem);
 

@@ -32,25 +32,6 @@ if (capEabEnabled && process.env.ACME_EAB_KID && process.env.ACME_EAB_HMAC_KEY) 
 
 
 describe('client', () => {
-    let testIssuers;
-    let testPrivateKey;
-    let testSecondaryPrivateKey;
-    let testClient;
-    let testAccount;
-    let testAccountUrl;
-    let testOrder;
-    let testOrderWildcard;
-    let testAuthz;
-    let testAuthzWildcard;
-    let testChallenge;
-    let testChallengeWildcard;
-    let testKeyAuthorization;
-    let testKeyAuthorizationWildcard;
-    let testCsr;
-    let testCsrWildcard;
-    let testCertificate;
-    let testCertificateWildcard;
-
     const testDomain = `${uuid()}.${domainName}`;
     const testDomainWildcard = `*.${testDomain}`;
     const testContact = `mailto:test-${uuid()}@nope.com`;
@@ -68,466 +49,497 @@ describe('client', () => {
 
 
     /**
-     * Fixtures
+     * Key types
      */
 
-    it('should generate a private key', async () => {
-        testPrivateKey = await acme.forge.createPrivateKey();
-        assert.isTrue(Buffer.isBuffer(testPrivateKey));
-    });
-
-    it('should create a second private key', async () => {
-        testSecondaryPrivateKey = await acme.forge.createPrivateKey(2048);
-        assert.isTrue(Buffer.isBuffer(testSecondaryPrivateKey));
-    });
-
-    it('should generate certificate signing request', async () => {
-        [, testCsr] = await acme.forge.createCsr({ commonName: testDomain });
-        [, testCsrWildcard] = await acme.forge.createCsr({ commonName: testDomainWildcard });
-    });
-
-    it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
+    Object.entries({
+        rsa: {
+            createKeyFn: () => acme.crypto.createPrivateRsaKey(),
+            jwkSpecFn: spec.jwk.rsa
+        },
+        ecdsa: {
+            createKeyFn: () => acme.crypto.createPrivateEcdsaKey(),
+            jwkSpecFn: spec.jwk.ecdsa
         }
-
-        testIssuers = await getCertIssuers();
-
-        assert.isArray(testIssuers);
-        assert.isTrue(testIssuers.length > 1);
-
-        testIssuers.forEach((i) => {
-            assert.isString(i);
-            assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
-        });
-    });
-
-
-    /**
-     * Initialize clients
-     */
-
-    it('should initialize client', () => {
-        testClient = new acme.Client({
-            ...clientOpts,
-            accountKey: testPrivateKey
-        });
-    });
-
-    it('should produce a valid JWK', () => {
-        const jwk = testClient.http.getJwk();
-
-        assert.isObject(jwk);
-        assert.strictEqual(jwk.e, 'AQAB');
-        assert.strictEqual(jwk.kty, 'RSA');
-    });
+    }).forEach(([name, { createKeyFn, jwkSpecFn }]) => {
+        describe(name, () => {
+            let testIssuers;
+            let testAccountKey;
+            let testAccountSecondaryKey;
+            let testClient;
+            let testAccount;
+            let testAccountUrl;
+            let testOrder;
+            let testOrderWildcard;
+            let testAuthz;
+            let testAuthzWildcard;
+            let testChallenge;
+            let testChallengeWildcard;
+            let testKeyAuthorization;
+            let testKeyAuthorizationWildcard;
+            let testCsr;
+            let testCsrWildcard;
+            let testCertificate;
+            let testCertificateWildcard;
 
 
-    /**
-     * Terms of Service
-     */
+            /**
+             * Fixtures
+             */
 
-    it('should produce Terms of Service URL [ACME_CAP_META_TOS_FIELD]', async function() {
-        if (!capMetaTosField) {
-            this.skip();
-        }
+            it('should generate a private key', async () => {
+                testAccountKey = await createKeyFn();
+                assert.isTrue(Buffer.isBuffer(testAccountKey));
+            });
 
-        const tos = await testClient.getTermsOfServiceUrl();
-        assert.isString(tos);
-    });
+            it('should create a second private key', async () => {
+                testAccountSecondaryKey = await createKeyFn();
+                assert.isTrue(Buffer.isBuffer(testAccountSecondaryKey));
+            });
 
-    it('should not produce Terms of Service URL [!ACME_CAP_META_TOS_FIELD]', async function() {
-        if (capMetaTosField) {
-            this.skip();
-        }
+            it('should generate certificate signing request', async () => {
+                [, testCsr] = await acme.crypto.createCsr({ commonName: testDomain }, await createKeyFn());
+                [, testCsrWildcard] = await acme.crypto.createCsr({ commonName: testDomainWildcard }, await createKeyFn());
+            });
 
-        const tos = await testClient.getTermsOfServiceUrl();
-        assert.isNull(tos);
-    });
+            it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
 
+                testIssuers = await getCertIssuers();
 
-    /**
-     * Create account
-     */
+                assert.isArray(testIssuers);
+                assert.isTrue(testIssuers.length > 1);
 
-    it('should refuse account creation without ToS [ACME_CAP_META_TOS_FIELD]', async function() {
-        if (!capMetaTosField) {
-            this.skip();
-        }
-
-        await assert.isRejected(testClient.createAccount());
-    });
-
-    it('should refuse account creation without EAB [ACME_CAP_EAB_ENABLED]', async function() {
-        if (!capEabEnabled) {
-            this.skip();
-        }
-
-        const client = new acme.Client({
-            ...clientOpts,
-            accountKey: testPrivateKey,
-            externalAccountBinding: null
-        });
-
-        await assert.isRejected(client.createAccount({
-            termsOfServiceAgreed: true
-        }));
-    });
-
-    it('should create an account', async () => {
-        testAccount = await testClient.createAccount({
-            termsOfServiceAgreed: true
-        });
-
-        spec.rfc8555.account(testAccount);
-        assert.strictEqual(testAccount.status, 'valid');
-    });
-
-    it('should produce an account URL', () => {
-        testAccountUrl = testClient.getAccountUrl();
-        assert.isString(testAccountUrl);
-    });
+                testIssuers.forEach((i) => {
+                    assert.isString(i);
+                    assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
+                });
+            });
 
 
-    /**
-     * Find existing account using secondary client
-     */
+            /**
+             * Initialize clients
+             */
 
-    it('should throw when trying to find account using invalid account key', async () => {
-        const client = new acme.Client({
-            ...clientOpts,
-            accountKey: testSecondaryPrivateKey
-        });
+            it('should initialize client', () => {
+                testClient = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountKey
+                });
+            });
 
-        await assert.isRejected(client.createAccount({
-            onlyReturnExisting: true
-        }));
-    });
-
-    it('should find existing account using account key', async () => {
-        const client = new acme.Client({
-            ...clientOpts,
-            accountKey: testPrivateKey
-        });
-
-        const account = await client.createAccount({
-            onlyReturnExisting: true
-        });
-
-        spec.rfc8555.account(account);
-        assert.strictEqual(account.status, 'valid');
-        assert.deepStrictEqual(account.key, testAccount.key);
-    });
+            it('should produce a valid jwk', () => {
+                const jwk = testClient.http.getJwk();
+                jwkSpecFn(jwk);
+            });
 
 
-    /**
-     * Account URL
-     */
+            /**
+             * Terms of Service
+             */
 
-    it('should refuse invalid account URL', async () => {
-        const client = new acme.Client({
-            ...clientOpts,
-            accountKey: testPrivateKey,
-            accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
-        });
+            it('should produce tos url [ACME_CAP_META_TOS_FIELD]', async function() {
+                if (!capMetaTosField) {
+                    this.skip();
+                }
 
-        await assert.isRejected(client.updateAccount());
-    });
+                const tos = await testClient.getTermsOfServiceUrl();
+                assert.isString(tos);
+            });
 
-    it('should find existing account using account URL', async () => {
-        const client = new acme.Client({
-            ...clientOpts,
-            accountKey: testPrivateKey,
-            accountUrl: testAccountUrl
-        });
+            it('should not produce tos url [!ACME_CAP_META_TOS_FIELD]', async function() {
+                if (capMetaTosField) {
+                    this.skip();
+                }
 
-        const account = await client.createAccount({
-            onlyReturnExisting: true
-        });
-
-        spec.rfc8555.account(account);
-        assert.strictEqual(account.status, 'valid');
-        assert.deepStrictEqual(account.key, testAccount.key);
-    });
+                const tos = await testClient.getTermsOfServiceUrl();
+                assert.isNull(tos);
+            });
 
 
-    /**
-     * Update account contact info
-     */
+            /**
+             * Create account
+             */
 
-    it('should update account contact info', async () => {
-        const data = { contact: [testContact] };
-        const account = await testClient.updateAccount(data);
+            it('should refuse account creation without tos [ACME_CAP_META_TOS_FIELD]', async function() {
+                if (!capMetaTosField) {
+                    this.skip();
+                }
 
-        spec.rfc8555.account(account);
-        assert.strictEqual(account.status, 'valid');
-        assert.deepStrictEqual(account.key, testAccount.key);
-        assert.isArray(account.contact);
-        assert.include(account.contact, testContact);
-    });
+                await assert.isRejected(testClient.createAccount());
+            });
 
+            it('should refuse account creation without eab [ACME_CAP_EAB_ENABLED]', async function() {
+                if (!capEabEnabled) {
+                    this.skip();
+                }
 
-    /**
-     * Change account private key
-     */
+                const client = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountKey,
+                    externalAccountBinding: null
+                });
 
-    it('should change account private key [ACME_CAP_UPDATE_ACCOUNT_KEY]', async function() {
-        if (!capUpdateAccountKey) {
-            this.skip();
-        }
+                await assert.isRejected(client.createAccount({
+                    termsOfServiceAgreed: true
+                }));
+            });
 
-        await testClient.updateAccountKey(testSecondaryPrivateKey);
+            it('should create an account', async () => {
+                testAccount = await testClient.createAccount({
+                    termsOfServiceAgreed: true
+                });
 
-        const account = await testClient.createAccount({
-            onlyReturnExisting: true
-        });
+                spec.rfc8555.account(testAccount);
+                assert.strictEqual(testAccount.status, 'valid');
+            });
 
-        spec.rfc8555.account(account);
-        assert.strictEqual(account.status, 'valid');
-        assert.notDeepEqual(account.key, testAccount.key);
-    });
-
-
-    /**
-     * Create new certificate order
-     */
-
-    it('should create new order', async () => {
-        const data1 = { identifiers: [{ type: 'dns', value: testDomain }] };
-        const data2 = { identifiers: [{ type: 'dns', value: testDomainWildcard }] };
-
-        testOrder = await testClient.createOrder(data1);
-        testOrderWildcard = await testClient.createOrder(data2);
-
-        [testOrder, testOrderWildcard].forEach((item) => {
-            spec.rfc8555.order(item);
-            assert.strictEqual(item.status, 'pending');
-        });
-    });
+            it('should produce an account url', () => {
+                testAccountUrl = testClient.getAccountUrl();
+                assert.isString(testAccountUrl);
+            });
 
 
-    /**
-     * Get status of existing certificate order
-     */
+            /**
+             * Find existing account using secondary client
+             */
 
-    it('should get existing order', async () => {
-        await Promise.all([testOrder, testOrderWildcard].map(async (existing) => {
-            const result = await testClient.getOrder(existing);
+            it('should throw when trying to find account using invalid account key', async () => {
+                const client = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountSecondaryKey
+                });
 
-            spec.rfc8555.order(result);
-            assert.deepStrictEqual(existing, result);
-        }));
-    });
+                await assert.isRejected(client.createAccount({
+                    onlyReturnExisting: true
+                }));
+            });
+
+            it('should find existing account using account key', async () => {
+                const client = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountKey
+                });
+
+                const account = await client.createAccount({
+                    onlyReturnExisting: true
+                });
+
+                spec.rfc8555.account(account);
+                assert.strictEqual(account.status, 'valid');
+                assert.deepStrictEqual(account.key, testAccount.key);
+            });
 
 
-    /**
-     * Get identifier authorization
-     */
+            /**
+             * Account URL
+             */
 
-    it('should get identifier authorization', async () => {
-        const orderAuthzCollection = await testClient.getAuthorizations(testOrder);
-        const wildcardAuthzCollection = await testClient.getAuthorizations(testOrderWildcard);
+            it('should refuse invalid account url', async () => {
+                const client = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountKey,
+                    accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/1'
+                });
 
-        [orderAuthzCollection, wildcardAuthzCollection].forEach((collection) => {
-            assert.isArray(collection);
-            assert.isNotEmpty(collection);
+                await assert.isRejected(client.updateAccount());
+            });
 
-            collection.forEach((authz) => {
-                spec.rfc8555.authorization(authz);
-                assert.strictEqual(authz.status, 'pending');
+            it('should find existing account using account url', async () => {
+                const client = new acme.Client({
+                    ...clientOpts,
+                    accountKey: testAccountKey,
+                    accountUrl: testAccountUrl
+                });
+
+                const account = await client.createAccount({
+                    onlyReturnExisting: true
+                });
+
+                spec.rfc8555.account(account);
+                assert.strictEqual(account.status, 'valid');
+                assert.deepStrictEqual(account.key, testAccount.key);
+            });
+
+
+            /**
+             * Update account contact info
+             */
+
+            it('should update account contact info', async () => {
+                const data = { contact: [testContact] };
+                const account = await testClient.updateAccount(data);
+
+                spec.rfc8555.account(account);
+                assert.strictEqual(account.status, 'valid');
+                assert.deepStrictEqual(account.key, testAccount.key);
+                assert.isArray(account.contact);
+                assert.include(account.contact, testContact);
+            });
+
+
+            /**
+             * Change account private key
+             */
+
+            it('should change account private key [ACME_CAP_UPDATE_ACCOUNT_KEY]', async function() {
+                if (!capUpdateAccountKey) {
+                    this.skip();
+                }
+
+                await testClient.updateAccountKey(testAccountSecondaryKey);
+
+                const account = await testClient.createAccount({
+                    onlyReturnExisting: true
+                });
+
+                spec.rfc8555.account(account);
+                assert.strictEqual(account.status, 'valid');
+                assert.notDeepEqual(account.key, testAccount.key);
+            });
+
+
+            /**
+             * Create new certificate order
+             */
+
+            it('should create new order', async () => {
+                const data1 = { identifiers: [{ type: 'dns', value: testDomain }] };
+                const data2 = { identifiers: [{ type: 'dns', value: testDomainWildcard }] };
+
+                testOrder = await testClient.createOrder(data1);
+                testOrderWildcard = await testClient.createOrder(data2);
+
+                [testOrder, testOrderWildcard].forEach((item) => {
+                    spec.rfc8555.order(item);
+                    assert.strictEqual(item.status, 'pending');
+                });
+            });
+
+
+            /**
+             * Get status of existing certificate order
+             */
+
+            it('should get existing order', async () => {
+                await Promise.all([testOrder, testOrderWildcard].map(async (existing) => {
+                    const result = await testClient.getOrder(existing);
+
+                    spec.rfc8555.order(result);
+                    assert.deepStrictEqual(existing, result);
+                }));
+            });
+
+
+            /**
+             * Get identifier authorization
+             */
+
+            it('should get identifier authorization', async () => {
+                const orderAuthzCollection = await testClient.getAuthorizations(testOrder);
+                const wildcardAuthzCollection = await testClient.getAuthorizations(testOrderWildcard);
+
+                [orderAuthzCollection, wildcardAuthzCollection].forEach((collection) => {
+                    assert.isArray(collection);
+                    assert.isNotEmpty(collection);
+
+                    collection.forEach((authz) => {
+                        spec.rfc8555.authorization(authz);
+                        assert.strictEqual(authz.status, 'pending');
+                    });
+                });
+
+                testAuthz = orderAuthzCollection.pop();
+                testAuthzWildcard = wildcardAuthzCollection.pop();
+
+                testAuthz.challenges.concat(testAuthzWildcard.challenges).forEach((item) => {
+                    spec.rfc8555.challenge(item);
+                    assert.strictEqual(item.status, 'pending');
+                });
+            });
+
+
+            /**
+             * Generate challenge key authorization
+             */
+
+            it('should get challenge key authorization', async () => {
+                testChallenge = testAuthz.challenges.find((c) => (c.type === 'http-01'));
+                testChallengeWildcard = testAuthzWildcard.challenges.find((c) => (c.type === 'dns-01'));
+
+                testKeyAuthorization = await testClient.getChallengeKeyAuthorization(testChallenge);
+                testKeyAuthorizationWildcard = await testClient.getChallengeKeyAuthorization(testChallengeWildcard);
+
+                [testKeyAuthorization, testKeyAuthorizationWildcard].forEach((k) => assert.isString(k));
+            });
+
+
+            /**
+             * Deactivate identifier authorization
+             */
+
+            it('should deactivate identifier authorization', async () => {
+                const order = await testClient.createOrder({
+                    identifiers: [
+                        { type: 'dns', value: `${uuid()}.${domainName}` },
+                        { type: 'dns', value: `${uuid()}.${domainName}` }
+                    ]
+                });
+
+                const authzCollection = await testClient.getAuthorizations(order);
+
+                const results = await Promise.all(authzCollection.map(async (authz) => {
+                    spec.rfc8555.authorization(authz);
+                    assert.strictEqual(authz.status, 'pending');
+                    return testClient.deactivateAuthorization(authz);
+                }));
+
+                results.forEach((authz) => {
+                    spec.rfc8555.authorization(authz);
+                    assert.strictEqual(authz.status, 'deactivated');
+                });
+            });
+
+
+            /**
+             * Verify satisfied challenge
+             */
+
+            it('should verify challenge', async () => {
+                await cts.assertHttpChallengeCreateFn(testAuthz, testChallenge, testKeyAuthorization);
+                await cts.assertDnsChallengeCreateFn(testAuthzWildcard, testChallengeWildcard, testKeyAuthorizationWildcard);
+
+                await testClient.verifyChallenge(testAuthz, testChallenge);
+                await testClient.verifyChallenge(testAuthzWildcard, testChallengeWildcard);
+            });
+
+
+            /**
+             * Complete challenge
+             */
+
+            it('should complete challenge', async () => {
+                await Promise.all([testChallenge, testChallengeWildcard].map(async (challenge) => {
+                    const result = await testClient.completeChallenge(challenge);
+
+                    spec.rfc8555.challenge(result);
+                    assert.strictEqual(challenge.url, result.url);
+                }));
+            });
+
+
+            /**
+             * Wait for valid challenge
+             */
+
+            it('should wait for valid challenge status', async () => {
+                await Promise.all([testChallenge, testChallengeWildcard].map(async (c) => testClient.waitForValidStatus(c)));
+            });
+
+
+            /**
+             * Finalize order
+             */
+
+            it('should finalize order', async () => {
+                const finalize = await testClient.finalizeOrder(testOrder, testCsr);
+                const finalizeWildcard = await testClient.finalizeOrder(testOrderWildcard, testCsrWildcard);
+
+                [finalize, finalizeWildcard].forEach((f) => spec.rfc8555.order(f));
+
+                assert.strictEqual(testOrder.url, finalize.url);
+                assert.strictEqual(testOrderWildcard.url, finalizeWildcard.url);
+            });
+
+
+            /**
+             * Wait for valid order
+             */
+
+            it('should wait for valid order status', async () => {
+                await Promise.all([testOrder, testOrderWildcard].map(async (o) => testClient.waitForValidStatus(o)));
+            });
+
+
+            /**
+             * Get certificate
+             */
+
+            it('should get certificate', async () => {
+                testCertificate = await testClient.getCertificate(testOrder);
+                testCertificateWildcard = await testClient.getCertificate(testOrderWildcard);
+
+                [testCertificate, testCertificateWildcard].forEach((cert) => {
+                    assert.isString(cert);
+                    acme.crypto.readCertificateInfo(cert);
+                });
+            });
+
+            it('should get alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
+
+                await Promise.all(testIssuers.map(async (issuer) => {
+                    const cert = await testClient.getCertificate(testOrder, issuer);
+                    const rootCert = acme.crypto.splitPemChain(cert).pop();
+                    const info = acme.crypto.readCertificateInfo(rootCert);
+
+                    assert.strictEqual(issuer, info.issuer.commonName);
+                }));
+            });
+
+            it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
+
+                const cert = await testClient.getCertificate(testOrder, uuid());
+                const rootCert = acme.crypto.splitPemChain(cert).pop();
+                const info = acme.crypto.readCertificateInfo(rootCert);
+
+                assert.strictEqual(testIssuers[0], info.issuer.commonName);
+            });
+
+
+            /**
+             * Revoke certificate
+             */
+
+            it('should revoke certificate', async () => {
+                await testClient.revokeCertificate(testCertificate);
+                await testClient.revokeCertificate(testCertificateWildcard, { reason: 4 });
+            });
+
+            it('should not allow getting revoked certificate', async () => {
+                await assert.isRejected(testClient.getCertificate(testOrder));
+                await assert.isRejected(testClient.getCertificate(testOrderWildcard));
+            });
+
+
+            /**
+             * Deactivate account
+             */
+
+            it('should deactivate account', async () => {
+                const data = { status: 'deactivated' };
+                const account = await testClient.updateAccount(data);
+
+                spec.rfc8555.account(account);
+                assert.strictEqual(account.status, 'deactivated');
+            });
+
+
+            /**
+             * Verify that no new orders can be made
+             */
+
+            it('should not allow new orders from deactivated account', async () => {
+                const data = { identifiers: [{ type: 'dns', value: 'nope.com' }] };
+                await assert.isRejected(testClient.createOrder(data));
             });
         });
-
-        testAuthz = orderAuthzCollection.pop();
-        testAuthzWildcard = wildcardAuthzCollection.pop();
-
-        testAuthz.challenges.concat(testAuthzWildcard.challenges).forEach((item) => {
-            spec.rfc8555.challenge(item);
-            assert.strictEqual(item.status, 'pending');
-        });
-    });
-
-
-    /**
-     * Generate challenge key authorization
-     */
-
-    it('should get challenge key authorization', async () => {
-        testChallenge = testAuthz.challenges.find((c) => (c.type === 'http-01'));
-        testChallengeWildcard = testAuthzWildcard.challenges.find((c) => (c.type === 'dns-01'));
-
-        testKeyAuthorization = await testClient.getChallengeKeyAuthorization(testChallenge);
-        testKeyAuthorizationWildcard = await testClient.getChallengeKeyAuthorization(testChallengeWildcard);
-
-        [testKeyAuthorization, testKeyAuthorizationWildcard].forEach((k) => assert.isString(k));
-    });
-
-
-    /**
-     * Deactivate identifier authorization
-     */
-
-    it('should deactivate identifier authorization', async () => {
-        const order = await testClient.createOrder({
-            identifiers: [
-                { type: 'dns', value: `${uuid()}.${domainName}` },
-                { type: 'dns', value: `${uuid()}.${domainName}` }
-            ]
-        });
-
-        const authzCollection = await testClient.getAuthorizations(order);
-
-        const results = await Promise.all(authzCollection.map(async (authz) => {
-            spec.rfc8555.authorization(authz);
-            assert.strictEqual(authz.status, 'pending');
-            return testClient.deactivateAuthorization(authz);
-        }));
-
-        results.forEach((authz) => {
-            spec.rfc8555.authorization(authz);
-            assert.strictEqual(authz.status, 'deactivated');
-        });
-    });
-
-
-    /**
-     * Verify satisfied challenge
-     */
-
-    it('should verify challenge', async () => {
-        await cts.assertHttpChallengeCreateFn(testAuthz, testChallenge, testKeyAuthorization);
-        await cts.assertDnsChallengeCreateFn(testAuthzWildcard, testChallengeWildcard, testKeyAuthorizationWildcard);
-
-        await testClient.verifyChallenge(testAuthz, testChallenge);
-        await testClient.verifyChallenge(testAuthzWildcard, testChallengeWildcard);
-    });
-
-
-    /**
-     * Complete challenge
-     */
-
-    it('should complete challenge', async () => {
-        await Promise.all([testChallenge, testChallengeWildcard].map(async (challenge) => {
-            const result = await testClient.completeChallenge(challenge);
-
-            spec.rfc8555.challenge(result);
-            assert.strictEqual(challenge.url, result.url);
-        }));
-    });
-
-
-    /**
-     * Wait for valid challenge
-     */
-
-    it('should wait for valid challenge status', async () => {
-        await Promise.all([testChallenge, testChallengeWildcard].map(async (c) => testClient.waitForValidStatus(c)));
-    });
-
-
-    /**
-     * Finalize order
-     */
-
-    it('should finalize order', async () => {
-        const finalize = await testClient.finalizeOrder(testOrder, testCsr);
-        const finalizeWildcard = await testClient.finalizeOrder(testOrderWildcard, testCsrWildcard);
-
-        [finalize, finalizeWildcard].forEach((f) => spec.rfc8555.order(f));
-
-        assert.strictEqual(testOrder.url, finalize.url);
-        assert.strictEqual(testOrderWildcard.url, finalizeWildcard.url);
-    });
-
-
-    /**
-     * Wait for valid order
-     */
-
-    it('should wait for valid order status', async () => {
-        await Promise.all([testOrder, testOrderWildcard].map(async (o) => testClient.waitForValidStatus(o)));
-    });
-
-
-    /**
-     * Get certificate
-     */
-
-    it('should get certificate', async () => {
-        testCertificate = await testClient.getCertificate(testOrder);
-        testCertificateWildcard = await testClient.getCertificate(testOrderWildcard);
-
-        await Promise.all([testCertificate, testCertificateWildcard].map(async (cert) => {
-            assert.isString(cert);
-            return acme.forge.readCertificateInfo(cert);
-        }));
-    });
-
-    it('should get alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
-        }
-
-        await Promise.all(testIssuers.map(async (issuer) => {
-            const cert = await testClient.getCertificate(testOrder, issuer);
-            const rootCert = acme.forge.splitPemChain(cert).pop();
-            const info = await acme.forge.readCertificateInfo(rootCert);
-
-            assert.strictEqual(issuer, info.issuer.commonName);
-        }));
-    });
-
-    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
-        }
-
-        const cert = await testClient.getCertificate(testOrder, uuid());
-        const rootCert = acme.forge.splitPemChain(cert).pop();
-        const info = await acme.forge.readCertificateInfo(rootCert);
-
-        assert.strictEqual(testIssuers[0], info.issuer.commonName);
-    });
-
-
-    /**
-     * Revoke certificate
-     */
-
-    it('should revoke certificate', async () => {
-        await testClient.revokeCertificate(testCertificate);
-        await testClient.revokeCertificate(testCertificateWildcard, { reason: 4 });
-    });
-
-    it('should not allow getting revoked certificate', async () => {
-        await assert.isRejected(testClient.getCertificate(testOrder));
-        await assert.isRejected(testClient.getCertificate(testOrderWildcard));
-    });
-
-
-    /**
-     * Deactivate account
-     */
-
-    it('should deactivate account', async () => {
-        const data = { status: 'deactivated' };
-        const account = await testClient.updateAccount(data);
-
-        spec.rfc8555.account(account);
-        assert.strictEqual(account.status, 'deactivated');
-    });
-
-
-    /**
-     * Verify that no new orders can be made
-     */
-
-    it('should not allow new orders from deactivated account', async () => {
-        const data = {
-            identifiers: [{ type: 'dns', value: 'nope.com' }]
-        };
-
-        await assert.isRejected(testClient.createOrder(data));
     });
 });

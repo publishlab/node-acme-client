@@ -70,26 +70,15 @@ describe('crypto', () => {
                 s2048: () => crypto.createPrivateRsaKey(),
                 s4096: () => crypto.createPrivateRsaKey(4096)
             },
-            jwkSpecFn: (jwk) => {
-                assert.isObject(jwk);
-                assert.isString(jwk.e);
-                assert.isString(jwk.kty);
-                assert.isString(jwk.n);
-            }
+            jwkSpecFn: spec.jwk.rsa
         },
-        ec: {
+        ecdsa: {
             createKeyFns: {
                 p256: () => crypto.createPrivateEcdsaKey(),
                 p384: () => crypto.createPrivateEcdsaKey('P-384'),
                 p521: () => crypto.createPrivateEcdsaKey('P-521')
             },
-            jwkSpecFn: (jwk) => {
-                assert.isObject(jwk);
-                assert.isString(jwk.crv);
-                assert.isString(jwk.kty);
-                assert.isString(jwk.x);
-                assert.isString(jwk.y);
-            }
+            jwkSpecFn: spec.jwk.ecdsa
         }
     }).forEach(([name, { createKeyFns, jwkSpecFn }]) => {
         describe(name, () => {

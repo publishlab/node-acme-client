@@ -149,3 +149,30 @@ spec.crypto.certificateInfo = (obj) => {
     assert.strictEqual(Object.prototype.toString.call(obj.notBefore), '[object Date]');
     assert.strictEqual(Object.prototype.toString.call(obj.notAfter), '[object Date]');
 };
+
+
+/**
+ * JWK
+ */
+
+spec.jwk = {};
+
+spec.jwk.rsa = (obj) => {
+    assert.isObject(obj);
+    assert.isString(obj.e);
+    assert.isString(obj.kty);
+    assert.isString(obj.n);
+
+    assert.strictEqual(obj.e, 'AQAB');
+    assert.strictEqual(obj.kty, 'RSA');
+};
+
+spec.jwk.ecdsa = (obj) => {
+    assert.isObject(obj);
+    assert.isString(obj.crv);
+    assert.isString(obj.kty);
+    assert.isString(obj.x);
+    assert.isString(obj.y);
+
+    assert.strictEqual(obj.kty, 'EC');
+};

@@ -38,7 +38,7 @@ describe('verify', () => {
      * API
      */
 
-    it('should expose verification API', async () => {
+    it('should expose verification api', async () => {
         assert.containsAllKeys(verify, challengeTypes);
     });
 

@@ -30,12 +30,6 @@ if (capEabEnabled && process.env.ACME_EAB_KID && process.env.ACME_EAB_HMAC_KEY) 
 
 
 describe('client.auto', () => {
-    let testIssuers;
-    let testClient;
-    let testCertificate;
-    let testSanCertificate;
-    let testWildcardCertificate;
-
     const testDomain = `${uuid()}.${domainName}`;
     const testHttpDomain = `${uuid()}.${domainName}`;
     const testDnsDomain = `${uuid()}.${domainName}`;
@@ -60,281 +54,301 @@ describe('client.auto', () => {
 
 
     /**
-     * Fixtures
+     * Key types
      */
 
-    it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
+    Object.entries({
+        rsa: {
+            createKeyFn: () => acme.crypto.createPrivateRsaKey()
+        },
+        ecdsa: {
+            createKeyFn: () => acme.crypto.createPrivateEcdsaKey()
         }
-
-        testIssuers = await getCertIssuers();
-
-        assert.isArray(testIssuers);
-        assert.isTrue(testIssuers.length > 1);
-
-        testIssuers.forEach((i) => {
-            assert.isString(i);
-            assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
-        });
-    });
+    }).forEach(([name, { createKeyFn }]) => {
+        describe(name, () => {
+            let testIssuers;
+            let testClient;
+            let testCertificate;
+            let testSanCertificate;
+            let testWildcardCertificate;
 
 
-    /**
-     * Initialize client
-     */
+            /**
+             * Fixtures
+             */
 
-    it('should initialize client', async () => {
-        const accountKey = await acme.forge.createPrivateKey();
+            it('should resolve certificate issuers [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
 
-        testClient = new acme.Client({
-            ...clientOpts,
-            accountKey
-        });
-    });
+                testIssuers = await getCertIssuers();
 
+                assert.isArray(testIssuers);
+                assert.isTrue(testIssuers.length > 1);
 
-    /**
-     * Invalid challenge response
-     */
-
-    it('should throw on invalid challenge response', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
-        });
-
-        await assert.isRejected(testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeNoopFn,
-            challengeRemoveFn: cts.challengeNoopFn
-        }), /^authorization not found/i);
-    });
-
-    it('should throw on invalid challenge response with opts.skipChallengeVerification=true', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
-        });
-
-        await assert.isRejected(testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            skipChallengeVerification: true,
-            challengeCreateFn: cts.challengeNoopFn,
-            challengeRemoveFn: cts.challengeNoopFn
-        }));
-    });
-
-
-    /**
-     * Challenge function exceptions
-     */
-
-    it('should throw on challengeCreate exception', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
-        });
-
-        await assert.isRejected(testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeThrowFn,
-            challengeRemoveFn: cts.challengeNoopFn
-        }), /^oops$/);
-    });
-
-    it('should not throw on challengeRemove exception', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeThrowFn
-        });
-
-        assert.isString(cert);
-    });
-
-
-    /**
-     * Order certificates
-     */
-
-    it('should order certificate', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: testDomain
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn
-        });
-
-        assert.isString(cert);
-        testCertificate = cert;
-    });
-
-    it('should order certificate using http-01', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: testHttpDomain
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.assertHttpChallengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn,
-            challengePriority: ['http-01']
-        });
-
-        assert.isString(cert);
-    });
-
-    it('should order certificate using dns-01', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: testDnsDomain
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.assertDnsChallengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn,
-            challengePriority: ['dns-01']
-        });
-
-        assert.isString(cert);
-    });
-
-    it('should order SAN certificate', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: testSanDomains[0],
-            altNames: testSanDomains
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn
-        });
-
-        assert.isString(cert);
-        testSanCertificate = cert;
-    });
-
-    it('should order wildcard certificate', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: testWildcardDomain,
-            altNames: [`*.${testWildcardDomain}`]
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn
-        });
-
-        assert.isString(cert);
-        testWildcardCertificate = cert;
-    });
-
-    it('should order certificate with opts.skipChallengeVerification=true', async () => {
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
-        });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            skipChallengeVerification: true,
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn
-        });
-
-        assert.isString(cert);
-    });
-
-    it('should order alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
-        }
-
-        await Promise.all(testIssuers.map(async (issuer) => {
-            const [, csr] = await acme.forge.createCsr({
-                commonName: `${uuid()}.${domainName}`
+                testIssuers.forEach((i) => {
+                    assert.isString(i);
+                    assert.strictEqual(1, testIssuers.filter((c) => (c === i)).length);
+                });
             });
 
-            const cert = await testClient.auto({
-                csr,
-                termsOfServiceAgreed: true,
-                preferredChain: issuer,
-                challengeCreateFn: cts.challengeCreateFn,
-                challengeRemoveFn: cts.challengeRemoveFn
+
+            /**
+             * Initialize client
+             */
+
+            it('should initialize client', async () => {
+                testClient = new acme.Client({
+                    ...clientOpts,
+                    accountKey: await createKeyFn()
+                });
             });
 
-            const rootCert = acme.forge.splitPemChain(cert).pop();
-            const info = await acme.forge.readCertificateInfo(rootCert);
 
-            assert.strictEqual(issuer, info.issuer.commonName);
-        }));
-    });
+            /**
+             * Invalid challenge response
+             */
 
-    it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
-        if (!capAlternateCertRoots) {
-            this.skip();
-        }
+            it('should throw on invalid challenge response', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
 
-        const [, csr] = await acme.forge.createCsr({
-            commonName: `${uuid()}.${domainName}`
+                await assert.isRejected(testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeNoopFn,
+                    challengeRemoveFn: cts.challengeNoopFn
+                }), /^authorization not found/i);
+            });
+
+            it('should throw on invalid challenge response with opts.skipChallengeVerification=true', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
+
+                await assert.isRejected(testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    skipChallengeVerification: true,
+                    challengeCreateFn: cts.challengeNoopFn,
+                    challengeRemoveFn: cts.challengeNoopFn
+                }));
+            });
+
+
+            /**
+             * Challenge function exceptions
+             */
+
+            it('should throw on challengeCreate exception', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
+
+                await assert.isRejected(testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeThrowFn,
+                    challengeRemoveFn: cts.challengeNoopFn
+                }), /^oops$/);
+            });
+
+            it('should not throw on challengeRemove exception', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeThrowFn
+                });
+
+                assert.isString(cert);
+            });
+
+
+            /**
+             * Order certificates
+             */
+
+            it('should order certificate', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testDomain
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn
+                });
+
+                assert.isString(cert);
+                testCertificate = cert;
+            });
+
+            it('should order certificate using http-01', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testHttpDomain
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.assertHttpChallengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn,
+                    challengePriority: ['http-01']
+                });
+
+                assert.isString(cert);
+            });
+
+            it('should order certificate using dns-01', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testDnsDomain
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.assertDnsChallengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn,
+                    challengePriority: ['dns-01']
+                });
+
+                assert.isString(cert);
+            });
+
+            it('should order san certificate', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testSanDomains[0],
+                    altNames: testSanDomains
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn
+                });
+
+                assert.isString(cert);
+                testSanCertificate = cert;
+            });
+
+            it('should order wildcard certificate', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testWildcardDomain,
+                    altNames: [`*.${testWildcardDomain}`]
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn
+                });
+
+                assert.isString(cert);
+                testWildcardCertificate = cert;
+            });
+
+            it('should order certificate with opts.skipChallengeVerification=true', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    skipChallengeVerification: true,
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn
+                });
+
+                assert.isString(cert);
+            });
+
+            it('should order alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
+
+                await Promise.all(testIssuers.map(async (issuer) => {
+                    const [, csr] = await acme.crypto.createCsr({
+                        commonName: `${uuid()}.${domainName}`
+                    }, await createKeyFn());
+
+                    const cert = await testClient.auto({
+                        csr,
+                        termsOfServiceAgreed: true,
+                        preferredChain: issuer,
+                        challengeCreateFn: cts.challengeCreateFn,
+                        challengeRemoveFn: cts.challengeRemoveFn
+                    });
+
+                    const rootCert = acme.crypto.splitPemChain(cert).pop();
+                    const info = acme.crypto.readCertificateInfo(rootCert);
+
+                    assert.strictEqual(issuer, info.issuer.commonName);
+                }));
+            });
+
+            it('should get default chain with invalid preference [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function() {
+                if (!capAlternateCertRoots) {
+                    this.skip();
+                }
+
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    preferredChain: uuid(),
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn
+                });
+
+                const rootCert = acme.crypto.splitPemChain(cert).pop();
+                const info = acme.crypto.readCertificateInfo(rootCert);
+
+                assert.strictEqual(testIssuers[0], info.issuer.commonName);
+            });
+
+
+            /**
+             * Read certificates
+             */
+
+            it('should read certificate info', () => {
+                const info = acme.crypto.readCertificateInfo(testCertificate);
+
+                spec.crypto.certificateInfo(info);
+                assert.strictEqual(info.domains.commonName, testDomain);
+                assert.deepStrictEqual(info.domains.altNames, [testDomain]);
+            });
+
+            it('should read san certificate info', () => {
+                const info = acme.crypto.readCertificateInfo(testSanCertificate);
+
+                spec.crypto.certificateInfo(info);
+                assert.strictEqual(info.domains.commonName, testSanDomains[0]);
+                assert.deepStrictEqual(info.domains.altNames, testSanDomains);
+            });
+
+            it('should read wildcard certificate info', () => {
+                const info = acme.crypto.readCertificateInfo(testWildcardCertificate);
+
+                spec.crypto.certificateInfo(info);
+                assert.strictEqual(info.domains.commonName, testWildcardDomain);
+                assert.deepStrictEqual(info.domains.altNames, [testWildcardDomain, `*.${testWildcardDomain}`]);
+            });
         });
-
-        const cert = await testClient.auto({
-            csr,
-            termsOfServiceAgreed: true,
-            preferredChain: uuid(),
-            challengeCreateFn: cts.challengeCreateFn,
-            challengeRemoveFn: cts.challengeRemoveFn
-        });
-
-        const rootCert = acme.forge.splitPemChain(cert).pop();
-        const info = await acme.forge.readCertificateInfo(rootCert);
-
-        assert.strictEqual(testIssuers[0], info.issuer.commonName);
-    });
-
-
-    /**
-     * Read certificates
-     */
-
-    it('should read certificate info', async () => {
-        const info = await acme.forge.readCertificateInfo(testCertificate);
-
-        spec.crypto.certificateInfo(info);
-        assert.strictEqual(info.domains.commonName, testDomain);
-        assert.deepStrictEqual(info.domains.altNames, [testDomain]);
-    });
-
-    it('should read SAN certificate info', async () => {
-        const info = await acme.forge.readCertificateInfo(testSanCertificate);
-
-        spec.crypto.certificateInfo(info);
-        assert.strictEqual(info.domains.commonName, testSanDomains[0]);
-        assert.deepStrictEqual(info.domains.altNames, testSanDomains);
-    });
-
-    it('should read wildcard certificate info', async () => {
-        const info = await acme.forge.readCertificateInfo(testWildcardCertificate);
-
-        spec.crypto.certificateInfo(info);
-        assert.strictEqual(info.domains.commonName, testWildcardDomain);
-        assert.deepStrictEqual(info.domains.altNames, [testWildcardDomain, `*.${testWildcardDomain}`]);
     });
 });
