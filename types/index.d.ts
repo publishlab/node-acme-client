@@ -132,6 +132,35 @@ export interface CsrOptions {
     emailAddress?: string;
 }
 
+export interface RsaPublicJwk {
+    e: string;
+    kty: string;
+    n: string;
+}
+
+export interface EcdsaPublicJwk {
+    crv: string;
+    kty: string;
+    x: string;
+    y: string;
+}
+
+export interface CryptoInterface {
+    createPrivateKey(keySize?: number): Promise<PrivateKeyBuffer>;
+    createPrivateRsaKey(keySize?: number): Promise<PrivateKeyBuffer>;
+    createPrivateEcdsaKey(namedCurve?: string): Promise<PrivateKeyBuffer>;
+    getPublicKey(keyPem: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString): PublicKeyBuffer;
+    getJwk(keyPem: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString): RsaPublicJwk | EcdsaPublicJwk;
+    splitPemChain(chainPem: CertificateBuffer | CertificateString): string[];
+    getPemBodyAsB64u(pem: CertificateBuffer | CertificateString): string;
+    readCsrDomains(csrPem: CsrBuffer | CsrString): CertificateDomains;
+    readCertificateInfo(certPem: CertificateBuffer | CertificateString): CertificateInfo;
+    createCsr(data: CsrOptions, keyPem?: PrivateKeyBuffer | PrivateKeyString): Promise<[PrivateKeyBuffer, CsrBuffer]>;
+}
+
+export const crypto: CryptoInterface;
+
+/* TODO: LEGACY */
 export interface CryptoLegacyInterface {
     createPrivateKey(size?: number): Promise<PrivateKeyBuffer>;
     createPublicKey(key: PrivateKeyBuffer | PrivateKeyString): Promise<PublicKeyBuffer>;

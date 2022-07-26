@@ -9,6 +9,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 ## v5.0.0
 
+* `added` New native crypto engine, ECC/ECDSA support
 * `changed` Replace `bluebird` dependency with native promise APIs
 * `breaking` Remove support for Node v10
 

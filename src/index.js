@@ -28,6 +28,7 @@ exports.directory = {
  * Crypto
  */
 
+exports.crypto = require('./crypto');
 exports.forge = require('./crypto/forge');
 
 
