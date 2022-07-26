@@ -5,13 +5,13 @@
  */
 
 const { createHash } = require('crypto');
+const { getPemBodyAsB64u } = require('./crypto');
 const { log } = require('./logger');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
 const verify = require('./verify');
 const util = require('./util');
 const auto = require('./auto');
-const forge = require('./crypto/forge');
 
 
 /**
@@ -266,14 +266,14 @@ class AcmeClient {
 
         /* Get new JWK */
         data.account = accountUrl;
-        data.oldKey = await this.http.getJwk();
+        data.oldKey = this.http.getJwk();
 
         /* TODO: Backward-compatibility with draft-ietf-acme-12, remove this in a later release */
-        data.newKey = await newHttpClient.getJwk();
+        data.newKey = newHttpClient.getJwk();
 
         /* Get signed request body from new client */
         const url = await newHttpClient.getResourceUrl('keyChange');
-        const body = await newHttpClient.createSignedRsaBody(url, data);
+        const body = newHttpClient.createSignedRsaBody(url, data);
 
         /* Change key using old client */
         const resp = await this.api.updateAccountKey(body);
@@ -371,9 +371,7 @@ class AcmeClient {
             csr = Buffer.from(csr);
         }
 
-        const body = forge.getPemBody(csr);
-        const data = { csr: util.b64escape(body) };
-
+        const data = { csr: getPemBodyAsB64u(csr) };
         const resp = await this.api.finalizeOrder(order.finalize, data);
 
         /* Add URL to response */
@@ -462,7 +460,7 @@ class AcmeClient {
      */
 
     async getChallengeKeyAuthorization(challenge) {
-        const jwk = await this.http.getJwk();
+        const jwk = this.http.getJwk();
         const keysum = createHash('sha256').update(JSON.stringify(jwk));
         const thumbprint = util.b64escape(keysum.digest('base64'));
         const result = `${challenge.token}.${thumbprint}`;
@@ -674,9 +672,7 @@ class AcmeClient {
      */
 
     async revokeCertificate(cert, data = {}) {
-        const body = forge.getPemBody(cert);
-        data.certificate = util.b64escape(body);
-
+        data.certificate = getPemBodyAsB64u(cert);
         const resp = await this.api.revokeCert(data);
         return resp.data;
     }
@@ -698,7 +694,7 @@ class AcmeClient {
      *
      * @example Order a certificate using auto mode
      * ```js
-     * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+     * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
      *     commonName: 'test.example.com'
      * });
      *
@@ -717,7 +713,7 @@ class AcmeClient {
      *
      * @example Order a certificate using auto mode with preferred chain
      * ```js
-     * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+     * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
      *     commonName: 'test.example.com'
      * });
      *

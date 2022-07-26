@@ -4,8 +4,8 @@
 
 const dns = require('dns').promises;
 const Backoff = require('backo2');
+const { readCertificateInfo, splitPemChain } = require('./crypto');
 const { log } = require('./logger');
-const forge = require('./crypto/forge');
 
 
 /**
@@ -108,14 +108,14 @@ function parseLinkHeader(header, rel = 'alternate') {
  *
  * @param {array} certificates Array of PEM encoded certificate chains
  * @param {string} issuer Preferred certificate issuer
- * @returns {Promise<string>} PEM encoded certificate chain
+ * @returns {string} PEM encoded certificate chain
  */
 
-async function findCertificateChainForIssuer(chains, issuer) {
-    const matches = await Promise.all(chains.map(async (chain) => {
+function findCertificateChainForIssuer(chains, issuer) {
+    const match = chains.find((chain) => {
         /* Look up all issuers */
-        const certs = forge.splitPemChain(chain);
-        const infoCollection = await Promise.all(certs.map(async (c) => forge.readCertificateInfo(c)));
+        const certs = splitPemChain(chain);
+        const infoCollection = certs.map((c) => readCertificateInfo(c));
         const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
 
         /* Found match, return chain */
@@ -127,13 +127,11 @@ async function findCertificateChainForIssuer(chains, issuer) {
         /* No match, return nothing */
         log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
         return null;
-    }));
+    });
 
-    /* Select first non-null and return it */
-    const result = matches.filter((r) => r).shift();
-
-    if (result) {
-        return result;
+    /* Return first non-null */
+    if (match) {
+        return match;
     }
 
     /* No certificates matched, return default */

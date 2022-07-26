@@ -2,8 +2,8 @@
  * ACME auto helper
  */
 
+const { readCsrDomains } = require('./crypto');
 const { log } = require('./logger');
-const forge = require('./crypto/forge');
 
 const defaultOpts = {
     csr: null,
@@ -59,7 +59,7 @@ module.exports = async function(client, userOpts) {
      */
 
     log('[auto] Parsing domains from Certificate Signing Request');
-    const csrDomains = await forge.readCsrDomains(opts.csr);
+    const csrDomains = readCsrDomains(opts.csr);
     const domains = [csrDomains.commonName].concat(csrDomains.altNames);
     const uniqueDomains = Array.from(new Set(domains));
 

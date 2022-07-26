@@ -114,8 +114,8 @@ describe('client', () => {
         });
     });
 
-    it('should produce a valid JWK', async () => {
-        const jwk = await testClient.http.getJwk();
+    it('should produce a valid JWK', () => {
+        const jwk = testClient.http.getJwk();
 
         assert.isObject(jwk);
         assert.strictEqual(jwk.e, 'AQAB');

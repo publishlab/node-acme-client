@@ -20,7 +20,7 @@ async function getPebbleCertIssuers() {
 
     /* Get certificate info */
     const certs = [root].concat(alternates).map((c) => c.data);
-    const info = await Promise.all(certs.map(async (c) => acme.forge.readCertificateInfo(c)));
+    const info = certs.map((c) => acme.crypto.readCertificateInfo(c));
 
     /* Return issuers */
     return info.map((i) => i.issuer.commonName);

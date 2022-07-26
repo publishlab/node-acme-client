@@ -3,10 +3,10 @@
  */
 
 const { createHmac, createSign } = require('crypto');
+const { getJwk } = require('./crypto');
 const { log } = require('./logger');
 const axios = require('./axios');
 const util = require('./util');
-const forge = require('./crypto/forge');
 
 
 /**
@@ -90,22 +90,13 @@ class HttpClient {
     /**
      * Get JSON Web Key
      *
-     * @returns {Promise<object>} {e, kty, n}
+     * @returns {object} JSON Web Key
      */
 
-    async getJwk() {
-        if (this.jwk) {
-            return this.jwk;
+    getJwk() {
+        if (!this.jwk) {
+            this.jwk = getJwk(this.accountKey);
         }
-
-        const exponent = await forge.getPublicExponent(this.accountKey);
-        const modulus = await forge.getModulus(this.accountKey);
-
-        this.jwk = {
-            e: util.b64encode(exponent),
-            kty: 'RSA',
-            n: util.b64encode(modulus)
-        };
 
         return this.jwk;
     }
@@ -176,10 +167,10 @@ class HttpClient {
      * @param {object} [opts]
      * @param {string} [opts.nonce] JWS anti-replay nonce
      * @param {string} [opts.kid] JWS KID
-     * @returns {Promise<object>} Signed HTTP request body
+     * @returns {object} Signed HTTP request body
      */
 
-    async prepareSignedBody(alg, url, payload = null, { nonce = null, kid = null } = {}) {
+    prepareSignedBody(alg, url, payload = null, { nonce = null, kid = null } = {}) {
         const header = { alg, url };
 
         /* Nonce */
@@ -193,7 +184,7 @@ class HttpClient {
             header.kid = kid;
         }
         else {
-            header.jwk = await this.getJwk();
+            header.jwk = this.getJwk();
         }
 
         /* Body */
@@ -213,11 +204,11 @@ class HttpClient {
      * @param {object} [opts]
      * @param {string} [opts.nonce] JWS anti-replay nonce
      * @param {string} [opts.kid] JWS KID
-     * @returns {Promise<object>} Signed HMAC request body
+     * @returns {object} Signed HMAC request body
      */
 
-    async createSignedHmacBody(hmacKey, url, payload = null, { nonce = null, kid = null } = {}) {
-        const result = await this.prepareSignedBody('HS256', url, payload, { nonce, kid });
+    createSignedHmacBody(hmacKey, url, payload = null, { nonce = null, kid = null } = {}) {
+        const result = this.prepareSignedBody('HS256', url, payload, { nonce, kid });
 
         /* Signature */
         const signer = createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
@@ -235,11 +226,11 @@ class HttpClient {
      * @param {object} [opts]
      * @param {string} [opts.nonce] JWS nonce
      * @param {string} [opts.kid] JWS KID
-     * @returns {Promise<object>} Signed RSA request body
+     * @returns {object} Signed RSA request body
      */
 
-    async createSignedRsaBody(url, payload = null, { nonce = null, kid = null } = {}) {
-        const result = await this.prepareSignedBody('RS256', url, payload, { nonce, kid });
+    createSignedRsaBody(url, payload = null, { nonce = null, kid = null } = {}) {
+        const result = this.prepareSignedBody('RS256', url, payload, { nonce, kid });
 
         /* Signature */
         const signer = createSign('RSA-SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
@@ -272,16 +263,16 @@ class HttpClient {
         /* External account binding */
         if (includeExternalAccountBinding && this.externalAccountBinding) {
             if (this.externalAccountBinding.kid && this.externalAccountBinding.hmacKey) {
-                const jwk = await this.getJwk();
+                const jwk = this.getJwk();
                 const eabKid = this.externalAccountBinding.kid;
                 const eabHmacKey = this.externalAccountBinding.hmacKey;
 
-                payload.externalAccountBinding = await this.createSignedHmacBody(eabHmacKey, url, jwk, { kid: eabKid });
+                payload.externalAccountBinding = this.createSignedHmacBody(eabHmacKey, url, jwk, { kid: eabKid });
             }
         }
 
         /* Sign body and send request */
-        const data = await this.createSignedRsaBody(url, payload, { nonce, kid });
+        const data = this.createSignedRsaBody(url, payload, { nonce, kid });
         const resp = await this.request(url, 'post', { data });
 
         /* Retry on bad nonce - https://tools.ietf.org/html/draft-ietf-acme-acme-10#section-6.4 */
