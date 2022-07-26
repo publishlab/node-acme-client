@@ -297,8 +297,9 @@ exports.readCsrDomains = (csrPem) => {
 
 /**
  * Read information from a certificate
+ * If multiple certificates are chained, the first will be read
  *
- * @param {buffer|string} certPem PEM encoded certificate
+ * @param {buffer|string} certPem PEM encoded certificate or chain
  * @returns {object} Certificate info
  *
  * @example Read certificate information
@@ -315,13 +316,15 @@ exports.readCsrDomains = (csrPem) => {
  */
 
 exports.readCertificateInfo = (certPem) => {
-    if (Buffer.isBuffer(certPem)) {
-        certPem = certPem.toString();
+    const chain = splitPemChain(certPem);
+
+    if (!chain.length) {
+        throw new Error('Unable to parse PEM body from string');
     }
 
     /* Parse certificate */
     const obj = new jsrsasign.X509();
-    obj.readCertPEM(certPem);
+    obj.readCertPEM(chain[0]);
     const params = obj.getParam();
 
     return {
