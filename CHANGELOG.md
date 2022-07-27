@@ -7,7 +7,7 @@ On September 15, 2022, Let's Encrypt will stop accepting Certificate Signing Req
 A more detailed explanation can be found [at the Let's Encrypt forums](https://community.letsencrypt.org/t/rejecting-sha-1-csrs-and-validation-using-tls-1-0-1-1-urls/175144).
 
 
-## v5.0.0
+## v5.0.0 (2022-07-28)
 
 * [Upgrade guide here](docs/upgrade-v5.md)
 * `added` New native crypto interface, ECC/ECDSA support
