@@ -12,6 +12,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 * [Upgrade guide here](docs/upgrade-v5.md)
 * `added` New native crypto interface, ECC/ECDSA support
 * `breaking` Remove support for Node v10, v12 and v14
+* `breaking` Prioritize issuer closest to root during preferred chain selection - [#46](https://github.com/publishlab/node-acme-client/issues/46)
 * `changed` Replace `bluebird` dependency with native promise APIs
 * `changed` Replace `backo2` dependency with internal utility
 

@@ -108,8 +108,9 @@ function parseLinkHeader(header, rel = 'alternate') {
 
 
 /**
- * Find certificate chain with preferred issuer
- * If issuer can not be located, the first certificate will be returned
+ * Find certificate chain with preferred issuer common name
+ *  - If issuer is found in multiple chains, the closest to root wins
+ *  - If issuer can not be located, the first chain will be returned
  *
  * @param {array} certificates Array of PEM encoded certificate chains
  * @param {string} issuer Preferred certificate issuer
@@ -117,29 +118,40 @@ function parseLinkHeader(header, rel = 'alternate') {
  */
 
 function findCertificateChainForIssuer(chains, issuer) {
-    const match = chains.find((chain) => {
+    log(`Attempting to find match for issuer="${issuer}" in ${chains.length} certificate chains`);
+    let bestMatch = null;
+    let bestDistance = null;
+
+    chains.forEach((chain) => {
         /* Look up all issuers */
         const certs = splitPemChain(chain);
         const infoCollection = certs.map((c) => readCertificateInfo(c));
         const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
 
-        /* Found match, return chain */
+        /* Found issuer match, get distance from root - lower is better */
         if (issuerCollection.includes(issuer)) {
-            log(`Found matching certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
-            return chain;
-        }
+            const distance = (issuerCollection.length - issuerCollection.indexOf(issuer));
+            log(`Found matching chain for preferred issuer="${issuer}" distance=${distance} issuers=${JSON.stringify(issuerCollection)}`);
 
-        /* No match, return nothing */
-        log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
-        return null;
+            /* Chain wins, use it */
+            if (!bestDistance || (distance < bestDistance)) {
+                log(`Issuer is closer to root than previous match, using it (${distance} < ${bestDistance || 'undefined'})`);
+                bestMatch = chain;
+                bestDistance = distance;
+            }
+        }
+        else {
+            /* No match */
+            log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
+        }
     });
 
-    /* Return first non-null */
-    if (match) {
-        return match;
+    /* Return found match */
+    if (bestMatch) {
+        return bestMatch;
     }
 
-    /* No certificates matched, return default */
+    /* No chains matched, return default */
     log(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
     return chains[0];
 }
