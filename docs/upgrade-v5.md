@@ -1,6 +1,6 @@
 # Upgrading to v5 of `acme-client`
 
-Hello. This document outlines the breaking changes introduced in v5 of `acme-client`, why they were introduced and what you should look out for when upgrading your application.
+This document outlines the breaking changes introduced in v5 of `acme-client`, why they were introduced and what you should look out for when upgrading your application.
 
 First off this release drops support for Node LTS v10, v12 and v14, and the reason for that is a new native crypto interface - more on that below. Since Node v14 is still currently in maintenance mode, `acme-client` v4 will continue to receive security updates and bugfixes until (at least) Node v14 reaches its end-of-line.
 

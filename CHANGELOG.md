@@ -2,17 +2,18 @@
 
 ## Important upgrade notice
 
-On September 15, 2022, Let's Encrypt will stop accepting Certificate Signing Requests signed using the obsolete SHA-1 hash. This change affects all `node-acme-client` versions lower than `3.3.2` and `4.2.4`. Please upgrade ASAP to ensure that your certificates can still be issued following this date.
+On September 15, 2022, Let's Encrypt will stop accepting Certificate Signing Requests signed using the obsolete SHA-1 hash. This change affects all `acme-client` versions lower than `3.3.2` and `4.2.4`. Please upgrade ASAP to ensure that your certificates can still be issued following this date.
 
 A more detailed explanation can be found [at the Let's Encrypt forums](https://community.letsencrypt.org/t/rejecting-sha-1-csrs-and-validation-using-tls-1-0-1-1-urls/175144).
 
 
 ## v5.0.0
 
+* [Upgrade guide here](docs/upgrade-v5.md)
 * `added` New native crypto interface, ECC/ECDSA support
+* `breaking` Remove support for Node v10, v12 and v14
 * `changed` Replace `bluebird` dependency with native promise APIs
 * `changed` Replace `backo2` dependency with internal utility
-* `breaking` Remove support for Node v10, v12 and v14
 
 
 ## v4.2.5 (2022-03-21)
