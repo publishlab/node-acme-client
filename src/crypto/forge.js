@@ -1,7 +1,7 @@
 /**
- * Legacy node-forge crypto engine
+ * Legacy node-forge crypto interface
  *
- * DEPRECATION WARNING: This crypto engine is deprecated and will be removed from acme-client in a future
+ * DEPRECATION WARNING: This crypto interface is deprecated and will be removed from acme-client in a future
  * major release. Please migrate to the new `acme.crypto` interface at your earliest convenience.
  *
  * @namespace forge

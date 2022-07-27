@@ -17,13 +17,13 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 ### Compatibility
 
-| acme-client   | Node.js   |                                       |
-| ------------- | --------- | ------------------------------------- |
-| v5.x          | >= v16    | [Upgrade guide](docs/upgrade-v5.md)   |
-| v4.x          | >= v10    |                                       |
-| v3.x          | >= v8     |                                       |
-| v2.x          | >= v4     |                                       |
-| v1.x          | >= v4     |                                       |
+| acme-client   | Node.js   |                                           |
+| ------------- | --------- | ----------------------------------------- |
+| v5.x          | >= v16    | [Upgrade guide](docs/upgrade-v5.md)       |
+| v4.x          | >= v10    | [Changelog](CHANGELOG.md#v400-2020-05-29) |
+| v3.x          | >= v8     | [Changelog](CHANGELOG.md#v300-2019-07-13) |
+| v2.x          | >= v4     | [Changelog](CHANGELOG.md#v200-2018-04-02) |
+| v1.x          | >= v4     | [Changelog](CHANGELOG.md#v100-2017-10-20) |
 
 
 ### Table of contents
@@ -34,6 +34,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
     * [External account binding](#external-account-binding)
     * [Specifying the account URL](#specifying-the-account-url)
 * [Cryptography](#cryptography)
+    * [Legacy .forge interface](#legacy-forge-interface)
 * [Auto mode](#auto-mode)
     * [Challenge priority](#challenge-priority)
     * [Internal challenge verification](#internal-challenge-verification)
@@ -116,35 +117,38 @@ const myAccountUrl = client.getAccountUrl();
 
 ## Cryptography
 
-For key pair generation and Certificate Signing Requests, `acme-client` uses [node-forge](https://www.npmjs.com/package/node-forge), a pure JavaScript implementation of the TLS protocol.
+For key pairs `acme-client` utilizes native Node.js cryptography APIs, supporting signing and generation of both RSA and ECDSA keys. The module [jsrsasign](https://www.npmjs.com/package/jsrsasign) is used to generate and parse Certificate Signing Requests.
 
-These utility methods are exposed through `.forge`.
+These utility methods are exposed through `.crypto`.
 
-__API documentation: [docs/forge.md](docs/forge.md)__
-
-
-#### Example
+* __Documentation: [docs/crypto.md](docs/crypto.md)__
 
 ```js
-const privateKey = await acme.forge.createPrivateKey();
+const privateRsaKey = await acme.crypto.createPrivateRsaKey();
+const privateEcdsaKey = await acme.crypto.createPrivateEcdsaKey();
 
-const [certificateKey, certificateCsr] = await acme.forge.createCsr({
+const [certificateKey, certificateCsr] = await acme.crypto.createCsr({
     commonName: '*.example.com',
     altNames: ['example.com']
 });
 ```
 
 
+### Legacy `.forge` interface
+
+The legacy `node-forge` crypto interface is still available for backwards compatibility, however this interface is now considered deprecated and will be removed in a future major version of `acme-client`.
+
+You should consider migrating to the new `.crypto` API at your earliest convenience. More details can be found in the [acme-client v5 upgrade guide](docs/upgrade-v5.md).
+
+* __Documentation: [docs/forge.md](docs/forge.md)__
+
+
 ## Auto mode
 
 For convenience an `auto()` method is included in the client that takes a single config object. This method will handle the entire process of getting a certificate for one or multiple domains.
 
-A full example can be found at [examples/auto.js](examples/auto.js).
-
-__Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)__
-
-
-#### Example
+* __Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)__
+* __Full example: [examples/auto.js](examples/auto.js)__
 
 ```js
 const autoOpts = {
@@ -195,12 +199,8 @@ await client.auto({
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
 
-A full example can be found at [examples/api.js](examples/api.js).
-
-__API documentation: [docs/client.md](docs/client.md)__
-
-
-#### Example
+* __Documentation: [docs/client.md](docs/client.md)__
+* __Full example: [examples/api.js](examples/api.js)__
 
 ```js
 const account = await client.createAccount({

@@ -478,7 +478,7 @@ Auto mode
 **Example**  
 Order a certificate using auto mode
 ```js
-const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
     commonName: 'test.example.com'
 });
 
@@ -497,7 +497,7 @@ const certificate = await client.auto({
 **Example**  
 Order a certificate using auto mode with preferred chain
 ```js
-const [certificateKey, certificateRequest] = await acme.forge.createCsr({
+const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
     commonName: 'test.example.com'
 });
 

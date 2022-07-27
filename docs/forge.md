@@ -2,7 +2,9 @@
 
 <dl>
 <dt><a href="#forge">forge</a> : <code>object</code></dt>
-<dd><p>node-forge crypto engine</p>
+<dd><p>Legacy node-forge crypto interface</p>
+<p>DEPRECATION WARNING: This crypto interface is deprecated and will be removed from acme-client in a future
+major release. Please migrate to the new <code>acme.crypto</code> interface at your earliest convenience.</p>
 </dd>
 </dl>
 
@@ -16,7 +18,7 @@
 <dd><p>Create public key from a private RSA key</p>
 </dd>
 <dt><a href="#getPemBody">getPemBody(str)</a> ⇒ <code>string</code></dt>
-<dd><p>Parse body of PEM encoded object form buffer or string
+<dd><p>Parse body of PEM encoded object from buffer or string
 If multiple objects are chained, the first body will be returned</p>
 </dd>
 <dt><a href="#splitPemChain">splitPemChain(str)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
@@ -42,7 +44,10 @@ If multiple objects are chained, the first body will be returned</p>
 <a name="forge"></a>
 
 ## forge : <code>object</code>
-node-forge crypto engine
+Legacy node-forge crypto interface
+
+DEPRECATION WARNING: This crypto interface is deprecated and will be removed from acme-client in a future
+major release. Please migrate to the new `acme.crypto` interface at your earliest convenience.
 
 **Kind**: global namespace  
 <a name="createPrivateKey"></a>
@@ -87,7 +92,7 @@ const publicKey = await acme.forge.createPublicKey(privateKey);
 <a name="getPemBody"></a>
 
 ## getPemBody(str) ⇒ <code>string</code>
-Parse body of PEM encoded object form buffer or string
+Parse body of PEM encoded object from buffer or string
 If multiple objects are chained, the first body will be returned
 
 **Kind**: global function  

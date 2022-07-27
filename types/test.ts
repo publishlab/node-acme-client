@@ -7,7 +7,7 @@ import * as acme from 'acme-client';
 
 (async () => {
     /* Client */
-    const accountKey = await acme.forge.createPrivateKey();
+    const accountKey = await acme.crypto.createPrivateKey();
 
     const client = new acme.Client({
         accountKey,
@@ -41,7 +41,7 @@ import * as acme from 'acme-client';
     await client.waitForValidStatus(challenge);
 
     /* Finalize */
-    const [certKey, certCsr] = await acme.forge.createCsr({
+    const [certKey, certCsr] = await acme.crypto.createCsr({
         commonName: 'example.com',
         altNames: ['example.com', '*.example.com']
     });

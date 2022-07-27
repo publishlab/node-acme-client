@@ -148,7 +148,7 @@ export interface EcdsaPublicJwk {
 export interface CryptoInterface {
     createPrivateKey(keySize?: number): Promise<PrivateKeyBuffer>;
     createPrivateRsaKey(keySize?: number): Promise<PrivateKeyBuffer>;
-    createPrivateEcdsaKey(namedCurve?: string): Promise<PrivateKeyBuffer>;
+    createPrivateEcdsaKey(namedCurve?: 'P-256' | 'P-384' | 'P-521'): Promise<PrivateKeyBuffer>;
     getPublicKey(keyPem: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString): PublicKeyBuffer;
     getJwk(keyPem: PrivateKeyBuffer | PrivateKeyString | PublicKeyBuffer | PublicKeyString): RsaPublicJwk | EcdsaPublicJwk;
     splitPemChain(chainPem: CertificateBuffer | CertificateString): string[];

@@ -9,7 +9,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 ## v5.0.0
 
-* `added` New native crypto engine, ECC/ECDSA support
+* `added` New native crypto interface, ECC/ECDSA support
 * `changed` Replace `bluebird` dependency with native promise APIs
 * `breaking` Remove support for Node v10, v12 and v14
 
@@ -174,7 +174,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 ## v2.2.0 (2018-11-06)
 
-* `added` New [node-forge](https://www.npmjs.com/package/node-forge) crypto engine, removes OpenSSL CLI dependency
+* `added` New [node-forge](https://www.npmjs.com/package/node-forge) crypto interface, removes OpenSSL CLI dependency
 * `added` Support native `crypto.generateKeyPair()` API when generating key pairs
 
 

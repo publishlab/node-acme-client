@@ -1,5 +1,5 @@
 /**
- * Native Node.js crypto engine
+ * Native Node.js crypto interface
  *
  * @namespace crypto
  */
@@ -74,13 +74,21 @@ async function createPrivateRsaKey(modulusLength = 2048) {
 }
 
 exports.createPrivateRsaKey = createPrivateRsaKey;
+
+
+/**
+ * Alias of `createPrivateRsaKey()`
+ *
+ * @function
+ */
+
 exports.createPrivateKey = createPrivateRsaKey;
 
 
 /**
  * Generate a private ECDSA key
  *
- * @param {string} [namedCurve] ECDSA curve name, default `P-256`
+ * @param {string} [namedCurve] ECDSA curve name (P-256, P-384 or P-521), default `P-256`
  * @returns {Promise<buffer>} PEM encoded private ECDSA key
  *
  * @example Generate private ECDSA key
