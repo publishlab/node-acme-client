@@ -136,7 +136,7 @@ const [certificateKey, certificateCsr] = await acme.crypto.createCsr({
 
 ### Legacy `.forge` interface
 
-The legacy `node-forge` crypto interface is still available for backwards compatibility, however this interface is now considered deprecated and will be removed in a future major version of `acme-client`.
+The legacy `node-forge` crypto interface is still available for backward compatibility, however this interface is now considered deprecated and will be removed in a future major version of `acme-client`.
 
 You should consider migrating to the new `.crypto` API at your earliest convenience. More details can be found in the [acme-client v5 upgrade guide](docs/upgrade-v5.md).
 

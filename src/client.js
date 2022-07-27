@@ -264,12 +264,9 @@ class AcmeClient {
         const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey);
         const newApiClient = new AcmeApi(newHttpClient, accountUrl);
 
-        /* Get new JWK */
+        /* Get old JWK */
         data.account = accountUrl;
         data.oldKey = this.http.getJwk();
-
-        /* TODO: Backward-compatibility with draft-ietf-acme-12, remove this in a later release */
-        data.newKey = newHttpClient.getJwk();
 
         /* Get signed request body from new client */
         const url = await newHttpClient.getResourceUrl('keyChange');
