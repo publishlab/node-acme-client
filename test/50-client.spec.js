@@ -55,13 +55,21 @@ describe('client', () => {
     Object.entries({
         rsa: {
             createKeyFn: () => acme.crypto.createPrivateRsaKey(),
+            createKeyAltFns: {
+                s1024: () => acme.crypto.createPrivateRsaKey(1024),
+                s4096: () => acme.crypto.createPrivateRsaKey(4096)
+            },
             jwkSpecFn: spec.jwk.rsa
         },
         ecdsa: {
             createKeyFn: () => acme.crypto.createPrivateEcdsaKey(),
+            createKeyAltFns: {
+                p384: () => acme.crypto.createPrivateEcdsaKey('P-384'),
+                p521: () => acme.crypto.createPrivateEcdsaKey('P-521')
+            },
             jwkSpecFn: spec.jwk.ecdsa
         }
-    }).forEach(([name, { createKeyFn, jwkSpecFn }]) => {
+    }).forEach(([name, { createKeyFn, createKeyAltFns, jwkSpecFn }]) => {
         describe(name, () => {
             let testIssuers;
             let testAccountKey;
@@ -199,6 +207,27 @@ describe('client', () => {
             it('should produce an account url', () => {
                 testAccountUrl = testClient.getAccountUrl();
                 assert.isString(testAccountUrl);
+            });
+
+
+            /**
+             * Create account with alternate key sizes
+             */
+
+            Object.entries(createKeyAltFns).forEach(([k, altKeyFn]) => {
+                it(`should create account with key=${k}`, async () => {
+                    const client = new acme.Client({
+                        ...clientOpts,
+                        accountKey: await altKeyFn()
+                    });
+
+                    const account = await client.createAccount({
+                        termsOfServiceAgreed: true
+                    });
+
+                    spec.rfc8555.account(account);
+                    assert.strictEqual(account.status, 'valid');
+                });
             });
 
 

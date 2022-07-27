@@ -59,12 +59,20 @@ describe('client.auto', () => {
 
     Object.entries({
         rsa: {
-            createKeyFn: () => acme.crypto.createPrivateRsaKey()
+            createKeyFn: () => acme.crypto.createPrivateRsaKey(),
+            createKeyAltFns: {
+                s1024: () => acme.crypto.createPrivateRsaKey(1024),
+                s4096: () => acme.crypto.createPrivateRsaKey(4096)
+            }
         },
         ecdsa: {
-            createKeyFn: () => acme.crypto.createPrivateEcdsaKey()
+            createKeyFn: () => acme.crypto.createPrivateEcdsaKey(),
+            createKeyAltFns: {
+                p384: () => acme.crypto.createPrivateEcdsaKey('P-384'),
+                p521: () => acme.crypto.createPrivateEcdsaKey('P-521')
+            }
         }
-    }).forEach(([name, { createKeyFn }]) => {
+    }).forEach(([name, { createKeyFn, createKeyAltFns }]) => {
         describe(name, () => {
             let testIssuers;
             let testClient;
@@ -319,6 +327,28 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(rootCert);
 
                 assert.strictEqual(testIssuers[0], info.issuer.commonName);
+            });
+
+
+            /**
+             * Order certificate with alternate key sizes
+             */
+
+            Object.entries(createKeyAltFns).forEach(([k, altKeyFn]) => {
+                it(`should order certificate with key=${k}`, async () => {
+                    const [, csr] = await acme.crypto.createCsr({
+                        commonName: testDomain
+                    }, await altKeyFn());
+
+                    const cert = await testClient.auto({
+                        csr,
+                        termsOfServiceAgreed: true,
+                        challengeCreateFn: cts.challengeCreateFn,
+                        challengeRemoveFn: cts.challengeRemoveFn
+                    });
+
+                    assert.isString(cert);
+                });
             });
 
 

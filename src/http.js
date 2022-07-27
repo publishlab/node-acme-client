@@ -196,7 +196,7 @@ class HttpClient {
 
 
     /**
-     * Create signed HMAC HTTP request body
+     * Create JWS HTTP request body using HMAC
      *
      * @param {string} hmacKey HMAC key
      * @param {string} url Request URL
@@ -219,10 +219,9 @@ class HttpClient {
 
 
     /**
-     * Create JWS HTTP request body using RS256 or ES256
+     * Create JWS HTTP request body using RSA or ECC
      *
      * https://datatracker.ietf.org/doc/html/rfc7515
-     * https://stackoverflow.com/questions/39554165
      *
      * @param {string} url Request URL
      * @param {object} [payload] Request payload
@@ -234,13 +233,28 @@ class HttpClient {
 
     createSignedBody(url, payload = null, { nonce = null, kid = null } = {}) {
         const jwk = this.getJwk();
-        const alg = (jwk.kty === 'EC') ? 'ES256' : 'RS256';
+        let headerAlg = 'RS256';
+        let signerAlg = 'SHA256';
+
+        /* https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
+        if (jwk.crv && (jwk.kty === 'EC')) {
+            headerAlg = 'ES256';
+
+            if (jwk.crv === 'P-384') {
+                headerAlg = 'ES384';
+                signerAlg = 'SHA384';
+            }
+            else if (jwk.crv === 'P-521') {
+                headerAlg = 'ES512';
+                signerAlg = 'SHA512';
+            }
+        }
 
         /* Prepare body and signer */
-        const result = this.prepareSignedBody(alg, url, payload, { nonce, kid });
-        const signer = createSign('SHA256').update(`${result.protected}.${result.payload}`, 'utf8');
+        const result = this.prepareSignedBody(headerAlg, url, payload, { nonce, kid });
+        const signer = createSign(signerAlg).update(`${result.protected}.${result.payload}`, 'utf8');
 
-        /* Signature */
+        /* Signature - https://stackoverflow.com/questions/39554165 */
         result.signature = util.b64encode(signer.sign({
             key: this.accountKey,
             padding: RSA_PKCS1_PADDING,
