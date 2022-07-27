@@ -6,7 +6,6 @@ const { createHmac, createSign, constants: { RSA_PKCS1_PADDING } } = require('cr
 const { getJwk } = require('./crypto');
 const { log } = require('./logger');
 const axios = require('./axios');
-const util = require('./util');
 
 
 /**
@@ -189,8 +188,8 @@ class HttpClient {
 
         /* Body */
         return {
-            payload: payload ? util.b64encode(JSON.stringify(payload)) : '',
-            protected: util.b64encode(JSON.stringify(header))
+            payload: payload ? Buffer.from(JSON.stringify(payload)).toString('base64url') : '',
+            protected: Buffer.from(JSON.stringify(header)).toString('base64url')
         };
     }
 
@@ -212,7 +211,7 @@ class HttpClient {
 
         /* Signature */
         const signer = createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
-        result.signature = util.b64encode(signer.digest());
+        result.signature = signer.digest().toString('base64url');
 
         return result;
     }
@@ -255,11 +254,11 @@ class HttpClient {
         const signer = createSign(signerAlg).update(`${result.protected}.${result.payload}`, 'utf8');
 
         /* Signature - https://stackoverflow.com/questions/39554165 */
-        result.signature = util.b64encode(signer.sign({
+        result.signature = signer.sign({
             key: this.accountKey,
             padding: RSA_PKCS1_PADDING,
             dsaEncoding: 'ieee-p1363'
-        }));
+        }, 'base64url');
 
         return result;
     }

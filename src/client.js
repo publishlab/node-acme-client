@@ -462,7 +462,7 @@ class AcmeClient {
     async getChallengeKeyAuthorization(challenge) {
         const jwk = this.http.getJwk();
         const keysum = createHash('sha256').update(JSON.stringify(jwk));
-        const thumbprint = util.b64escape(keysum.digest('base64'));
+        const thumbprint = keysum.digest('base64url');
         const result = `${challenge.token}.${thumbprint}`;
 
         /**
@@ -480,7 +480,7 @@ class AcmeClient {
 
         if ((challenge.type === 'dns-01') || (challenge.type === 'tls-alpn-01')) {
             const shasum = createHash('sha256').update(result);
-            return util.b64escape(shasum.digest('base64'));
+            return shasum.digest('base64url');
         }
 
         throw new Error(`Unable to produce key authorization, unknown challenge type: ${challenge.type}`);

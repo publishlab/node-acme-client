@@ -56,33 +56,6 @@ function retry(fn, { attempts = 5, min = 5000, max = 30000 } = {}) {
 
 
 /**
- * Escape base64 encoded string
- *
- * @param {string} str Base64 encoded string
- * @returns {string} Escaped string
- */
-
-function b64escape(str) {
-    return str.replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=/g, '');
-}
-
-
-/**
- * Base64 encode and escape buffer or string
- *
- * @param {buffer|string} str Buffer or string to be encoded
- * @returns {string} Escaped base64 encoded string
- */
-
-function b64encode(str) {
-    const buf = Buffer.isBuffer(str) ? str : Buffer.from(str);
-    return b64escape(buf.toString('base64'));
-}
-
-
-/**
  * Parse URLs from link header
  *
  * @param {string} header Link header contents
@@ -234,8 +207,6 @@ async function getAuthoritativeDnsResolver(recordName) {
 
 module.exports = {
     retry,
-    b64escape,
-    b64encode,
     parseLinkHeader,
     findCertificateChainForIssuer,
     formatResponseError,
