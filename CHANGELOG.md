@@ -11,6 +11,7 @@ A more detailed explanation can be found [at the Let's Encrypt forums](https://c
 
 * `added` New native crypto interface, ECC/ECDSA support
 * `changed` Replace `bluebird` dependency with native promise APIs
+* `changed` Replace `backo2` dependency with internal utility
 * `breaking` Remove support for Node v10, v12 and v14
 
 

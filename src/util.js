@@ -3,9 +3,41 @@
  */
 
 const dns = require('dns').promises;
-const Backoff = require('backo2');
 const { readCertificateInfo, splitPemChain } = require('./crypto');
 const { log } = require('./logger');
+
+
+/**
+ * Exponential backoff
+ *
+ * https://github.com/mokesmokes/backo
+ *
+ * @class
+ * @param {object} [opts]
+ * @param {number} [opts.min] Minimum backoff duration in ms
+ * @param {number} [opts.max] Maximum backoff duration in ms
+ */
+
+class Backoff {
+    constructor({ min = 100, max = 10000 } = {}) {
+        this.min = min;
+        this.max = max;
+        this.attempts = 0;
+    }
+
+
+    /**
+     * Get backoff duration
+     *
+     * @returns {number} Backoff duration in ms
+     */
+
+    duration() {
+        const ms = this.min * (2 ** this.attempts);
+        this.attempts += 1;
+        return Math.min(ms, this.max);
+    }
+}
 
 
 /**
