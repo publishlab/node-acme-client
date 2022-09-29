@@ -5,6 +5,7 @@
 const dns = require('dns').promises;
 const { log } = require('./logger');
 const axios = require('./axios');
+const https = require('https');
 const util = require('./util');
 
 
@@ -24,8 +25,11 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
     const httpPort = axios.defaults.acmeSettings.httpChallengePort || 80;
     const challengeUrl = `http://${authz.identifier.value}:${httpPort}${suffix}`;
 
+    // http-01 challenge responses may redirect to https ports with self-signed or otherwise invalid certificates.
+    const httpsAgent = new https.Agent({rejectUnauthorized: false});
+
     log(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}, port: ${httpPort}`);
-    const resp = await axios.get(challengeUrl);
+    const resp = await axios.get(challengeUrl, {httpsAgent});
     const data = (resp.data || '').replace(/\s+$/, '');
 
     log(`Query successful, HTTP status code: ${resp.status}`);
