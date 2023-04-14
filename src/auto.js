@@ -2,8 +2,8 @@
  * ACME auto helper
  */
 
-const { readCsrDomains } = require('./crypto');
-const { log } = require('./logger');
+const { readCsrDomains } = require('./crypto/index.js');
+const { log } = require('./logger.js');
 
 const defaultOpts = {
     csr: null,

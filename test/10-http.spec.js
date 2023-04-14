@@ -5,8 +5,8 @@
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
 const nock = require('nock');
-const axios = require('./../src/axios');
-const HttpClient = require('./../src/http');
+const axios = require('./../src/axios.js');
+const HttpClient = require('./../src/http.js');
 const pkg = require('./../package.json');
 
 

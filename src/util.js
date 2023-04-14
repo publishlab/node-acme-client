@@ -3,8 +3,8 @@
  */
 
 const dns = require('dns').promises;
-const { readCertificateInfo, splitPemChain } = require('./crypto');
-const { log } = require('./logger');
+const { readCertificateInfo, splitPemChain } = require('./crypto/index.js');
+const { log } = require('./logger.js');
 
 
 /**

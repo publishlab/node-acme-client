@@ -5,8 +5,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { assert } = require('chai');
-const spec = require('./spec');
-const { crypto } = require('./../');
+const spec = require('./spec.js');
+const { crypto } = require('../src/index.js');
 
 const emptyBodyChain1 = `
 -----BEGIN TEST-----

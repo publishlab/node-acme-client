@@ -2,7 +2,7 @@
  * acme-client
  */
 
-exports.Client = require('./client');
+exports.Client = require('./client.js');
 
 
 /**
@@ -28,19 +28,19 @@ exports.directory = {
  * Crypto
  */
 
-exports.crypto = require('./crypto');
-exports.forge = require('./crypto/forge');
+exports.crypto = require('./crypto/index.js');
+exports.forge = require('./crypto/forge.js');
 
 
 /**
  * Axios
  */
 
-exports.axios = require('./axios');
+exports.axios = require('./axios.js');
 
 
 /**
  * Logger
  */
 
-exports.setLogger = require('./logger').setLogger;
+exports.setLogger = require('./logger.js').setLogger;

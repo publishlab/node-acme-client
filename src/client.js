@@ -5,13 +5,13 @@
  */
 
 const { createHash } = require('crypto');
-const { getPemBodyAsB64u } = require('./crypto');
-const { log } = require('./logger');
-const HttpClient = require('./http');
-const AcmeApi = require('./api');
-const verify = require('./verify');
-const util = require('./util');
-const auto = require('./auto');
+const { getPemBodyAsB64u } = require('./crypto/index.js');
+const { log } = require('./logger.js');
+const HttpClient = require('./http.js');
+const AcmeApi = require('./api.js');
+const verify = require('./verify.js');
+const util = require('./util.js');
+const auto = require('./auto.js');
 
 
 /**

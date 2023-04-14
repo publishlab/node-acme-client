@@ -5,8 +5,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { assert } = require('chai');
-const spec = require('./spec');
-const forge = require('./../src/crypto/forge');
+const spec = require('./spec.js');
+const forge = require('./../src/crypto/forge.js');
 
 const cryptoEngines = {
     forge
