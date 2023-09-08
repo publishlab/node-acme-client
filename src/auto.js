@@ -166,7 +166,9 @@ module.exports = async function(client, userOpts) {
     });
 
     log('[auto] Waiting for challenge valid status');
-    await Promise.all(challengePromises);
+    await Promise.allSettled(challengePromises);
+    const rejected = challengePromises.find((p) => p.status === 'rejected');
+    if (rejected) throw rejected.reason;
 
 
     /**
