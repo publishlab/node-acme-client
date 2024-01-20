@@ -30,8 +30,7 @@
         "jsdoc-to-markdown": "^7.1.1",
         "mocha": "^10.0.0",
         "nock": "^13.2.4",
-        "tsd": "^0.30.4",
-        "uuid": "^8.3.2"
+        "tsd": "^0.30.4"
     },
     "scripts": {
         "build-docs": "jsdoc2md src/client.js > docs/client.md && jsdoc2md src/crypto/index.js > docs/crypto.md && jsdoc2md src/crypto/forge.js > docs/forge.md",
