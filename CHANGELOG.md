@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.1.0
+
+* `fixed` Upgrade `jsrsasign@11.0.0` - [GHSA-rh63-9qcf-83gf](https://github.com/kjur/jsrsasign/security/advisories/GHSA-rh63-9qcf-83gf)
+
 ## v5.0.0 (2022-07-28)
 
 * [Upgrade guide here](docs/upgrade-v5.md)
