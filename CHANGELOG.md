@@ -1,6 +1,6 @@
 # Changelog
 
-## v5.1.0
+## v5.1.0 (2024-01-20)
 
 * `fixed` Upgrade `jsrsasign@11.0.0` - [GHSA-rh63-9qcf-83gf](https://github.com/kjur/jsrsasign/security/advisories/GHSA-rh63-9qcf-83gf)
 * `fixed` Upgrade `axios@1.6.5` - [CVE-2023-45857](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2023-45857)
