@@ -15,7 +15,7 @@
         "types"
     ],
     "dependencies": {
-        "axios": "0.27.2",
+        "axios": "^1.6.5",
         "debug": "^4.1.1",
         "jsrsasign": "^11.0.0",
         "node-forge": "^1.3.1"
