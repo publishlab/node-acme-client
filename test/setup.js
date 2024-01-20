@@ -8,7 +8,7 @@ const fs = require('fs');
 const dns = require('dns').promises;
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const axios = require('./../src/axios');
+const axios = require('../src/axios.js');
 
 
 /**

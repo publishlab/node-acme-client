@@ -21,3 +21,4 @@ rules:
   no-multiple-empty-lines: [2, { max: 2, maxBOF: 0, maxEOF: 0 }]
   prefer-object-spread: 0
   import/no-useless-path-segments: 0
+  import/extensions: [2, 'always']

@@ -4,8 +4,8 @@
 
 const { assert } = require('chai');
 const { v4: uuid } = require('uuid');
-const cts = require('./challtestsrv');
-const verify = require('./../src/verify');
+const cts = require('./challtestsrv.js');
+const verify = require('./../src/verify.js');
 
 const domainName = process.env.ACME_DOMAIN_NAME || 'example.com';
 

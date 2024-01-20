@@ -2,8 +2,8 @@
  * Get ACME certificate issuers
  */
 
-const acme = require('./../');
-const util = require('./../src/util');
+const acme = require('../src/index.js');
+const util = require('../src/util.js');
 
 const pebbleManagementUrl = process.env.ACME_PEBBLE_MANAGEMENT_URL || null;
 

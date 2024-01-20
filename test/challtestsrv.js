@@ -3,7 +3,7 @@
  */
 
 const { assert } = require('chai');
-const axios = require('./../src/axios');
+const axios = require('../src/axios.js');
 
 const apiBaseUrl = process.env.ACME_CHALLTESTSRV_URL || null;
 

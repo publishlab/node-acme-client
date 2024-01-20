@@ -3,7 +3,7 @@
  */
 
 const { assert } = require('chai');
-const logger = require('./../src/logger');
+const logger = require('./../src/logger.js');
 
 
 describe('logger', () => {

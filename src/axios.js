@@ -3,7 +3,7 @@
  */
 
 const axios = require('axios');
-const adapter = require('axios/lib/adapters/http');
+const adapter = require('axios/lib/adapters/http.js');
 const pkg = require('./../package.json');
 
 

@@ -2,7 +2,7 @@
  * ACME API client
  */
 
-const util = require('./util');
+const util = require('./util.js');
 
 
 /**

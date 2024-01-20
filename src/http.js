@@ -3,9 +3,9 @@
  */
 
 const { createHmac, createSign, constants: { RSA_PKCS1_PADDING } } = require('crypto');
-const { getJwk } = require('./crypto');
-const { log } = require('./logger');
-const axios = require('./axios');
+const { getJwk } = require('./crypto/index.js');
+const { log } = require('./logger.js');
+const axios = require('./axios.js');
 
 
 /**

@@ -3,9 +3,9 @@
  */
 
 const dns = require('dns').promises;
-const { log } = require('./logger');
-const axios = require('./axios');
-const util = require('./util');
+const { log } = require('./logger.js');
+const axios = require('./axios.js');
+const util = require('./util.js');
 
 
 /**
