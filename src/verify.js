@@ -25,7 +25,7 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
     const httpPort = axios.defaults.acmeSettings.httpChallengePort || 80;
     const challengeUrl = `http://${authz.identifier.value}:${httpPort}${suffix}`;
 
-    // http-01 challenge responses may redirect to https ports with self-signed or otherwise invalid certificates.
+    /* May redirect to HTTPS with invalid/self-signed cert - https://letsencrypt.org/docs/challenge-types/#http-01-challenge */
     const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
     log(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}, port: ${httpPort}`);

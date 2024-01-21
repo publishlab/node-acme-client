@@ -32,6 +32,7 @@ if (capEabEnabled && process.env.ACME_EAB_KID && process.env.ACME_EAB_HMAC_KEY) 
 describe('client.auto', () => {
     const testDomain = `${uuid()}.${domainName}`;
     const testHttpDomain = `${uuid()}.${domainName}`;
+    const testHttpsDomain = `${uuid()}.${domainName}`;
     const testDnsDomain = `${uuid()}.${domainName}`;
     const testWildcardDomain = `${uuid()}.${domainName}`;
 
@@ -208,6 +209,22 @@ describe('client.auto', () => {
                     csr,
                     termsOfServiceAgreed: true,
                     challengeCreateFn: cts.assertHttpChallengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn,
+                    challengePriority: ['http-01']
+                });
+
+                assert.isString(cert);
+            });
+
+            it('should order certificate using https-01', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testHttpsDomain
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: cts.assertHttpsChallengeCreateFn,
                     challengeRemoveFn: cts.challengeRemoveFn,
                     challengePriority: ['http-01']
                 });

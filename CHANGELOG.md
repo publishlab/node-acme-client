@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.2.0
+
+* `fixed` Allow self-signed or invalid certs when validating `http-01` challenges that redirect to HTTPS [#66](https://github.com/publishlab/node-acme-client/pull/66)
+
 ## v5.1.0 (2024-01-20)
 
 * `fixed` Upgrade `jsrsasign@11.0.0` - [GHSA-rh63-9qcf-83gf](https://github.com/kjur/jsrsasign/security/advisories/GHSA-rh63-9qcf-83gf)
