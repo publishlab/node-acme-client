@@ -17,7 +17,8 @@ instance.defaults.headers.common['User-Agent'] = `node-${pkg.name}/${pkg.version
 
 /* Default ACME settings */
 instance.defaults.acmeSettings = {
-    httpChallengePort: 80
+    httpChallengePort: 80,
+    httpsChallengePort: 443
 };
 
 

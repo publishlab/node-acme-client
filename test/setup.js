@@ -16,11 +16,15 @@ chai.use(chaiAsPromised);
 
 
 /**
- * HTTP challenge port
+ * Challenge test server ports
  */
 
 if (process.env.ACME_HTTP_PORT) {
     axios.defaults.acmeSettings.httpChallengePort = process.env.ACME_HTTP_PORT;
+}
+
+if (process.env.ACME_HTTPS_PORT) {
+    axios.defaults.acmeSettings.httpsChallengePort = process.env.ACME_HTTPS_PORT;
 }
 
 
