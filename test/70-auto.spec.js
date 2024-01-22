@@ -179,6 +179,38 @@ describe('client.auto', () => {
                 assert.isString(cert);
             });
 
+            it('should settle all challenges before rejecting', async () => {
+                const results = [];
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`,
+                    altNames: [
+                        `${uuid()}.${domainName}`,
+                        `${uuid()}.${domainName}`,
+                        `${uuid()}.${domainName}`,
+                        `${uuid()}.${domainName}`
+                    ]
+                }, await createKeyFn());
+
+                await assert.isRejected(testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    challengeCreateFn: async (...args) => {
+                        if ([0, 1, 2].includes(results.length)) {
+                            results.push(false);
+                            throw new Error('oops');
+                        }
+
+                        await new Promise((resolve) => { setTimeout(resolve, 500); });
+                        results.push(true);
+                        return cts.challengeCreateFn(...args);
+                    },
+                    challengeRemoveFn: cts.challengeRemoveFn
+                }));
+
+                assert.strictEqual(results.length, 5);
+                assert.deepStrictEqual(results, [false, false, false, true, true]);
+            });
+
 
             /**
              * Order certificates

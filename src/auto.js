@@ -165,8 +165,13 @@ module.exports = async function(client, userOpts) {
         }
     });
 
-    log('[auto] Waiting for challenge valid status');
+
+    /**
+     * Wait for all challenge promises to settle
+     */
+
     try {
+        log('[auto] Waiting for challenge valid status');
         await Promise.all(challengePromises);
     }
     catch (e) {
