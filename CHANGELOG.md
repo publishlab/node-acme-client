@@ -1,6 +1,6 @@
 # Changelog
 
-## v5.2.0
+## v5.2.0 (2024-01-22)
 
 * `fixed` Allow self-signed or invalid certs when validating `http-01` challenges that redirect to HTTPS - [#65](https://github.com/publishlab/node-acme-client/issues/65)
 * `fixed` Wait for all challenge promises to settle before rejecting `client.auto()` - [#75](https://github.com/publishlab/node-acme-client/issues/75)
