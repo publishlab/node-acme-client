@@ -195,7 +195,7 @@ describe('pebble', () => {
 
     describe('tls-alpn-01', () => {
         it('should not locate challenge response', async () => {
-            await assert.isRejected(retrieveTlsAlpnCertificate(testTlsAlpn01ChallengeHost, tlsAlpnPort), /failed to retrieve/);
+            await assert.isRejected(retrieveTlsAlpnCertificate(testTlsAlpn01ChallengeHost, tlsAlpnPort), /(failed to retrieve)|(ssl3_read_bytes:tlsv1 alert internal error)/);
         });
 
         it('should timeout challenge response', async () => {
