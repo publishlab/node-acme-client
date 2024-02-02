@@ -41,7 +41,7 @@ class AcmeApi {
      * @private
      * @param {string} url Request URL
      * @param {object} [payload] Request payload, default: `null`
-     * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
+     * @param {number[]} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
      * @param {object} [opts]
      * @param {boolean} [opts.includeJwsKid] Include KID instead of JWK in JWS header, default: `true`
      * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request, default: `false`
@@ -66,7 +66,7 @@ class AcmeApi {
      * @private
      * @param {string} resource Request resource name
      * @param {object} [payload] Request payload, default: `null`
-     * @param {array} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
+     * @param {number[]} [validStatusCodes] Array of valid HTTP response status codes, default: `[]`
      * @param {object} [opts]
      * @param {boolean} [opts.includeJwsKid] Include KID instead of JWK in JWS header, default: `true`
      * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request, default: `false`

@@ -551,7 +551,7 @@ class AcmeClient {
      * await client.waitForValidStatus(challenge);
      * ```
      *
-     * @example Wait for valid authoriation status
+     * @example Wait for valid authorization status
      * ```js
      * const authz = { ... };
      * await client.waitForValidStatus(authz);

@@ -220,7 +220,7 @@ async function getWebCryptoKeyPair(keyPem) {
  * Split chain of PEM encoded objects from string into array
  *
  * @param {buffer|string} chainPem PEM encoded object chain
- * @returns {array} Array of PEM objects including headers
+ * @returns {string[]} Array of PEM objects including headers
  */
 
 function splitPemChain(chainPem) {
@@ -416,7 +416,7 @@ function createSubjectAltNameExtension(altNames) {
  * @param {object} data
  * @param {number} [data.keySize] Size of newly created RSA private key modulus in bits, default: `2048`
  * @param {string} [data.commonName] FQDN of your server
- * @param {array} [data.altNames] SAN (Subject Alternative Names), default: `[]`
+ * @param {string[]} [data.altNames] SAN (Subject Alternative Names), default: `[]`
  * @param {string} [data.country] 2 letter country code
  * @param {string} [data.state] State or province
  * @param {string} [data.locality] City
