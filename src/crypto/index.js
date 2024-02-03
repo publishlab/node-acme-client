@@ -350,7 +350,7 @@ exports.readCertificateInfo = (certPem) => {
 /**
  * Determine ASN.1 character string type for CSR subject field name
  *
- * https://tools.ietf.org/html/rfc5280
+ * https://datatracker.ietf.org/doc/html/rfc5280
  * https://github.com/PeculiarVentures/x509/blob/ecf78224fd594abbc2fa83c41565d79874f88e00/src/name.ts#L65-L71
  *
  * @private
@@ -517,7 +517,7 @@ exports.createCsr = async (data, keyPem = null) => {
 /**
  * Create a self-signed ALPN certificate for TLS-ALPN-01 challenges
  *
- * https://tools.ietf.org/html/rfc8737
+ * https://datatracker.ietf.org/doc/html/rfc8737
  *
  * @param {object} authz Identifier authorization
  * @param {string} keyAuthorization Challenge key authorization

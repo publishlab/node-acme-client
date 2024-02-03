@@ -281,7 +281,7 @@ exports.readCertificateInfo = async function(cert) {
 
 /**
  * Determine ASN.1 type for CSR subject short name
- * Note: https://tools.ietf.org/html/rfc5280
+ * Note: https://datatracker.ietf.org/doc/html/rfc5280
  *
  * @private
  * @param {string} shortName CSR subject short name
