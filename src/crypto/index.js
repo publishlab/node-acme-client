@@ -476,23 +476,21 @@ exports.createCsr = async (data, keyPem = null) => {
         data.altNames = [];
     }
 
-    /* CryptoKeyPair and signing algorithm from private key */
-    const [keys, signingAlgorithm] = await getWebCryptoKeyPair(keyPem);
-
-    const extensions = [
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3 */
-        new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyEncipherment) // eslint-disable-line no-bitwise
-    ];
-
     /* Ensure subject common name is present in SAN - https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf */
     if (data.commonName && !data.altNames.includes(data.commonName)) {
         data.altNames.unshift(data.commonName);
     }
 
-    /* SAN extension */
-    if (data.altNames.length) {
-        extensions.push(createSubjectAltNameExtension(data.altNames));
-    }
+    /* CryptoKeyPair and signing algorithm from private key */
+    const [keys, signingAlgorithm] = await getWebCryptoKeyPair(keyPem);
+
+    const extensions = [
+        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3 */
+        new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyEncipherment), // eslint-disable-line no-bitwise
+
+        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
+        createSubjectAltNameExtension(data.altNames)
+    ];
 
     /* Create CSR */
     const csr = await x509.Pkcs10CertificateRequestGenerator.create({
@@ -563,7 +561,10 @@ exports.createAlpnCertificate = async (authz, keyAuthorization, keyPem = null) =
         new x509.BasicConstraintsExtension(true, 2, true),
 
         /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.2 */
-        await x509.SubjectKeyIdentifierExtension.create(keys.publicKey)
+        await x509.SubjectKeyIdentifierExtension.create(keys.publicKey),
+
+        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
+        createSubjectAltNameExtension([commonName])
     ];
 
     /* ALPN extension */
