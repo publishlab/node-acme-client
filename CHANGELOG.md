@@ -3,6 +3,7 @@
 ## v5.3.0
 
 * `added` Support and tests for satisfying `tls-alpn-01` challenges
+* `changed` Replace `jsrsasign` with `@peculiar/x509` for certificate and CSR generation and parsing
 * `changed` Method `getChallengeKeyAuthorization()` now returns `$token.$thumbprint` when called with a `tls-alpn-01` challenge
     * Previously returned base64url encoded SHA256 digest of `$token.$thumbprint` erroneously
     * This change is not considered breaking since the previous behavior was incorrect

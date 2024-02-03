@@ -102,7 +102,7 @@ const myAccountUrl = client.getAccountUrl();
 
 ## Cryptography
 
-For key pairs `acme-client` utilizes native Node.js cryptography APIs, supporting signing and generation of both RSA and ECDSA keys. The module [jsrsasign](https://www.npmjs.com/package/jsrsasign) is used to generate and parse Certificate Signing Requests.
+For key pairs `acme-client` utilizes native Node.js cryptography APIs, supporting signing and generation of both RSA and ECDSA keys. The module [@peculiar/x509](https://www.npmjs.com/package/@peculiar/x509) is used to generate and parse Certificate Signing Requests.
 
 These utility methods are exposed through `.crypto`.
 
