@@ -80,7 +80,7 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
 
         /* Replace this */
         log(`Would remove TXT record "${dnsRecord}" with value "${recordValue}"`);
-        // await dnsProvider.removeRecord(dnsRecord, 'TXT');
+        // await dnsProvider.removeRecord(dnsRecord, 'TXT', recordValue);
     }
 }
 
