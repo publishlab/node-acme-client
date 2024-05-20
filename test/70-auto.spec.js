@@ -425,7 +425,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.isNull(info.domains.commonName);
+                assert.strictEqual(info.domains.commonName, testDomain);
                 assert.deepStrictEqual(info.domains.altNames, [testDomain]);
             });
 
@@ -433,7 +433,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testSanCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.isNull(info.domains.commonName);
+                assert.strictEqual(info.domains.commonName, testSanDomains[0]);
                 assert.deepStrictEqual(info.domains.altNames, testSanDomains);
             });
 
@@ -441,7 +441,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testWildcardCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.isNull(info.domains.commonName);
+                assert.strictEqual(info.domains.commonName, testWildcardDomain);
                 assert.deepStrictEqual(info.domains.altNames, [testWildcardDomain, `*.${testWildcardDomain}`]);
             });
         });

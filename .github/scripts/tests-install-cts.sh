@@ -5,10 +5,8 @@
 set -euo pipefail
 
 # Download and install
-wget -nv "https://github.com/letsencrypt/pebble/releases/download/v${PEBBLECTS_VERSION}/pebble-challtestsrv-linux-amd64.tar.gz" -O /tmp/pebble-challtestsrv.tar.gz
-tar zxvf /tmp/pebble-challtestsrv.tar.gz -C /tmp
+wget -nv "https://github.com/letsencrypt/pebble/releases/download/v${PEBBLECTS_VERSION}/pebble-challtestsrv_linux-amd64" -O /usr/local/bin/pebble-challtestsrv
 
-mv /tmp/pebble-challtestsrv-linux-amd64/linux/amd64/pebble-challtestsrv /usr/local/bin/pebble-challtestsrv
 chown root:root /usr/local/bin/pebble-challtestsrv
 chmod 0755 /usr/local/bin/pebble-challtestsrv
 
