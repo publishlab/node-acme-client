@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.3.1
+
+* `fixed` Bug when calling `updateAccountKey()` with external account binding
+
 ## v5.3.0 (2024-02-05)
 
 * `added` Support and tests for satisfying `tls-alpn-01` challenges
