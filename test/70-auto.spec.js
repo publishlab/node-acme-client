@@ -299,7 +299,6 @@ describe('client.auto', () => {
 
             it('should order san certificate', async () => {
                 const [, csr] = await acme.crypto.createCsr({
-                    commonName: testSanDomains[0],
                     altNames: testSanDomains
                 }, await createKeyFn());
 
@@ -426,7 +425,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.strictEqual(info.domains.commonName, testDomain);
+                assert.isNull(info.domains.commonName);
                 assert.deepStrictEqual(info.domains.altNames, [testDomain]);
             });
 
@@ -434,7 +433,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testSanCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.strictEqual(info.domains.commonName, testSanDomains[0]);
+                assert.isNull(info.domains.commonName);
                 assert.deepStrictEqual(info.domains.altNames, testSanDomains);
             });
 
@@ -442,7 +441,7 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(testWildcardCertificate);
 
                 spec.crypto.certificateInfo(info);
-                assert.strictEqual(info.domains.commonName, testWildcardDomain);
+                assert.isNull(info.domains.commonName);
                 assert.deepStrictEqual(info.domains.altNames, [testWildcardDomain, `*.${testWildcardDomain}`]);
             });
         });
