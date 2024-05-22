@@ -517,6 +517,7 @@ exports.createCsr = async (data, keyPem = null) => {
  * ```js
  * const alpnKey = await acme.crypto.createPrivateEcdsaKey();
  * const [, alpnCertificate] = await acme.crypto.createAlpnCertificate(authz, keyAuthorization, alpnKey);
+ * ```
  */
 
 exports.createAlpnCertificate = async (authz, keyAuthorization, keyPem = null) => {

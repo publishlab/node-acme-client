@@ -299,6 +299,7 @@ Create a ALPN certificate with ECDSA private key
 ```js
 const alpnKey = await acme.crypto.createPrivateEcdsaKey();
 const [, alpnCertificate] = await acme.crypto.createAlpnCertificate(authz, keyAuthorization, alpnKey);
+```
 <a name="isAlpnCertificateAuthorizationValid"></a>
 
 ## isAlpnCertificateAuthorizationValid(certPem, keyAuthorization) ⇒ <code>boolean</code>
