@@ -273,6 +273,7 @@ const certificateKey = await acme.crypto.createPrivateEcdsaKey();
 const [, certificateRequest] = await acme.crypto.createCsr({
     altNames: ['test.example.com'],
 }, certificateKey);
+```
 <a name="createAlpnCertificate"></a>
 
 ## createAlpnCertificate(authz, keyAuthorization, [keyPem]) ⇒ <code>Promise.&lt;Array.&lt;buffer&gt;&gt;</code>

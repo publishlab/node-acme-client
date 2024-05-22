@@ -447,6 +447,7 @@ function createSubjectAltNameExtension(altNames) {
  * const [, certificateRequest] = await acme.crypto.createCsr({
  *     altNames: ['test.example.com'],
  * }, certificateKey);
+ * ```
  */
 
 exports.createCsr = async (data, keyPem = null) => {
