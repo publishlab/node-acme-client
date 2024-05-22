@@ -413,11 +413,12 @@ function createSubjectAltNameExtension(altNames) {
  * @example Create a Certificate Signing Request
  * ```js
  * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
- *     commonName: 'test.example.com',
+ *     altNames: ['test.example.com'],
  * });
  * ```
  *
  * @example Certificate Signing Request with both common and alternative names
+ * > *Warning*: Certificate subject common name has been [deprecated](https://letsencrypt.org/docs/glossary/#def-CN) and its use is [discouraged](https://cabforum.org/uploads/BRv1.2.3.pdf).
  * ```js
  * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
  *     keySize: 4096,
@@ -429,7 +430,7 @@ function createSubjectAltNameExtension(altNames) {
  * @example Certificate Signing Request with additional information
  * ```js
  * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
- *     commonName: 'test.example.com',
+ *     altNames: ['test.example.com'],
  *     country: 'US',
  *     state: 'California',
  *     locality: 'Los Angeles',
@@ -444,7 +445,7 @@ function createSubjectAltNameExtension(altNames) {
  * const certificateKey = await acme.crypto.createPrivateEcdsaKey();
  *
  * const [, certificateRequest] = await acme.crypto.createCsr({
- *     commonName: 'test.example.com',
+ *     altNames: ['test.example.com'],
  * }, certificateKey);
  */
 

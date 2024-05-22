@@ -113,8 +113,7 @@ const privateRsaKey = await acme.crypto.createPrivateRsaKey();
 const privateEcdsaKey = await acme.crypto.createPrivateEcdsaKey();
 
 const [certificateKey, certificateCsr] = await acme.crypto.createCsr({
-    commonName: '*.example.com',
-    altNames: ['example.com'],
+    altNames: ['example.com', '*.example.com'],
 });
 ```
 

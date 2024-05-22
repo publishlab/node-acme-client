@@ -666,7 +666,7 @@ class AcmeClient {
      * @example Order a certificate using auto mode
      * ```js
      * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
-     *     commonName: 'test.example.com',
+     *     altNames: ['test.example.com'],
      * });
      *
      * const certificate = await client.auto({
@@ -685,7 +685,7 @@ class AcmeClient {
      * @example Order a certificate using auto mode with preferred chain
      * ```js
      * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
-     *     commonName: 'test.example.com',
+     *     altNames: ['test.example.com'],
      * });
      *
      * const certificate = await client.auto({
