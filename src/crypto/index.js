@@ -413,7 +413,7 @@ function createSubjectAltNameExtension(altNames) {
  * @example Create a Certificate Signing Request
  * ```js
  * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
- *     commonName: 'test.example.com'
+ *     commonName: 'test.example.com',
  * });
  * ```
  *
@@ -422,7 +422,7 @@ function createSubjectAltNameExtension(altNames) {
  * const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
  *     keySize: 4096,
  *     commonName: 'test.example.com',
- *     altNames: ['foo.example.com', 'bar.example.com']
+ *     altNames: ['foo.example.com', 'bar.example.com'],
  * });
  * ```
  *
@@ -435,7 +435,7 @@ function createSubjectAltNameExtension(altNames) {
  *     locality: 'Los Angeles',
  *     organization: 'The Company Inc.',
  *     organizationUnit: 'IT Department',
- *     emailAddress: 'contact@example.com'
+ *     emailAddress: 'contact@example.com',
  * });
  * ```
  *
@@ -444,7 +444,7 @@ function createSubjectAltNameExtension(altNames) {
  * const certificateKey = await acme.crypto.createPrivateEcdsaKey();
  *
  * const [, certificateRequest] = await acme.crypto.createCsr({
- *     commonName: 'test.example.com'
+ *     commonName: 'test.example.com',
  * }, certificateKey);
  */
 

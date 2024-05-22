@@ -342,7 +342,7 @@ function formatCsrAltNames(altNames) {
  * @example Create a Certificate Signing Request
  * ```js
  * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
- *     commonName: 'test.example.com'
+ *     commonName: 'test.example.com',
  * });
  * ```
  *
@@ -351,7 +351,7 @@ function formatCsrAltNames(altNames) {
  * const [certificateKey, certificateRequest] = await acme.forge.createCsr({
  *     keySize: 4096,
  *     commonName: 'test.example.com',
- *     altNames: ['foo.example.com', 'bar.example.com']
+ *     altNames: ['foo.example.com', 'bar.example.com'],
  * });
  * ```
  *
@@ -364,7 +364,7 @@ function formatCsrAltNames(altNames) {
  *     locality: 'Los Angeles',
  *     organization: 'The Company Inc.',
  *     organizationUnit: 'IT Department',
- *     emailAddress: 'contact@example.com'
+ *     emailAddress: 'contact@example.com',
  * });
  * ```
  *
@@ -373,7 +373,7 @@ function formatCsrAltNames(altNames) {
  * const certificateKey = await acme.forge.createPrivateKey();
  *
  * const [, certificateRequest] = await acme.forge.createCsr({
- *     commonName: 'test.example.com'
+ *     commonName: 'test.example.com',
  * }, certificateKey);
  */
 
