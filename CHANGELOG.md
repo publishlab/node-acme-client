@@ -1,5 +1,9 @@
 # Changelog
 
+## v5.4.0
+
+* `added` Directory URLs for [Google](https://cloud.google.com/certificate-manager/docs/overview) ACME provider
+
 ## v5.3.1 (2024-05-22)
 
 * `fixed` Allow `client.auto()` being called with an empty CSR common name
