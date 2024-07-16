@@ -44,12 +44,14 @@ export interface Order {
     notAfter?: string;
     error?: object;
     certificate?: string;
+    replaces?: string;
 }
 
 export interface OrderCreateRequest {
     identifiers: Identifier[];
     notBefore?: string;
     notAfter?: string;
+    replaces?: string;
 }
 
 /**
@@ -120,4 +122,20 @@ export enum CertificateRevocationReason {
 
 export interface CertificateRevocationRequest {
     reason?: CertificateRevocationReason;
+}
+
+/**
+ * Certificate ACME Renewal Information (ARI)
+ *
+ * https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari
+ */
+
+export interface CertificateRenewalWindow {
+    start: string;
+    end: string;
+}
+
+export interface CertificateRenewalInfo {
+    suggestedWindow: CertificateRenewalWindow;
+    explanationURL?: string;
 }

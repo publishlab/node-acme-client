@@ -529,6 +529,34 @@ describe('client', () => {
             });
 
             /**
+             * Certificate ACME Renewal Information (ARI)
+             */
+
+            it('should get certificate ari', async () => {
+                await Promise.all([testCertificate, testCertificateAlpn, testCertificateWildcard].map(async (cert) => {
+                    const id = acme.crypto.getAriCertificateId(cert);
+                    const info = await testClient.getCertificateRenewalInfo(id);
+
+                    assert.isObject(info);
+                    assert.isObject(info.suggestedWindow);
+                    assert.isString(info.suggestedWindow.start);
+                    assert.isString(info.suggestedWindow.end);
+                }));
+            });
+
+            it('should order certificate renewal using ari', async () => {
+                const id = acme.crypto.getAriCertificateId(testCertificate);
+                const order = await testClient.createOrder({
+                    identifiers: [{ type: 'dns', value: testDomain }],
+                    replaces: id,
+                });
+
+                spec.rfc8555.order(order);
+                assert.isString(order.replaces);
+                assert.strictEqual(order.replaces, id);
+            });
+
+            /**
              * Revoke certificate
              */
 

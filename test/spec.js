@@ -69,6 +69,10 @@ spec.rfc8555.order = (obj) => {
         assert.isString(obj.certificate);
     }
 
+    if ('replaces' in obj) {
+        assert.isString(obj.replaces);
+    }
+
     /* Augmentations */
     assert.isString(obj.url);
 };

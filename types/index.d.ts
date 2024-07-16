@@ -75,6 +75,7 @@ export class Client {
     waitForValidStatus<T = Order | Authorization | rfc8555.Challenge>(item: T): Promise<T>;
     getCertificate(order: Order, preferredChain?: string): Promise<string>;
     revokeCertificate(cert: CertificateBuffer | CertificateString, data?: rfc8555.CertificateRevocationRequest): Promise<void>;
+    getCertificateRenewalInfo(certId: string): Promise<rfc8555.CertificateRenewalInfo>;
     auto(opts: ClientAutoOptions): Promise<string>;
 }
 

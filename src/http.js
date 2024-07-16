@@ -160,6 +160,24 @@ class HttpClient {
     }
 
     /**
+     * Determine if provider supports ACME Renewal Information (ARI)
+     *
+     * https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari#section-3
+     *
+     * @returns {Promise<boolean>} Provider supports ARI
+     */
+
+    async hasAriSupport() {
+        try {
+            await this.getResourceUrl('renewalInfo');
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    /**
      * Prepare HTTP request body for signature
      *
      * @param {string} alg JWS algorithm

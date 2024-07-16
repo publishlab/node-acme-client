@@ -650,6 +650,33 @@ class AcmeClient {
     }
 
     /**
+     * Get certificate ACME Renewal Information (ARI)
+     *
+     * https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari#section-4.2
+     *
+     * @param {string} certId ARI certificate identifier
+     * @returns {Promise<object>} Certificate Renewal Information
+     *
+     * @example Get certificate renewal information
+     * ```js
+     * const certificate = { ... }; // Previously created certificate
+     * const certId = acme.crypto.getAriCertificateId(certificate);
+     * const renewalInfo = await client.getCertificateRenewalInfo(certId);
+     * ```
+     */
+
+    async getCertificateRenewalInfo(certId) {
+        const isSupported = await this.http.hasAriSupport();
+
+        if (!isSupported) {
+            throw new Error('This ACME provider does not support ACME Renewal Information (ARI)');
+        }
+
+        const resp = await this.api.getCertRenewalInfo(certId);
+        return resp.data;
+    }
+
+    /**
      * Auto mode
      *
      * @param {object} opts

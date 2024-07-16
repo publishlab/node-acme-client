@@ -228,6 +228,26 @@ class AcmeApi {
     revokeCert(data) {
         return this.apiResourceRequest('revokeCert', data, [200]);
     }
+
+    /**
+     * Get certificate ACME Renewal Information (ARI)
+     *
+     * https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari#section-4.2
+     *
+     * @param {string} certId ARI certificate identifier
+     * @returns {Promise<object>} HTTP response
+     */
+
+    async getCertRenewalInfo(certId) {
+        const url = await this.http.getResourceUrl('renewalInfo');
+        const resp = await this.http.request(`${url}/${certId}`, 'GET');
+
+        if (resp.status !== 200) {
+            throw new Error(util.formatResponseError(resp));
+        }
+
+        return resp;
+    }
 }
 
 /* Export API */
