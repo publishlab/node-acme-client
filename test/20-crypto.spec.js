@@ -56,6 +56,7 @@ describe('crypto', () => {
     const testKeyPath = path.join(__dirname, 'fixtures', 'private.key');
     const testCertPath = path.join(__dirname, 'fixtures', 'certificate.crt');
     const testSanCertPath = path.join(__dirname, 'fixtures', 'san-certificate.crt');
+    const testAriCertPath = path.join(__dirname, 'fixtures', 'letsencrypt.crt');
 
     /**
      * Key types
@@ -272,6 +273,28 @@ describe('crypto', () => {
 
                 it(`${n}/should validate valid alpn certificate with cert as string`, () => {
                     assert.isTrue(crypto.isAlpnCertificateAuthorizationValid(testAlpnCertificate.toString(), 'super-secret.12345'));
+                });
+
+                /**
+                 * ACME Renewal Information (ARI)
+                 */
+
+                it(`${n}/should generate certificate ari id`, async () => {
+                    const cert = await fs.readFile(testAriCertPath);
+                    const ari = crypto.getAriCertificateId(cert);
+                    assert.isString(ari);
+                    assert.isNotEmpty(ari);
+                });
+
+                it(`${n}/should generate certificate ari id with cert as string`, async () => {
+                    const cert = await fs.readFile(testAriCertPath);
+                    const ari = crypto.getAriCertificateId(cert.toString());
+                    assert.isString(ari);
+                    assert.isNotEmpty(ari);
+                });
+
+                it(`${n}/should throw with missing aki extension`, async () => {
+                    assert.throws(() => crypto.getAriCertificateId(testAlpnCertificate));
                 });
             });
         });

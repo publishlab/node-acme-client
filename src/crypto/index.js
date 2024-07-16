@@ -19,6 +19,9 @@ x509.cryptoProvider.set(crypto.webcrypto);
 /* id-ce-subjectAltName - https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
 const subjectAltNameOID = '2.5.29.17';
 
+/* id-ce-authorityKeyIdentifier - https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.1 */
+const authorityKeyIdentifierOID = '2.5.29.35';
+
 /* id-pe-acmeIdentifier - https://datatracker.ietf.org/doc/html/rfc8737#section-6.1 */
 const alpnAcmeIdentifierOID = '1.3.6.1.5.5.7.1.31';
 
@@ -601,4 +604,35 @@ exports.isAlpnCertificateAuthorizationValid = (certPem, keyAuthorization) => {
 
     /* Return true if match */
     return (result === expected);
+};
+
+/**
+ * Get certificate identifier used for ACME Renewal Information (ARI)
+ *
+ * https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari#section-4.1
+ *
+ * @param {buffer|string} certPem PEM encoded certificate
+ * @returns {string} Certificate ARI
+ */
+
+exports.getAriCertificateId = (certPem) => {
+    if (Buffer.isBuffer(certPem)) {
+        certPem = certPem.toString();
+    }
+
+    const dec = x509.PemConverter.decodeFirst(certPem);
+    const cert = new x509.X509Certificate(dec);
+
+    /* Attempt to locate AKI extension */
+    const ext = cert.getExtension(authorityKeyIdentifierOID);
+
+    if (!ext || !ext.keyId) {
+        throw new Error('Unable to locate Authority Key Identifier extension within parsed certificate');
+    }
+
+    /* Values as b64u */
+    const aki = Buffer.from(ext.keyId, 'hex').toString('base64url');
+    const serial = Buffer.from(cert.serialNumber, 'hex').toString('base64url');
+
+    return `${aki}.${serial}`;
 };
