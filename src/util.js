@@ -106,6 +106,37 @@ function parseLinkHeader(header, rel = 'alternate') {
 }
 
 /**
+ * Parse date or duration from Retry-After header
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+ *
+ * @param {string} header Header contents
+ * @returns {number} Retry duration in seconds
+ */
+
+function parseRetryAfterHeader(header) {
+    const sec = parseInt(header, 10);
+    const date = new Date(header);
+
+    /* Seconds into the future */
+    if (Number.isSafeInteger(sec) && (sec > 0)) {
+        return sec;
+    }
+
+    /* Future date string */
+    if (date instanceof Date && !Number.isNaN(date)) {
+        const now = new Date();
+        const diff = Math.ceil((date.getTime() - now.getTime()) / 1000);
+
+        if (diff > 0) {
+            return diff;
+        }
+    }
+
+    return 0;
+}
+
+/**
  * Find certificate chain with preferred issuer common name
  *  - If issuer is found in multiple chains, the closest to root wins
  *  - If issuer can not be located, the first chain will be returned
@@ -301,6 +332,7 @@ async function retrieveTlsAlpnCertificate(host, port, timeout = 30000) {
 module.exports = {
     retry,
     parseLinkHeader,
+    parseRetryAfterHeader,
     findCertificateChainForIssuer,
     formatResponseError,
     getAuthoritativeDnsResolver,

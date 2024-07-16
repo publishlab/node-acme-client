@@ -64,6 +64,31 @@ describe('util', () => {
         assert.strictEqual(r4[2], 'https://example.com/c');
     });
 
+    it('parseRetryAfterHeader()', () => {
+        const r1 = util.parseRetryAfterHeader('');
+        assert.strictEqual(r1, 0);
+
+        const r2 = util.parseRetryAfterHeader('abcdef');
+        assert.strictEqual(r2, 0);
+
+        const r3 = util.parseRetryAfterHeader('123');
+        assert.strictEqual(r3, 123);
+
+        const r4 = util.parseRetryAfterHeader('123.456');
+        assert.strictEqual(r4, 123);
+
+        const r5 = util.parseRetryAfterHeader('-555');
+        assert.strictEqual(r5, 0);
+
+        const r6 = util.parseRetryAfterHeader('Wed, 21 Oct 2015 07:28:00 GMT');
+        assert.strictEqual(r6, 0);
+
+        const now = new Date();
+        const future = new Date(now.getTime() + 123000);
+        const r7 = util.parseRetryAfterHeader(future.toUTCString());
+        assert.isTrue(r7 > 100);
+    });
+
     it('findCertificateChainForIssuer()', async () => {
         const certs = [
             (await fs.readFile(testCertPath1)).toString(),

@@ -111,7 +111,7 @@ class HttpClient {
      *
      * https://datatracker.ietf.org/doc/html/rfc8555#section-7.2
      *
-     * @returns {Promise<string>} nonce
+     * @returns {Promise<string>} Nonce
      */
 
     async getNonce() {

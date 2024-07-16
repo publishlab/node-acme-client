@@ -4,6 +4,7 @@
 
 * `added` Directory URLs for [Google](https://cloud.google.com/certificate-manager/docs/overview) ACME provider
 * `fixed` Invalidate ACME directory cache after 24 hours
+* `fixed` Retry HTTP requests on server errors or when rate limited
 
 ## v5.3.1 (2024-05-22)
 
