@@ -1,6 +1,6 @@
 # acme-client [![test](https://github.com/publishlab/node-acme-client/actions/workflows/tests.yml/badge.svg)](https://github.com/publishlab/node-acme-client/actions/workflows/tests.yml)
 
-*A simple and unopinionated ACME client.*
+> A simple and unopinionated ACME client.
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
 
@@ -29,6 +29,7 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 * [Auto mode](#auto-mode)
     * [Challenge priority](#challenge-priority)
     * [Internal challenge verification](#internal-challenge-verification)
+    * [Certificate renewal using ARI](#certificate-renewal-using-ari)
 * [API](#api)
 * [HTTP client defaults](#http-client-defaults)
 * [Debugging](#debugging)
@@ -175,6 +176,43 @@ await client.auto({
     ...,
     skipChallengeVerification: true,
 });
+```
+
+### Certificate renewal using ARI
+
+`acme-client` supports ACME Renewal Information (ARI) [draft-ietf-acme-ari-04](https://datatracker.ietf.org/doc/html/draft-ietf-acme-ari), which can be used to query the ACME provider for an appropriate time window where a previously issued certificate can be renewed. This adds several benefits, which are outlined along with further details in these blog posts by Let's Encrypt:
+
+* [letsencrypt.org/2023/03/23/improving-resliiency-and-reliability-with-ari](https://letsencrypt.org/2023/03/23/improving-resliiency-and-reliability-with-ari)
+* [letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients](https://letsencrypt.org/2024/04/25/guide-to-integrating-ari-into-existing-acme-clients)
+
+The included method `client.getSecondsUntilCertificateRenewable()` utilizes ARI and returns the amount of seconds to wait until retrying the method again. If the returned value is exactly `0`, the certificate is ready to be renewed. Include the `client.auto()` option `replacesCertificateId` to signal to the ACME provider that the renewal was suggested by ARI.
+
+> **WARNING:** Not all ACME providers support ARI yet, at the time of writing only Let's Encrypt and Google have this implemented. To check if your provider supports ARI, open the directory URL in your browser and look for `renewalInfo`.
+>
+> As ARI is still a draft and its implementation in `acme-client` is experimental, breaking changes *may* be pushed outside a semver major.
+
+Example using ARI with `client.auto()`:
+
+```js
+async function renewCertificateLoop(ariCertId) {
+    const waitSeconds = await client.getSecondsUntilCertificateRenewable(ariCertId);
+
+    // Not ready, wait and try again later
+    if (waitSeconds > 0) {
+        await new Promise((resolve) => { setTimeout(resolve, (waitSeconds * 1000)); });
+        return renewCertificateLoop(ariCertId);
+    }
+
+    // The certificate can be renewed
+    return client.auto({
+        ...,
+        replacesCertificateId: ariCertId
+    });
+}
+
+const certificate = { ... }; // Previously issued certificate
+const ariCertId = acme.crypto.getAriCertificateId(certificate);
+const newCertificate = await renewCertificateLoop(ariCertId);
 ```
 
 ## API

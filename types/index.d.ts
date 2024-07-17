@@ -80,6 +80,7 @@ export class Client {
     getCertificate(order: Order, preferredChain?: string): Promise<string>;
     revokeCertificate(cert: CertificateBuffer | CertificateString, data?: rfc8555.CertificateRevocationRequest): Promise<void>;
     getCertificateRenewalInfo(certId: string): Promise<CertificateRenewalInfo>;
+    getSecondsUntilCertificateRenewable(certId: string): Promise<number>;
     auto(opts: ClientAutoOptions): Promise<string>;
 }
 
