@@ -738,6 +738,7 @@ class AcmeClient {
      * @param {function} opts.challengeRemoveFn Function returning Promise triggered after completing ACME challenge
      * @param {string} [opts.email] Account email address
      * @param {boolean} [opts.termsOfServiceAgreed] Agree to Terms of Service, default: `false`
+     * @param {string} [opts.replacesCertificateId] Certificate ID to replace when renewing using ARI
      * @param {boolean} [opts.skipChallengeVerification] Skip internal challenge verification before notifying ACME provider, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
      * @param {string} [opts.preferredChain] Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null`
@@ -776,6 +777,28 @@ class AcmeClient {
      *     challengeCreateFn: async () => {},
      *     challengeRemoveFn: async () => {},
      * });
+     * ```
+     *
+     * @example Renew an existing certificate using ARI (ACME Renewal Information)
+     * ```js
+     * const certificate = { ... }; // Previously issued certificate
+     * const ariCertId = acme.crypto.getAriCertificateId(certificate);
+     * const waitSeconds = await client.getSecondsUntilCertificateRenewable(certId);
+     *
+     * if (waitSeconds === 0) {
+     *     const [certificateKey, certificateRequest] = await acme.crypto.createCsr({
+     *         altNames: ['test.example.com'],
+     *     });
+     *
+     *     const renewedCertificate = await client.auto({
+     *         csr: certificateRequest,
+     *         email: 'test@example.com',
+     *         termsOfServiceAgreed: true,
+     *         replacesCertificateId: ariCertId,
+     *         challengeCreateFn: async () => {},
+     *         challengeRemoveFn: async () => {},
+     *     });
+     * }
      * ```
      */
 

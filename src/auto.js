@@ -10,6 +10,7 @@ const defaultOpts = {
     email: null,
     preferredChain: null,
     termsOfServiceAgreed: false,
+    replacesCertificateId: null,
     skipChallengeVerification: false,
     challengePriority: ['http-01', 'dns-01'],
     challengeCreateFn: async () => { throw new Error('Missing challengeCreateFn()'); },
@@ -67,6 +68,12 @@ module.exports = async (client, userOpts) => {
 
     log('[auto] Placing new certificate order with ACME provider');
     const orderPayload = { identifiers: uniqueDomains.map((d) => ({ type: 'dns', value: d })) };
+
+    if (opts.replacesCertificateId) {
+        log(`[auto] Replacing certificate with ID ${opts.replacesCertificateId}`);
+        orderPayload.replaces = opts.replacesCertificateId;
+    }
+
     const order = await client.createOrder(orderPayload);
     const authorizations = await client.getAuthorizations(order);
 

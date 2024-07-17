@@ -337,6 +337,10 @@ describe('client.auto', () => {
                 assert.isString(cert);
             });
 
+            /**
+             * Alternate certificate chains
+             */
+
             it('should order alternate certificate chain [ACME_CAP_ALTERNATE_CERT_ROOTS]', async function () {
                 if (!capAlternateCertRoots) {
                     this.skip();
@@ -383,6 +387,27 @@ describe('client.auto', () => {
                 const info = acme.crypto.readCertificateInfo(rootCert);
 
                 assert.strictEqual(testIssuers[0], info.issuer.commonName);
+            });
+
+            /**
+             * Renew certificate using ACME Renewal Information (ARI)
+             */
+
+            it('should renew certificate using ari', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: testDomain,
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    replacesCertificateId: acme.crypto.getAriCertificateId(testCertificate),
+                    challengeCreateFn: cts.challengeCreateFn,
+                    challengeRemoveFn: cts.challengeRemoveFn,
+                });
+
+                assert.isString(cert);
+                assert.notStrictEqual(cert, testCertificate);
             });
 
             /**
