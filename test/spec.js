@@ -73,7 +73,7 @@ spec.rfc8555.order = (obj) => {
         assert.isString(obj.replaces);
     }
 
-    /* Augmentations */
+    // Augmentations
     assert.isString(obj.url);
 };
 
@@ -96,7 +96,7 @@ spec.rfc8555.authorization = (obj) => {
         assert.isBoolean(obj.wildcard);
     }
 
-    /* Augmentations */
+    // Augmentations
     assert.isString(obj.url);
 };
 
@@ -130,7 +130,7 @@ spec.rfc8555.certRenewalInfo = (obj) => {
     assert.isString(obj.suggestedWindow.start);
     assert.isString(obj.suggestedWindow.end);
 
-    /* Augmentations */
+    // Augmentations
     assert.isNumber(obj.retryAfter);
 };
 

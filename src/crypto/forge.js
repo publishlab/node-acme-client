@@ -392,17 +392,18 @@ exports.createCsr = async (data, key = null) => {
 
     const csr = forge.pki.createCertificationRequest();
 
-    /* Public key */
+    // Public key
     const privateKey = forge.pki.privateKeyFromPem(key);
     const publicKey = forge.pki.rsa.setPublicKey(privateKey.n, privateKey.e);
     csr.publicKey = publicKey;
 
-    /* Ensure subject common name is present in SAN - https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf */
+    // Ensure subject common name is present in SAN
+    // https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf
     if (data.commonName && !data.altNames.includes(data.commonName)) {
         data.altNames.unshift(data.commonName);
     }
 
-    /* Subject */
+    // Subject
     const subject = createCsrSubject({
         CN: data.commonName,
         C: data.country,
@@ -415,7 +416,7 @@ exports.createCsr = async (data, key = null) => {
 
     csr.setSubject(subject);
 
-    /* SAN extension */
+    // SAN extension
     if (data.altNames.length) {
         csr.setAttributes([{
             name: 'extensionRequest',
@@ -426,10 +427,10 @@ exports.createCsr = async (data, key = null) => {
         }]);
     }
 
-    /* Sign CSR using SHA-256 */
+    // Sign CSR using SHA-256
     csr.sign(privateKey, forge.md.sha256.create());
 
-    /* Done */
+    // Done
     const pemCsr = forge.pki.certificationRequestToPem(csr);
     return [key, Buffer.from(pemCsr)];
 };

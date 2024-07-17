@@ -46,14 +46,14 @@ class HttpClient {
         opts.method = method;
         opts.validateStatus = null;
 
-        /* Headers */
+        // Headers
         if (typeof opts.headers === 'undefined') {
             opts.headers = {};
         }
 
         opts.headers['Content-Type'] = 'application/jose+json';
 
-        /* Request */
+        // Request
         log(`HTTP request: ${method} ${url}`);
         const resp = await axios.request(opts);
 
@@ -192,13 +192,13 @@ class HttpClient {
     prepareSignedBody(alg, url, payload = null, { nonce = null, kid = null } = {}) {
         const header = { alg, url };
 
-        /* Nonce */
+        // Nonce
         if (nonce) {
             log(`Using nonce: ${nonce}`);
             header.nonce = nonce;
         }
 
-        /* KID or JWK */
+        // KID or JWK
         if (kid) {
             header.kid = kid;
         }
@@ -206,7 +206,7 @@ class HttpClient {
             header.jwk = this.getJwk();
         }
 
-        /* Body */
+        // Body
         return {
             payload: payload ? Buffer.from(JSON.stringify(payload)).toString('base64url') : '',
             protected: Buffer.from(JSON.stringify(header)).toString('base64url'),
@@ -228,7 +228,7 @@ class HttpClient {
     createSignedHmacBody(hmacKey, url, payload = null, { nonce = null, kid = null } = {}) {
         const result = this.prepareSignedBody('HS256', url, payload, { nonce, kid });
 
-        /* Signature */
+        // Signature
         const signer = createHmac('SHA256', Buffer.from(hmacKey, 'base64')).update(`${result.protected}.${result.payload}`, 'utf8');
         result.signature = signer.digest().toString('base64url');
 
@@ -253,7 +253,7 @@ class HttpClient {
         let headerAlg = 'RS256';
         let signerAlg = 'SHA256';
 
-        /* https://datatracker.ietf.org/doc/html/rfc7518#section-3.1 */
+        // https://datatracker.ietf.org/doc/html/rfc7518#section-3.1
         if (jwk.crv && (jwk.kty === 'EC')) {
             headerAlg = 'ES256';
 
@@ -267,11 +267,12 @@ class HttpClient {
             }
         }
 
-        /* Prepare body and signer */
+        // Prepare body and signer
         const result = this.prepareSignedBody(headerAlg, url, payload, { nonce, kid });
         const signer = createSign(signerAlg).update(`${result.protected}.${result.payload}`, 'utf8');
 
-        /* Signature - https://stackoverflow.com/questions/39554165 */
+        // Signature
+        // https://stackoverflow.com/questions/39554165
         result.signature = signer.sign({
             key: this.accountKey,
             padding: RSA_PKCS1_PADDING,
@@ -301,7 +302,7 @@ class HttpClient {
             nonce = await this.getNonce();
         }
 
-        /* External account binding */
+        // External account binding
         if (includeExternalAccountBinding && this.externalAccountBinding) {
             if (this.externalAccountBinding.kid && this.externalAccountBinding.hmacKey) {
                 const jwk = this.getJwk();
@@ -312,11 +313,12 @@ class HttpClient {
             }
         }
 
-        /* Sign body and send request */
+        // Sign body and send request
         const data = this.createSignedBody(url, payload, { nonce, kid });
         const resp = await this.request(url, 'post', { data });
 
-        /* Retry on bad nonce - https://datatracker.ietf.org/doc/html/rfc8555#section-6.5 */
+        // Retry on bad nonce
+        // https://datatracker.ietf.org/doc/html/rfc8555#section-6.5
         if (resp.data && resp.data.type && (resp.status === 400) && (resp.data.type === 'urn:ietf:params:acme:error:badNonce') && (attempts < this.maxBadNonceRetries)) {
             nonce = resp.headers['replay-nonce'] || null;
             attempts += 1;
@@ -325,10 +327,10 @@ class HttpClient {
             return this.signedRequest(url, payload, { kid, nonce, includeExternalAccountBinding }, attempts);
         }
 
-        /* Return response */
+        // Return response
         return resp;
     }
 }
 
-/* Export client */
+// Export client
 module.exports = HttpClient;

@@ -168,7 +168,7 @@ export interface CryptoInterface {
 
 export const crypto: CryptoInterface;
 
-/* TODO: LEGACY */
+// TODO: LEGACY
 export interface CryptoLegacyInterface {
     createPrivateKey(size?: number): Promise<PrivateKeyBuffer>;
     createPublicKey(key: PrivateKeyBuffer | PrivateKeyString): Promise<PublicKeyBuffer>;

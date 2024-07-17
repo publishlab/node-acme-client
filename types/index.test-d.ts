@@ -5,7 +5,7 @@
 import * as acme from 'acme-client';
 
 (async () => {
-    /* Client */
+    // Client
     const accountKey = await acme.crypto.createPrivateKey();
 
     const client = new acme.Client({
@@ -13,13 +13,13 @@ import * as acme from 'acme-client';
         directoryUrl: acme.directory.letsencrypt.staging
     });
 
-    /* Account */
+    // Account
     await client.createAccount({
         termsOfServiceAgreed: true,
         contact: ['mailto:test@example.com']
     });
 
-    /* Order */
+    // Order
     const order = await client.createOrder({
         identifiers: [
             { type: 'dns', value: 'example.com' },
@@ -29,7 +29,7 @@ import * as acme from 'acme-client';
 
     await client.getOrder(order);
 
-    /* Authorizations / Challenges */
+    // Authorizations / Challenges
     const authorizations = await client.getAuthorizations(order);
     const authorization = authorizations[0];
     const challenge = authorization.challenges[0];
@@ -39,7 +39,7 @@ import * as acme from 'acme-client';
     await client.completeChallenge(challenge);
     await client.waitForValidStatus(challenge);
 
-    /* Finalize */
+    // Finalize
     const [certKey, certCsr] = await acme.crypto.createCsr({
         commonName: 'example.com',
         altNames: ['example.com', '*.example.com']
@@ -49,7 +49,7 @@ import * as acme from 'acme-client';
     await client.getCertificate(order);
     await client.getCertificate(order, 'DST Root CA X3');
 
-    /* Auto */
+    // Auto
     await client.auto({
         csr: certCsr,
         challengeCreateFn: async (authz, challenge, keyAuthorization) => {},

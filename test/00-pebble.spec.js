@@ -135,7 +135,7 @@ describe('pebble', () => {
         });
 
         it('should 302 with self-signed cert', async () => {
-            /* Assert HTTP 302 */
+            // Assert HTTP 302
             const resp = await axios.get(`http://${testHttps01ChallengeHost}:${httpPort}/.well-known/acme-challenge/${testHttps01ChallengeToken}`, {
                 maxRedirects: 0,
                 validateStatus: null,
@@ -144,7 +144,7 @@ describe('pebble', () => {
             assert.strictEqual(resp.status, 302);
             assert.strictEqual(resp.headers.location, `https://${testHttps01ChallengeHost}:${httpsPort}/.well-known/acme-challenge/${testHttps01ChallengeToken}`);
 
-            /* Self-signed cert test */
+            // Self-signed cert test
             await assert.isRejected(axios.get(`https://${testHttps01ChallengeHost}:${httpsPort}/.well-known/acme-challenge/${testHttps01ChallengeToken}`));
             await assert.isFulfilled(axios.get(`https://${testHttps01ChallengeHost}:${httpsPort}/.well-known/acme-challenge/${testHttps01ChallengeToken}`, { httpsAgent }));
         });

@@ -27,17 +27,17 @@ function log(m) {
  */
 
 async function getCertOnDemand(client, servername, attempt = 0) {
-    /* Invalid domain */
+    // Invalid domain
     if (!VALID_DOMAINS.includes(servername)) {
         throw new Error(`Invalid domain: ${servername}`);
     }
 
-    /* Certificate exists */
+    // Certificate exists
     if (servername in certificateStore) {
         return certificateStore[servername];
     }
 
-    /* Waiting on certificate order to go through */
+    // Waiting on certificate order to go through
     if (servername in pendingDomains) {
         if (attempt >= 10) {
             throw new Error(`Gave up waiting on certificate for ${servername}`);
@@ -47,13 +47,13 @@ async function getCertOnDemand(client, servername, attempt = 0) {
         return getCertOnDemand(client, servername, (attempt + 1));
     }
 
-    /* Create CSR */
+    // Create CSR
     log(`Creating CSR for ${servername}`);
     const [key, csr] = await acme.crypto.createCsr({
         altNames: [servername],
     });
 
-    /* Order certificate */
+    // Order certificate
     log(`Ordering certificate for ${servername}`);
     const cert = await client.auto({
         csr,
@@ -68,7 +68,7 @@ async function getCertOnDemand(client, servername, attempt = 0) {
         },
     });
 
-    /* Done, store certificate */
+    // Done, store certificate
     log(`Certificate for ${servername} created successfully`);
     certificateStore[servername] = [key, cert];
     delete pendingDomains[servername];
@@ -96,14 +96,14 @@ async function getCertOnDemand(client, servername, attempt = 0) {
          */
 
         const alpnResponder = https.createServer({
-            /* Fallback cert */
+            // Fallback cert
             key: FALLBACK_KEY,
             cert: FALLBACK_CERT,
 
-            /* Allow acme-tls/1 ALPN protocol */
+            // Allow acme-tls/1 ALPN protocol
             ALPNProtocols: ['acme-tls/1'],
 
-            /* Serve ALPN certificate based on servername */
+            // Serve ALPN certificate based on servername
             SNICallback: async (servername, cb) => {
                 try {
                     log(`Handling ALPN SNI request for ${servername}`);
@@ -111,7 +111,7 @@ async function getCertOnDemand(client, servername, attempt = 0) {
                         throw new Error(`No ALPN certificate found for ${servername}`);
                     }
 
-                    /* Serve ALPN challenge response */
+                    // Serve ALPN challenge response
                     log(`Found ALPN certificate for ${servername}, serving secure context`);
                     cb(null, tls.createSecureContext({
                         key: alpnResponses[servername][0],
@@ -125,7 +125,7 @@ async function getCertOnDemand(client, servername, attempt = 0) {
             },
         });
 
-        /* Terminate once TLS handshake has been established */
+        // Terminate once TLS handshake has been established
         alpnResponder.on('secureConnection', (socket) => {
             socket.end();
         });
@@ -145,11 +145,11 @@ async function getCertOnDemand(client, servername, attempt = 0) {
         };
 
         const httpsServer = https.createServer({
-            /* Fallback cert */
+            // Fallback cert
             key: FALLBACK_KEY,
             cert: FALLBACK_CERT,
 
-            /* Serve certificate based on servername */
+            // Serve certificate based on servername
             SNICallback: async (servername, cb) => {
                 try {
                     log(`Handling SNI request for ${servername}`);

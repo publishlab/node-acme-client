@@ -128,18 +128,18 @@ describe('util', () => {
     });
 
     it('getAuthoritativeDnsResolver()', async () => {
-        /* valid domain - should not use global default */
+        // valid domain - should not use global default
         const r1 = await util.getAuthoritativeDnsResolver('example.com');
         assert.instanceOf(r1, dns.Resolver);
         assert.isNotEmpty(r1.getServers());
         assert.notDeepEqual(r1.getServers(), dns.getServers());
 
-        /* invalid domain - fallback to global default */
+        // invalid domain - fallback to global default
         const r2 = await util.getAuthoritativeDnsResolver('invalid.xtldx');
         assert.instanceOf(r2, dns.Resolver);
         assert.deepStrictEqual(r2.getServers(), dns.getServers());
     });
 
-    /* TODO: Figure out how to test this */
+    // TODO: Figure out how to test this
     it('retrieveTlsAlpnCertificate()');
 });

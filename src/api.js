@@ -101,7 +101,7 @@ class AcmeApi {
             includeExternalAccountBinding: (data.onlyReturnExisting !== true),
         });
 
-        /* Set account URL */
+        // Set account URL
         if (resp.headers.location) {
             this.accountUrl = resp.headers.location;
         }
@@ -250,5 +250,5 @@ class AcmeApi {
     }
 }
 
-/* Export API */
+// Export API
 module.exports = AcmeApi;

@@ -15,10 +15,10 @@ const { AxiosError } = axios;
 
 const instance = axios.create();
 
-/* Default User-Agent */
+// Default User-Agent
 instance.defaults.headers.common['User-Agent'] = `node-${pkg.name}/${pkg.version}`;
 
-/* Default ACME settings */
+// Default ACME settings
 instance.defaults.acmeSettings = {
     httpChallengePort: 80,
     httpsChallengePort: 443,
@@ -51,7 +51,7 @@ function isRetryableError(error) {
             || ((error.response.status >= 500) && (error.response.status <= 599)));
 }
 
-/* https://github.com/axios/axios/blob/main/lib/core/settle.js */
+// https://github.com/axios/axios/blob/main/lib/core/settle.js
 function validateStatus(response) {
     const validator = response.config.retryValidateStatus;
 
@@ -68,7 +68,7 @@ function validateStatus(response) {
     );
 }
 
-/* Pass all responses through the error interceptor */
+// Pass all responses through the error interceptor
 instance.interceptors.request.use((config) => {
     if (!('retryValidateStatus' in config)) {
         config.retryValidateStatus = config.validateStatus;
@@ -78,7 +78,7 @@ instance.interceptors.request.use((config) => {
     return config;
 });
 
-/* Handle request retries if applicable */
+// Handle request retries if applicable
 instance.interceptors.response.use(null, async (error) => {
     const { config, response } = error;
 
@@ -86,7 +86,7 @@ instance.interceptors.response.use(null, async (error) => {
         return Promise.reject(error);
     }
 
-    /* Pick up errors we want to retry */
+    // Pick up errors we want to retry
     if (isRetryableError(error)) {
         const { retryMaxAttempts, retryDefaultDelay } = instance.defaults.acmeSettings;
         config.retryAttempt = ('retryAttempt' in config) ? (config.retryAttempt + 1) : 1;
@@ -95,7 +95,7 @@ instance.interceptors.response.use(null, async (error) => {
             const code = response ? `HTTP ${response.status}` : error.code;
             log(`Caught ${code}, retry attempt ${config.retryAttempt}/${retryMaxAttempts} to URL ${config.url}`);
 
-            /* Attempt to parse Retry-After header, fallback to default delay */
+            // Attempt to parse Retry-After header, fallback to default delay
             let retryAfter = response ? parseRetryAfterHeader(response.headers['retry-after']) : 0;
 
             if (retryAfter > 0) {
@@ -106,13 +106,13 @@ instance.interceptors.response.use(null, async (error) => {
                 log(`Unable to locate or parse retry-after response header, waiting ${retryAfter} seconds`);
             }
 
-            /* Wait and retry the request */
+            // Wait and retry the request
             await new Promise((resolve) => { setTimeout(resolve, (retryAfter * 1000)); });
             return instance(config);
         }
     }
 
-    /* Validate and return response */
+    // Validate and return response
     return validateStatus(response);
 });
 

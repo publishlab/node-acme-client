@@ -89,14 +89,14 @@ module.exports = async (client, userOpts) => {
         const d = authz.identifier.value;
         let challengeCompleted = false;
 
-        /* Skip authz that already has valid status */
+        // Skip authz that already has valid status
         if (authz.status === 'valid') {
             log(`[auto] [${d}] Authorization already has valid status, no need to complete challenges`);
             return;
         }
 
         try {
-            /* Select challenge based on priority */
+            // Select challenge based on priority
             const challenge = authz.challenges.sort((a, b) => {
                 const aidx = opts.challengePriority.indexOf(a.type);
                 const bidx = opts.challengePriority.indexOf(b.type);
@@ -112,14 +112,14 @@ module.exports = async (client, userOpts) => {
 
             log(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
 
-            /* Trigger challengeCreateFn() */
+            // Trigger challengeCreateFn()
             log(`[auto] [${d}] Trigger challengeCreateFn()`);
             const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
             try {
                 await opts.challengeCreateFn(authz, challenge, keyAuthorization);
 
-                /* Challenge verification */
+                // Challenge verification
                 if (opts.skipChallengeVerification === true) {
                     log(`[auto] [${d}] Skipping challenge verification since skipChallengeVerification=true`);
                 }
@@ -128,7 +128,7 @@ module.exports = async (client, userOpts) => {
                     await client.verifyChallenge(authz, challenge);
                 }
 
-                /* Complete challenge and wait for valid status */
+                // Complete challenge and wait for valid status
                 log(`[auto] [${d}] Completing challenge with ACME provider and waiting for valid status`);
                 await client.completeChallenge(challenge);
                 challengeCompleted = true;
@@ -136,7 +136,7 @@ module.exports = async (client, userOpts) => {
                 await client.waitForValidStatus(challenge);
             }
             finally {
-                /* Trigger challengeRemoveFn(), suppress errors */
+                // Trigger challengeRemoveFn(), suppress errors
                 log(`[auto] [${d}] Trigger challengeRemoveFn()`);
 
                 try {
@@ -148,7 +148,7 @@ module.exports = async (client, userOpts) => {
             }
         }
         catch (e) {
-            /* Deactivate pending authz when unable to complete challenge */
+            // Deactivate pending authz when unable to complete challenge
             if (!challengeCompleted) {
                 log(`[auto] [${d}] Unable to complete challenge: ${e.message}`);
 
@@ -157,7 +157,7 @@ module.exports = async (client, userOpts) => {
                     await client.deactivateAuthorization(authz);
                 }
                 catch (f) {
-                    /* Suppress deactivateAuthorization() errors */
+                    // Suppress deactivateAuthorization() errors
                     log(`[auto] [${d}] Authorization deactivation threw error: ${f.message}`);
                 }
             }

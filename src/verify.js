@@ -25,7 +25,8 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
     const httpPort = axios.defaults.acmeSettings.httpChallengePort || 80;
     const challengeUrl = `http://${authz.identifier.value}:${httpPort}${suffix}`;
 
-    /* May redirect to HTTPS with invalid/self-signed cert - https://letsencrypt.org/docs/challenge-types/#http-01-challenge */
+    // May redirect to HTTPS with invalid/self-signed cert
+    // https://letsencrypt.org/docs/challenge-types/#http-01-challenge
     const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
     log(`Sending HTTP query to ${authz.identifier.value}, suffix: ${suffix}, port: ${httpPort}`);
@@ -47,7 +48,7 @@ async function verifyHttpChallenge(authz, challenge, keyAuthorization, suffix = 
  */
 
 async function walkDnsChallengeRecord(recordName, resolver = dns) {
-    /* Resolve CNAME record first */
+    // Resolve CNAME record first
     try {
         log(`Checking name for CNAME records: ${recordName}`);
         const cnameRecords = await resolver.resolveCname(recordName);
@@ -61,7 +62,7 @@ async function walkDnsChallengeRecord(recordName, resolver = dns) {
         log(`No CNAME records found for name: ${recordName}`);
     }
 
-    /* Resolve TXT records */
+    // Resolve TXT records
     try {
         log(`Checking name for TXT records: ${recordName}`);
         const txtRecords = await resolver.resolveTxt(recordName);
@@ -75,7 +76,7 @@ async function walkDnsChallengeRecord(recordName, resolver = dns) {
         log(`No TXT records found for name: ${recordName}`);
     }
 
-    /* Found nothing */
+    // Found nothing
     throw new Error(`No TXT records found for name: ${recordName}`);
 }
 
@@ -97,12 +98,12 @@ async function verifyDnsChallenge(authz, challenge, keyAuthorization, prefix = '
     log(`Resolving DNS TXT from record: ${recordName}`);
 
     try {
-        /* Default DNS resolver first */
+        // Default DNS resolver first
         log('Attempting to resolve TXT with default DNS resolver first');
         recordValues = await walkDnsChallengeRecord(recordName);
     }
     catch (e) {
-        /* Authoritative DNS resolver */
+        // Authoritative DNS resolver
         log(`Error using default resolver, attempting to resolve TXT with authoritative NS: ${e.message}`);
         const authoritativeResolver = await util.getAuthoritativeDnsResolver(recordName);
         recordValues = await walkDnsChallengeRecord(recordName, authoritativeResolver);

@@ -51,11 +51,11 @@ function log(m) {
             termsOfServiceAgreed: true,
             challengePriority: ['dns-01'],
             challengeCreateFn: (authz, challenge, keyAuthorization) => {
-                /* TODO: Implement this */
+                // TODO: Implement this
                 log(`[TODO] Add TXT record key=_acme-challenge.${authz.identifier.value} value=${keyAuthorization}`);
             },
             challengeRemoveFn: (authz, challenge, keyAuthorization) => {
-                /* TODO: Implement this */
+                // TODO: Implement this
                 log(`[TODO] Remove TXT record key=_acme-challenge.${authz.identifier.value} value=${keyAuthorization}`);
             },
         });

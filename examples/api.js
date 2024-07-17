@@ -18,7 +18,7 @@ function log(m) {
  */
 
 async function challengeCreateFn(authz, challenge, keyAuthorization) {
-    /* Do something here */
+    // Do something here
     log(JSON.stringify(authz));
     log(JSON.stringify(challenge));
     log(keyAuthorization);
@@ -33,7 +33,7 @@ async function challengeCreateFn(authz, challenge, keyAuthorization) {
  */
 
 async function challengeRemoveFn(authz, challenge, keyAuthorization) {
-    /* Do something here */
+    // Do something here
     log(JSON.stringify(authz));
     log(JSON.stringify(challenge));
     log(keyAuthorization);
@@ -44,19 +44,19 @@ async function challengeRemoveFn(authz, challenge, keyAuthorization) {
  */
 
 module.exports = async () => {
-    /* Init client */
+    // Init client
     const client = new acme.Client({
         directoryUrl: acme.directory.letsencrypt.staging,
         accountKey: await acme.crypto.createPrivateKey(),
     });
 
-    /* Register account */
+    // Register account
     await client.createAccount({
         termsOfServiceAgreed: true,
         contact: ['mailto:test@example.com'],
     });
 
-    /* Place new order */
+    // Place new order
     const order = await client.createOrder({
         identifiers: [
             { type: 'dns', value: 'example.com' },
@@ -84,26 +84,26 @@ module.exports = async () => {
 
             const { challenges } = authz;
 
-            /* Just select any challenge */
+            // Just select any challenge
             const challenge = challenges.pop();
             const keyAuthorization = await client.getChallengeKeyAuthorization(challenge);
 
             try {
-                /* Satisfy challenge */
+                // Satisfy challenge
                 await challengeCreateFn(authz, challenge, keyAuthorization);
 
-                /* Verify that challenge is satisfied */
+                // Verify that challenge is satisfied
                 await client.verifyChallenge(authz, challenge);
 
-                /* Notify ACME provider that challenge is satisfied */
+                // Notify ACME provider that challenge is satisfied
                 await client.completeChallenge(challenge);
                 challengeCompleted = true;
 
-                /* Wait for ACME provider to respond with valid status */
+                // Wait for ACME provider to respond with valid status
                 await client.waitForValidStatus(challenge);
             }
             finally {
-                /* Clean up challenge response */
+                // Clean up challenge response
                 try {
                     await challengeRemoveFn(authz, challenge, keyAuthorization);
                 }
@@ -116,13 +116,13 @@ module.exports = async () => {
             }
         }
         catch (e) {
-            /* Deactivate pending authz when unable to complete challenge */
+            // Deactivate pending authz when unable to complete challenge
             if (!challengeCompleted) {
                 try {
                     await client.deactivateAuthorization(authz);
                 }
                 catch (f) {
-                    /* Catch and suppress deactivateAuthorization() errors */
+                    // Catch and suppress deactivateAuthorization() errors
                 }
             }
 
@@ -130,10 +130,10 @@ module.exports = async () => {
         }
     });
 
-    /* Wait for challenges to complete */
+    // Wait for challenges to complete
     await Promise.all(promises);
 
-    /* Finalize order */
+    // Finalize order
     const [key, csr] = await acme.crypto.createCsr({
         altNames: ['example.com', '*.example.com'],
     });
@@ -141,7 +141,7 @@ module.exports = async () => {
     const finalized = await client.finalizeOrder(order, csr);
     const cert = await client.getCertificate(finalized);
 
-    /* Done */
+    // Done
     log(`CSR:\n${csr.toString()}`);
     log(`Private key:\n${key.toString()}`);
     log(`Certificate:\n${cert.toString()}`);

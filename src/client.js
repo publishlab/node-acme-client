@@ -172,14 +172,14 @@ class AcmeClient {
         try {
             this.getAccountUrl();
 
-            /* Account URL exists */
+            // Account URL exists
             log('Account URL exists, returning updateAccount()');
             return this.updateAccount(data);
         }
         catch (e) {
             const resp = await this.api.createAccount(data);
 
-            /* HTTP 200: Account exists */
+            // HTTP 200: Account exists
             if (resp.status === 200) {
                 log('Account already exists (HTTP 200), returning updateAccount()');
                 return this.updateAccount(data);
@@ -214,12 +214,12 @@ class AcmeClient {
             return this.createAccount(data);
         }
 
-        /* Remove data only applicable to createAccount() */
+        // Remove data only applicable to createAccount()
         if ('onlyReturnExisting' in data) {
             delete data.onlyReturnExisting;
         }
 
-        /* POST-as-GET */
+        // POST-as-GET
         if (Object.keys(data).length === 0) {
             data = null;
         }
@@ -251,22 +251,22 @@ class AcmeClient {
 
         const accountUrl = this.api.getAccountUrl();
 
-        /* Create new HTTP and API clients using new key */
+        // Create new HTTP and API clients using new key
         const newHttpClient = new HttpClient(this.opts.directoryUrl, newAccountKey, this.opts.externalAccountBinding);
         const newApiClient = new AcmeApi(newHttpClient, accountUrl);
 
-        /* Get old JWK */
+        // Get old JWK
         data.account = accountUrl;
         data.oldKey = this.http.getJwk();
 
-        /* Get signed request body from new client */
+        // Get signed request body from new client
         const url = await newHttpClient.getResourceUrl('keyChange');
         const body = newHttpClient.createSignedBody(url, data);
 
-        /* Change key using old client */
+        // Change key using old client
         const resp = await this.api.updateAccountKey(body);
 
-        /* Replace existing HTTP and API client */
+        // Replace existing HTTP and API client
         this.http = newHttpClient;
         this.api = newApiClient;
 
@@ -299,7 +299,7 @@ class AcmeClient {
             throw new Error('Creating a new order did not return an order link');
         }
 
-        /* Add URL to response */
+        // Augment response with order URL
         resp.data.url = resp.headers.location;
         return resp.data;
     }
@@ -326,7 +326,7 @@ class AcmeClient {
 
         const resp = await this.api.getOrder(order.url);
 
-        /* Add URL to response */
+        // Augment response with order URL
         resp.data.url = order.url;
         return resp.data;
     }
@@ -360,7 +360,7 @@ class AcmeClient {
         const data = { csr: getPemBodyAsB64u(csr) };
         const resp = await this.api.finalizeOrder(order.finalize, data);
 
-        /* Add URL to response */
+        // Augment response with order URL
         resp.data.url = order.url;
         return resp.data;
     }
@@ -388,7 +388,7 @@ class AcmeClient {
         return Promise.all((order.authorizations || []).map(async (url) => {
             const resp = await this.api.getAuthorization(url);
 
-            /* Add URL to response */
+            // Augment response with authz URL
             resp.data.url = url;
             return resp.data;
         }));
@@ -417,7 +417,7 @@ class AcmeClient {
         const data = { status: 'deactivated' };
         const resp = await this.api.updateAuthorization(authz.url, data);
 
-        /* Add URL to response */
+        // Augment response with authz URL
         resp.data.url = authz.url;
         return resp.data;
     }
@@ -445,17 +445,17 @@ class AcmeClient {
         const thumbprint = keysum.digest('base64url');
         const result = `${challenge.token}.${thumbprint}`;
 
-        /* https://datatracker.ietf.org/doc/html/rfc8555#section-8.3 */
+        // https://datatracker.ietf.org/doc/html/rfc8555#section-8.3
         if (challenge.type === 'http-01') {
             return result;
         }
 
-        /* https://datatracker.ietf.org/doc/html/rfc8555#section-8.4 */
+        // https://datatracker.ietf.org/doc/html/rfc8555#section-8.4
         if (challenge.type === 'dns-01') {
             return createHash('sha256').update(result).digest('base64url');
         }
 
-        /* https://datatracker.ietf.org/doc/html/rfc8737 */
+        // https://datatracker.ietf.org/doc/html/rfc8737
         if (challenge.type === 'tls-alpn-01') {
             return result;
         }
@@ -552,7 +552,7 @@ class AcmeClient {
         const verifyFn = async (abort) => {
             const resp = await this.api.apiRequest(item.url, null, [200]);
 
-            /* Verify status */
+            // Verify status
             log(`Item has status: ${resp.data.status}`);
 
             if (invalidStates.includes(resp.data.status)) {
@@ -606,7 +606,7 @@ class AcmeClient {
 
         const resp = await this.api.apiRequest(order.certificate, null, [200]);
 
-        /* Handle alternate certificate chains */
+        // Handle alternate certificate chains
         if (preferredChain && resp.headers.link) {
             const alternateLinks = util.parseLinkHeader(resp.headers.link);
             const alternates = await Promise.all(alternateLinks.map(async (link) => this.api.apiRequest(link, null, [200])));
@@ -615,7 +615,7 @@ class AcmeClient {
             return util.findCertificateChainForIssuer(certificates, preferredChain);
         }
 
-        /* Return default certificate chain */
+        // Return default certificate chain
         return resp.data;
     }
 
@@ -630,13 +630,13 @@ class AcmeClient {
      *
      * @example Revoke certificate
      * ```js
-     * const certificate = { ... }; // Previously created certificate
+     * const certificate = { ... }; // Previously issued certificate
      * const result = await client.revokeCertificate(certificate);
      * ```
      *
      * @example Revoke certificate with reason
      * ```js
-     * const certificate = { ... }; // Previously created certificate
+     * const certificate = { ... }; // Previously issued certificate
      * const result = await client.revokeCertificate(certificate, {
      *     reason: 4,
      * });
@@ -659,7 +659,7 @@ class AcmeClient {
      *
      * @example Get certificate renewal information
      * ```js
-     * const certificate = { ... }; // Previously created certificate
+     * const certificate = { ... }; // Previously issued certificate
      * const certId = acme.crypto.getAriCertificateId(certificate);
      * const renewalInfo = await client.getCertificateRenewalInfo(certId);
      * ```
@@ -674,7 +674,7 @@ class AcmeClient {
 
         const resp = await this.api.getCertRenewalInfo(certId);
 
-        /* Augment response with Retry-After header */
+        // Augment response with Retry-After header
         resp.data.retryAfter = util.parseRetryAfterHeader(resp.headers['retry-after']);
         return resp.data;
     }
@@ -712,16 +712,16 @@ class AcmeClient {
         const timeStart = dateStart.getTime();
         const timeEnd = dateEnd.getTime();
 
-        /* Renew immediately if window start is in the past */
+        // Renew immediately if window start is in the past
         if (timeNow >= timeStart) {
             log(`Certificate is renewable, start: ${dateStart.toISOString()}, current: ${dateNow.toISOString()}`);
             return 0;
         }
 
-        /* Select a random renewal time within suggested window */
+        // Select a random renewal time within suggested window
         const timeRenew = (Math.random() * (timeEnd - timeStart) + timeStart);
 
-        /* Seconds until next retry or renewal, whichever comes first */
+        // Seconds until next retry or renewal, whichever comes first
         const timeRetry = (timeNow + ((info.retryAfter || 3600) * 1000));
         const waitSeconds = Math.ceil((Math.min(timeRetry, timeRenew) - timeNow) / 1000);
 
@@ -807,5 +807,5 @@ class AcmeClient {
     }
 }
 
-/* Export client */
+// Export client
 module.exports = AcmeClient;

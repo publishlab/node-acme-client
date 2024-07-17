@@ -13,16 +13,19 @@ const x509 = require('@peculiar/x509');
 const randomInt = promisify(crypto.randomInt);
 const generateKeyPair = promisify(crypto.generateKeyPair);
 
-/* Use Node.js Web Crypto API */
+// Use Node.js Web Crypto API
 x509.cryptoProvider.set(crypto.webcrypto);
 
-/* id-ce-subjectAltName - https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
+// id-ce-subjectAltName
+// https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
 const subjectAltNameOID = '2.5.29.17';
 
-/* id-ce-authorityKeyIdentifier - https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.1 */
+// id-ce-authorityKeyIdentifier
+// https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.1
 const authorityKeyIdentifierOID = '2.5.29.35';
 
-/* id-pe-acmeIdentifier - https://datatracker.ietf.org/doc/html/rfc8737#section-6.1 */
+// id-pe-acmeIdentifier
+// https://datatracker.ietf.org/doc/html/rfc8737#section-6.1
 const alpnAcmeIdentifierOID = '1.3.6.1.5.5.7.1.31';
 
 /**
@@ -163,7 +166,7 @@ function getJwk(keyPem) {
         format: 'jwk',
     });
 
-    /* Sort keys */
+    // Sort keys
     return Object.keys(jwk).sort().reduce((result, k) => {
         result[k] = jwk[k];
         return result;
@@ -184,7 +187,7 @@ async function getWebCryptoKeyPair(keyPem) {
     const info = getKeyInfo(keyPem);
     const jwk = getJwk(keyPem);
 
-    /* Signing algorithm */
+    // Signing algorithm
     const sigalg = {
         name: 'RSASSA-PKCS1-v1_5',
         hash: { name: 'SHA-256' },
@@ -203,7 +206,7 @@ async function getWebCryptoKeyPair(keyPem) {
         }
     }
 
-    /* Decode PEM and import into CryptoKeyPair */
+    // Decode PEM and import into CryptoKeyPair
     const privateKeyDec = x509.PemConverter.decodeFirst(keyPem.toString());
     const privateKey = await crypto.webcrypto.subtle.importKey('pkcs8', privateKeyDec, sigalg, true, ['sign']);
     const publicKey = await crypto.webcrypto.subtle.importKey('jwk', jwk, sigalg, true, ['verify']);
@@ -223,7 +226,7 @@ function splitPemChain(chainPem) {
         chainPem = chainPem.toString();
     }
 
-    /* Decode into array and re-encode */
+    // Decode into array and re-encode
     return x509.PemConverter.decodeWithHeaders(chainPem)
         .map((params) => x509.PemConverter.encode([params]));
 }
@@ -245,7 +248,7 @@ exports.getPemBodyAsB64u = (pem) => {
         throw new Error('Unable to parse PEM body from string');
     }
 
-    /* Select first object, extract body and convert to b64u */
+    // Select first object, extract body and convert to b64u
     const dec = x509.PemConverter.decodeFirst(chain[0]);
     return Buffer.from(dec).toString('base64url');
 };
@@ -465,23 +468,24 @@ exports.createCsr = async (data, keyPem = null) => {
         data.altNames = [];
     }
 
-    /* Ensure subject common name is present in SAN - https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf */
+    // Ensure subject common name is present in SAN
+    // https://cabforum.org/wp-content/uploads/BRv1.2.3.pdf
     if (data.commonName && !data.altNames.includes(data.commonName)) {
         data.altNames.unshift(data.commonName);
     }
 
-    /* CryptoKeyPair and signing algorithm from private key */
+    // CryptoKeyPair and signing algorithm from private key
     const [keys, signingAlgorithm] = await getWebCryptoKeyPair(keyPem);
 
     const extensions = [
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
         new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyEncipherment), // eslint-disable-line no-bitwise
 
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
         createSubjectAltNameExtension(data.altNames),
     ];
 
-    /* Create CSR */
+    // Create CSR
     const csr = await x509.Pkcs10CertificateRequestGenerator.create({
         keys,
         extensions,
@@ -497,7 +501,7 @@ exports.createCsr = async (data, keyPem = null) => {
         }),
     });
 
-    /* Done */
+    // Done
     const pem = csr.toString('pem');
     return [keyPem, Buffer.from(pem)];
 };
@@ -535,33 +539,33 @@ exports.createAlpnCertificate = async (authz, keyAuthorization, keyPem = null) =
     const now = new Date();
     const commonName = authz.identifier.value;
 
-    /* Pseudo-random serial - max 20 bytes, 11 for epoch (year 5138), 9 random */
+    // Pseudo-random serial - max 20 bytes, 11 for epoch (year 5138), 9 random
     const random = await randomInt(1, 999999999);
     const serialNumber = `${Math.floor(now.getTime() / 1000)}${random}`;
 
-    /* CryptoKeyPair and signing algorithm from private key */
+    // CryptoKeyPair and signing algorithm from private key
     const [keys, signingAlgorithm] = await getWebCryptoKeyPair(keyPem);
 
     const extensions = [
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
         new x509.KeyUsagesExtension(x509.KeyUsageFlags.keyCertSign | x509.KeyUsageFlags.cRLSign, true), // eslint-disable-line no-bitwise
 
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
         new x509.BasicConstraintsExtension(true, 2, true),
 
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.2 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.2
         await x509.SubjectKeyIdentifierExtension.create(keys.publicKey),
 
-        /* https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6 */
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
         createSubjectAltNameExtension([commonName]),
     ];
 
-    /* ALPN extension */
+    // ALPN extension
     const payload = crypto.createHash('sha256').update(keyAuthorization).digest('hex');
     const octstr = new asn1js.OctetString({ valueHex: Buffer.from(payload, 'hex') });
     extensions.push(new x509.Extension(alpnAcmeIdentifierOID, true, octstr.toBER()));
 
-    /* Self-signed ALPN certificate */
+    // Self-signed ALPN certificate
     const cert = await x509.X509CertificateGenerator.createSelfSigned({
         keys,
         signingAlgorithm,
@@ -574,7 +578,7 @@ exports.createAlpnCertificate = async (authz, keyAuthorization, keyPem = null) =
         }),
     });
 
-    /* Done */
+    // Done
     const pem = cert.toString('pem');
     return [keyPem, Buffer.from(pem)];
 };
@@ -590,7 +594,7 @@ exports.createAlpnCertificate = async (authz, keyAuthorization, keyPem = null) =
 exports.isAlpnCertificateAuthorizationValid = (certPem, keyAuthorization) => {
     const expected = crypto.createHash('sha256').update(keyAuthorization).digest('hex');
 
-    /* Attempt to locate ALPN extension */
+    // Attempt to locate ALPN extension
     const cert = new x509.X509Certificate(certPem);
     const ext = cert.getExtension(alpnAcmeIdentifierOID);
 
@@ -598,11 +602,11 @@ exports.isAlpnCertificateAuthorizationValid = (certPem, keyAuthorization) => {
         throw new Error('Unable to locate ALPN extension within parsed certificate');
     }
 
-    /* Decode extension value */
+    // Decode extension value
     const parsed = asn1js.fromBER(ext.value);
     const result = Buffer.from(parsed.result.valueBlock.valueHexView).toString('hex');
 
-    /* Return true if match */
+    // Return true if match
     return (result === expected);
 };
 
@@ -623,14 +627,14 @@ exports.getAriCertificateId = (certPem) => {
     const dec = x509.PemConverter.decodeFirst(certPem);
     const cert = new x509.X509Certificate(dec);
 
-    /* Attempt to locate AKI extension */
+    // Attempt to locate AKI extension
     const ext = cert.getExtension(authorityKeyIdentifierOID);
 
     if (!ext || !ext.keyId) {
         throw new Error('Unable to locate Authority Key Identifier extension within parsed certificate');
     }
 
-    /* Values as b64u */
+    // Values as b64u
     const aki = Buffer.from(ext.keyId, 'hex').toString('base64url');
     const serial = Buffer.from(cert.serialNumber, 'hex').toString('base64url');
 

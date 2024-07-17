@@ -118,12 +118,12 @@ function parseRetryAfterHeader(header) {
     const sec = parseInt(header, 10);
     const date = new Date(header);
 
-    /* Seconds into the future */
+    // Seconds into the future
     if (Number.isSafeInteger(sec) && (sec > 0)) {
         return sec;
     }
 
-    /* Future date string */
+    // Future date string
     if (date instanceof Date && !Number.isNaN(date)) {
         const now = new Date();
         const diff = Math.ceil((date.getTime() - now.getTime()) / 1000);
@@ -152,17 +152,17 @@ function findCertificateChainForIssuer(chains, issuer) {
     let bestDistance = null;
 
     chains.forEach((chain) => {
-        /* Look up all issuers */
+        // Look up all issuers
         const certs = splitPemChain(chain);
         const infoCollection = certs.map((c) => readCertificateInfo(c));
         const issuerCollection = infoCollection.map((i) => i.issuer.commonName);
 
-        /* Found issuer match, get distance from root - lower is better */
+        // Found issuer match, get distance from root - lower is better
         if (issuerCollection.includes(issuer)) {
             const distance = (issuerCollection.length - issuerCollection.indexOf(issuer));
             log(`Found matching chain for preferred issuer="${issuer}" distance=${distance} issuers=${JSON.stringify(issuerCollection)}`);
 
-            /* Chain wins, use it */
+            // Chain wins, use it
             if (!bestDistance || (distance < bestDistance)) {
                 log(`Issuer is closer to root than previous match, using it (${distance} < ${bestDistance || 'undefined'})`);
                 bestMatch = chain;
@@ -170,17 +170,17 @@ function findCertificateChainForIssuer(chains, issuer) {
             }
         }
         else {
-            /* No match */
+            // No match
             log(`Unable to match certificate for preferred issuer="${issuer}", issuers=${JSON.stringify(issuerCollection)}`);
         }
     });
 
-    /* Return found match */
+    // Return found match
     if (bestMatch) {
         return bestMatch;
     }
 
-    /* No chains matched, return default */
+    // No chains matched, return default
     log(`Found no match in ${chains.length} certificate chains for preferred issuer="${issuer}", returning default certificate chain`);
     return chains[0];
 }
@@ -244,10 +244,10 @@ async function getAuthoritativeDnsResolver(recordName) {
     const resolver = new dns.Resolver();
 
     try {
-        /* Resolve root domain by SOA */
+        // Resolve root domain by SOA
         const domain = await resolveDomainBySoaRecord(recordName);
 
-        /* Resolve authoritative NS addresses */
+        // Resolve authoritative NS addresses
         log(`Looking up authoritative NS records for domain: ${domain}`);
         const nsRecords = await dns.resolveNs(domain);
         const nsAddrArray = await Promise.all(nsRecords.map(async (r) => dns.resolve4(r)));
@@ -257,7 +257,7 @@ async function getAuthoritativeDnsResolver(recordName) {
             throw new Error(`Unable to locate any valid authoritative NS addresses for domain: ${domain}`);
         }
 
-        /* Authoritative NS success */
+        // Authoritative NS success
         log(`Found ${nsAddresses.length} authoritative NS addresses for domain: ${domain}`);
         resolver.setServers(nsAddresses);
     }
@@ -265,7 +265,7 @@ async function getAuthoritativeDnsResolver(recordName) {
         log(`Authoritative NS lookup error: ${e.message}`);
     }
 
-    /* Return resolver */
+    // Return resolver
     const addresses = resolver.getServers();
     log(`DNS resolver addresses: ${addresses.join(', ')}`);
 
@@ -287,7 +287,7 @@ async function retrieveTlsAlpnCertificate(host, port, timeout = 30000) {
     return new Promise((resolve, reject) => {
         let result;
 
-        /* TLS connection */
+        // TLS connection
         const socket = tls.connect({
             host,
             port,
@@ -299,13 +299,13 @@ async function retrieveTlsAlpnCertificate(host, port, timeout = 30000) {
         socket.setTimeout(timeout);
         socket.setEncoding('utf-8');
 
-        /* Grab certificate once connected and close */
+        // Grab certificate once connected and close
         socket.on('secureConnect', () => {
             result = socket.getPeerX509Certificate();
             socket.end();
         });
 
-        /* Errors */
+        // Errors
         socket.on('error', (err) => {
             reject(err);
         });
@@ -314,7 +314,7 @@ async function retrieveTlsAlpnCertificate(host, port, timeout = 30000) {
             socket.destroy(new Error('TLS ALPN certificate lookup request timed out'));
         });
 
-        /* Done, return cert as PEM if found */
+        // Done, return cert as PEM if found
         socket.on('end', () => {
             if (result) {
                 return resolve(result.toString());
