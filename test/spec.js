@@ -123,6 +123,17 @@ spec.rfc8555.challenge = (obj) => {
     }
 };
 
+spec.rfc8555.certRenewalInfo = (obj) => {
+    assert.isObject(obj);
+
+    assert.isObject(obj.suggestedWindow);
+    assert.isString(obj.suggestedWindow.start);
+    assert.isString(obj.suggestedWindow.end);
+
+    /* Augmentations */
+    assert.isNumber(obj.retryAfter);
+};
+
 /**
  * Crypto
  */

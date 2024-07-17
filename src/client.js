@@ -673,6 +673,9 @@ class AcmeClient {
         }
 
         const resp = await this.api.getCertRenewalInfo(certId);
+
+        /* Augment response with Retry-After header */
+        resp.data.retryAfter = util.parseRetryAfterHeader(resp.headers['retry-after']);
         return resp.data;
     }
 

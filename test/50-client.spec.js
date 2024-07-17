@@ -536,11 +536,7 @@ describe('client', () => {
                 await Promise.all([testCertificate, testCertificateAlpn, testCertificateWildcard].map(async (cert) => {
                     const id = acme.crypto.getAriCertificateId(cert);
                     const info = await testClient.getCertificateRenewalInfo(id);
-
-                    assert.isObject(info);
-                    assert.isObject(info.suggestedWindow);
-                    assert.isString(info.suggestedWindow.start);
-                    assert.isString(info.suggestedWindow.end);
+                    spec.rfc8555.certRenewalInfo(info);
                 }));
             });
 
