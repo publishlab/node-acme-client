@@ -540,6 +540,15 @@ describe('client', () => {
                 }));
             });
 
+            it('should get seconds until certificate is renewable', async () => {
+                await Promise.all([testCertificate, testCertificateAlpn, testCertificateWildcard].map(async (cert) => {
+                    const id = acme.crypto.getAriCertificateId(cert);
+                    const seconds = await testClient.getSecondsUntilCertificateRenewable(id);
+                    assert.isNumber(seconds);
+                    assert.isTrue(seconds > 0);
+                }));
+            });
+
             it('should order certificate renewal using ari', async () => {
                 const id = acme.crypto.getAriCertificateId(testCertificate);
                 const order = await testClient.createOrder({

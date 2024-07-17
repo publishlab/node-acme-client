@@ -680,6 +680,56 @@ class AcmeClient {
     }
 
     /**
+     * Utility method that checks when a certificate is eligible for renewal using ACME Renewal Information (ARI)
+     *
+     * NOTE: The certificate is only considered renewable when the return value equals 0.
+     * If the value is greater than zero, wait that amount of time before trying again.
+     *
+     * @param {string} certId ARI certificate identifier
+     * @returns {Promise<number>} Seconds until next retry, 0 when renewable
+     *
+     * @example Check if certificate is renewable
+     * ```js
+     * const certificate = { ... }; // Previously issued certificate
+     * const certId = acme.crypto.getAriCertificateId(certificate);
+     * const waitSeconds = await client.getSecondsUntilCertificateRenewable(certId);
+     *
+     * if (waitSeconds === 0) {
+     *     // Renew certificate now
+     * } else {
+     *     // Wait for waitSeconds before checking again
+     * }
+     * ```
+     */
+
+    async getSecondsUntilCertificateRenewable(certId) {
+        const info = await this.getCertificateRenewalInfo(certId);
+        const dateNow = new Date();
+        const dateStart = new Date(info.suggestedWindow.start);
+        const dateEnd = new Date(info.suggestedWindow.end);
+
+        const timeNow = dateNow.getTime();
+        const timeStart = dateStart.getTime();
+        const timeEnd = dateEnd.getTime();
+
+        /* Renew immediately if window start is in the past */
+        if (timeNow >= timeStart) {
+            log(`Certificate is renewable, start: ${dateStart.toISOString()}, current: ${dateNow.toISOString()}`);
+            return 0;
+        }
+
+        /* Select a random renewal time within suggested window */
+        const timeRenew = (Math.random() * (timeEnd - timeStart) + timeStart);
+
+        /* Seconds until next retry or renewal, whichever comes first */
+        const timeRetry = (timeNow + ((info.retryAfter || 3600) * 1000));
+        const waitSeconds = Math.ceil((Math.min(timeRetry, timeRenew) - timeNow) / 1000);
+
+        log(`Certificate not renewable, window: ${dateStart.toISOString()} - ${dateEnd.toISOString()}, current: ${dateNow.toISOString()}, wait: ${waitSeconds}`);
+        return waitSeconds;
+    }
+
+    /**
      * Auto mode
      *
      * @param {object} opts
