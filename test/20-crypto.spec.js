@@ -55,6 +55,7 @@ describe('crypto', () => {
     const testSanCsrDomains = ['example.com', 'test.example.com', 'abc.example.com'];
     const testKeyPath = path.join(__dirname, 'fixtures', 'private.key');
     const testCertPath = path.join(__dirname, 'fixtures', 'certificate.crt');
+    const testCertWithAuthorityKeyIdentifierPath = path.join(__dirname, 'fixtures', 'certificate-with-authority-key-identifier.crt');
     const testSanCertPath = path.join(__dirname, 'fixtures', 'san-certificate.crt');
 
     /**
@@ -284,6 +285,7 @@ describe('crypto', () => {
     describe('common', () => {
         let testPemKey;
         let testCert;
+        let testCertWithAuthorityKeyIdentifier;
         let testSanCert;
 
         it('should read private key fixture', async () => {
@@ -294,6 +296,11 @@ describe('crypto', () => {
         it('should read certificate fixture', async () => {
             testCert = await fs.readFile(testCertPath);
             assert.isTrue(Buffer.isBuffer(testCert));
+        });
+
+        it('should read certificate with authority key identifier fixture', async () => {
+            testCertWithAuthorityKeyIdentifier = await fs.readFile(testCertWithAuthorityKeyIdentifierPath);
+            assert.isTrue(Buffer.isBuffer(testCertWithAuthorityKeyIdentifier));
         });
 
         it('should read san certificate fixture', async () => {
@@ -324,6 +331,16 @@ describe('crypto', () => {
             spec.crypto.certificateInfo(info);
             assert.strictEqual(info.domains.commonName, testCsrDomain);
             assert.strictEqual(info.domains.altNames.length, 0);
+            assert.strictEqual(info.serialNumber, '0095a2b76ab8b9eaf1');
+            assert.strictEqual(info.authorityKeyIdentifier, undefined);
+        });
+
+        it('should read authorityKeyIdentifier', () => {
+            const info = crypto.readCertificateInfo(testCertWithAuthorityKeyIdentifier);
+
+            spec.crypto.certificateInfo(info);
+            assert.strictEqual(info.serialNumber, '542adb619441bad4b591ae5fc947b688ecc5026c');
+            assert.strictEqual(info.authorityKeyIdentifier, '7a7a7a');
         });
 
         it('should read certificate info with san', () => {
@@ -332,6 +349,8 @@ describe('crypto', () => {
             spec.crypto.certificateInfo(info);
             assert.strictEqual(info.domains.commonName, testSanCsrDomains[0]);
             assert.deepEqual(info.domains.altNames, testSanCsrDomains.slice(1, testSanCsrDomains.length));
+            assert.strictEqual(info.serialNumber, '00f6640fda83f855fc');
+            assert.strictEqual(info.authorityKeyIdentifier, undefined);
         });
 
         it('should read certificate info from string', () => {

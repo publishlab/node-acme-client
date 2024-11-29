@@ -278,7 +278,12 @@ class HttpClient {
      * @returns {Promise<object>} HTTP response
      */
 
-    async signedRequest(url, payload, { kid = null, nonce = null, includeExternalAccountBinding = false } = {}, attempts = 0) {
+    async signedRequest(url, payload, { kid = null, nonce = null, includeExternalAccountBinding = false } = {}, method = 'post', attempts = 0) {
+        if (method === 'get') {
+            const resp = await this.request(url, method);
+            return resp;
+        }
+
         if (!nonce) {
             nonce = await this.getNonce();
         }
@@ -296,7 +301,7 @@ class HttpClient {
 
         /* Sign body and send request */
         const data = this.createSignedBody(url, payload, { nonce, kid });
-        const resp = await this.request(url, 'post', { data });
+        const resp = await this.request(url, method, { data });
 
         /* Retry on bad nonce - https://datatracker.ietf.org/doc/html/rfc8555#section-6.5 */
         if (resp.data && resp.data.type && (resp.status === 400) && (resp.data.type === 'urn:ietf:params:acme:error:badNonce') && (attempts < this.maxBadNonceRetries)) {
@@ -304,7 +309,7 @@ class HttpClient {
             attempts += 1;
 
             log(`Caught invalid nonce error, retrying (${attempts}/${this.maxBadNonceRetries}) signed request to: ${url}`);
-            return this.signedRequest(url, payload, { kid, nonce, includeExternalAccountBinding }, attempts);
+            return this.signedRequest(url, payload, { kid, nonce, includeExternalAccountBinding }, method, attempts);
         }
 
         /* Return response */

@@ -40,6 +40,9 @@ AcmeClient
     * [.getCertificate(order, [preferredChain])](#AcmeClient+getCertificate) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.revokeCertificate(cert, [data])](#AcmeClient+revokeCertificate) ⇒ <code>Promise</code>
     * [.auto(opts)](#AcmeClient+auto) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.isAriSupported()](#AcmeClient+isAriSupported) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.getAriUniqueIdentifier()](#AcmeClient+getAriUniqueIdentifier) ⇒ <code>AriUniqueIdentifierString</code>
+    * [.getAriRenewalInfo()](#AcmeClient+getAriRenewalInfo) ⇒ <code>Promise.&lt;Ari&gt;</code>
 
 <a name="new_AcmeClient_new"></a>
 
@@ -509,6 +512,49 @@ const certificate = await client.auto({
     challengeCreateFn: async () => {},
     challengeRemoveFn: async () => {},
 });
+```
+<a name="AcmeClient+isAriSupported"></a>
+
+### acmeClient.isAriSupported() ⇒ <code>Promise.&lt;boolean&gt;</code>
+Check if the new ACME ARI draft is supported (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+
+**Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - indicating support  
+**Example**  
+Get ACME ARI supported status
+```js
+const supported = await client.isAriSupported();
+
+if (!supported) {
+    // CA does not support ARI draft
+}
+```
+<a name="AcmeClient+getAriUniqueIdentifier"></a>
+
+### acmeClient.getAriUniqueIdentifier() ⇒ <code>AriUniqueIdentifierString</code>
+Get the ACME ARI draft unique identifier (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+
+**Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
+**Returns**: <code>AriUniqueIdentifierString</code> - unique identifier  
+**Example**  
+Get ACME ARI draft unique identifier
+```js
+const uniqueIdentifier = client.getAriUniqueIdentifier();
+```
+<a name="AcmeClient+getAriRenewalInfo"></a>
+
+### acmeClient.getAriRenewalInfo() ⇒ <code>Promise.&lt;Ari&gt;</code>
+Get the ACME ARI renewal window (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+
+**Kind**: instance method of [<code>AcmeClient</code>](#AcmeClient)  
+**Returns**: <code>Promise.&lt;Ari&gt;</code> - ari renewal info  
+**Params**: <code>AriUniqueIdentifierString</code> ariUniqueIdentifier unique identifier  
+**Example**  
+Get ACME ARI renewal window
+```js
+// const certificate = client.auto(...);
+const ariUniqueIdentifier = client.getAriUniqueIdentifier(certificate);
+const renewalInfo = await client.getAriRenewalInfo(ariUniqueIdentifier);
 ```
 <a name="Client"></a>
 

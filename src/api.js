@@ -43,12 +43,13 @@ class AcmeApi {
      * @param {object} [opts]
      * @param {boolean} [opts.includeJwsKid] Include KID instead of JWK in JWS header, default: `true`
      * @param {boolean} [opts.includeExternalAccountBinding] Include EAB in request, default: `false`
+     * @param {string} [method] Optional request method, can be either `post` or `get`, default: `post`
      * @returns {Promise<object>} HTTP response
      */
 
-    async apiRequest(url, payload = null, validStatusCodes = [], { includeJwsKid = true, includeExternalAccountBinding = false } = {}) {
+    async apiRequest(url, payload = null, validStatusCodes = [], { includeJwsKid = true, includeExternalAccountBinding = false } = {}, method = 'post') {
         const kid = includeJwsKid ? this.getAccountUrl() : null;
-        const resp = await this.http.signedRequest(url, payload, { kid, includeExternalAccountBinding });
+        const resp = await this.http.signedRequest(url, payload, { kid, includeExternalAccountBinding }, method);
 
         if (validStatusCodes.length && (validStatusCodes.indexOf(resp.status) === -1)) {
             throw new HttpError(util.formatResponseError(resp), resp);
@@ -85,6 +86,40 @@ class AcmeApi {
 
     async getTermsOfServiceUrl() {
         return this.http.getMetaField('termsOfService');
+    }
+
+    /**
+     * Get ARI supported status
+     *
+     * https://datatracker.ietf.org/doc/draft-ietf-acme-ari/
+     *
+     * @returns {Promise<boolean>} supported status
+     */
+
+    async isAriSupported() {
+        try {
+            await this.http.getResourceUrl('renewalInfo');
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get ARI renewal window
+     *
+     * https://datatracker.ietf.org/doc/draft-ietf-acme-ari/
+     *
+     * @param {string} ariUniqueIdentifier The unique ARI identifier
+     *
+     * @returns {Promise<object>} HTTP response
+     */
+
+    async getAriRenewalInfo(ariUniqueIdentifier) {
+        const resourceUrl = await this.http.getResourceUrl('renewalInfo');
+
+        return this.apiRequest(`${resourceUrl}/${ariUniqueIdentifier}`, undefined, [200], { includeJwsKid: false, includeExternalAccountBinding: false }, 'get');
     }
 
     /**

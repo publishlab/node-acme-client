@@ -212,6 +212,9 @@ console.log(`Not before: ${info.notBefore}`);
 
 console.log(`Common name: ${commonName}`);
 console.log(`Alt names: ${altNames.join(', ')}`);
+
+console.log(`Serial: ${info.serialNumber}`);
+console.log(`Authority Key Identifier: ${info.authorityKeyIdentifier}`);
 ```
 <a name="createCsr"></a>
 

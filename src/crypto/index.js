@@ -313,9 +313,11 @@ exports.readCsrDomains = (csrPem) => {
  *
  * console.log(`Common name: ${commonName}`);
  * console.log(`Alt names: ${altNames.join(', ')}`);
+ *
+ * console.log(`Serial: ${info.serialNumber}`);
+ * console.log(`Authority Key Identifier: ${info.authorityKeyIdentifier}`);
  * ```
  */
-
 exports.readCertificateInfo = (certPem) => {
     if (Buffer.isBuffer(certPem)) {
         certPem = certPem.toString();
@@ -324,6 +326,9 @@ exports.readCertificateInfo = (certPem) => {
     const dec = x509.PemConverter.decodeFirst(certPem);
     const cert = new x509.X509Certificate(dec);
 
+    const extension = cert.getExtension(x509.AuthorityKeyIdentifierExtension);
+    const authorityKeyIdentifier = extension ? extension.keyId : undefined;
+
     return {
         issuer: {
             commonName: cert.issuerName.getField('CN').pop() || null,
@@ -331,6 +336,8 @@ exports.readCertificateInfo = (certPem) => {
         domains: parseDomains(cert),
         notBefore: cert.notBefore,
         notAfter: cert.notAfter,
+        serialNumber: cert.serialNumber,
+        authorityKeyIdentifier,
     };
 };
 

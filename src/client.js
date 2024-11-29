@@ -5,7 +5,7 @@
  */
 
 const { createHash } = require('crypto');
-const { getPemBodyAsB64u } = require('./crypto');
+const { getPemBodyAsB64u, readCertificateInfo } = require('./crypto');
 const { log } = require('./logger');
 const HttpClient = require('./http');
 const AcmeApi = require('./api');
@@ -701,6 +701,69 @@ class AcmeClient {
 
     auto(opts) {
         return auto(this, opts);
+    }
+
+    /**
+     * Check if the new ACME ARI draft is supported (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+     *
+     * @returns {Promise<boolean>} indicating support
+     *
+     * @example Get ACME ARI supported status
+     * ```js
+     * const supported = await client.isAriSupported();
+     *
+     * if (!supported) {
+     *     // CA does not support ARI draft
+     * }
+     * ```
+     */
+
+    isAriSupported() {
+        return this.api.isAriSupported();
+    }
+
+    /**
+     * Get the ACME ARI draft unique identifier (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+     *
+     * @returns {AriUniqueIdentifierString} unique identifier
+     *
+     * @example Get ACME ARI draft unique identifier
+     * ```js
+     * const uniqueIdentifier = client.getAriUniqueIdentifier();
+     * ```
+     */
+    getAriUniqueIdentifier(certificate) {
+        const certInfo = readCertificateInfo(certificate);
+        if (undefined === certInfo.authorityKeyIdentifier) {
+            throw new Error('authorityKeyIdentifier not found in certificate');
+        }
+
+        const serial = Buffer.from(certInfo.serialNumber, 'hex').toString('base64url');
+        const keyId = Buffer.from(certInfo.authorityKeyIdentifier, 'hex').toString('base64url');
+
+        return `${keyId}.${serial}`;
+    }
+
+    /**
+     * Get the ACME ARI renewal window (https://datatracker.ietf.org/doc/draft-ietf-acme-ari/)
+     *
+     * @params {AriUniqueIdentifierString} ariUniqueIdentifier unique identifier
+     * @return {Promise<Ari>} ari renewal info
+     *
+     * @example Get ACME ARI renewal window
+     * ```js
+     * // const certificate = client.auto(...);
+     * const ariUniqueIdentifier = client.getAriUniqueIdentifier(certificate);
+     * const renewalInfo = await client.getAriRenewalInfo(ariUniqueIdentifier);
+     * ```
+     */
+    async getAriRenewalInfo(ariUniqueIdentifier) {
+        const resp = await this.api.getAriRenewalInfo(ariUniqueIdentifier);
+
+        return {
+            ...resp.data,
+            pollingInterval: resp.headers['retry-after'] ? util.parseRetryAfterHeader(resp.headers['retry-after']) : undefined,
+        };
     }
 }
 

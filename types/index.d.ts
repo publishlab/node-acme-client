@@ -4,16 +4,19 @@
 
 import { AxiosInstance, AxiosResponse } from 'axios';
 import * as rfc8555 from './rfc8555';
+import * as draftIetfAcmeAri06 from 'types/draft-ietf-acme-ari-06';
 
 export type PrivateKeyBuffer = Buffer;
 export type PublicKeyBuffer = Buffer;
 export type CertificateBuffer = Buffer;
 export type CsrBuffer = Buffer;
+export type KeyIdentifierBuffer = Buffer;
 
 export type PrivateKeyString = string;
 export type PublicKeyString = string;
 export type CertificateString = string;
 export type CsrString = string;
+export type AriUniqueIdentifierString = string;
 
 /**
  * Augmented ACME interfaces
@@ -25,6 +28,11 @@ export interface Order extends rfc8555.Order {
 
 export interface Authorization extends rfc8555.Authorization {
     url: string;
+}
+
+export interface Ari {
+    info: draftIetfAcmeAri06.RenewalInfo;
+    pollingInterval?: number;
 }
 
 /**
@@ -64,7 +72,7 @@ export class Client {
     createAccount(data?: rfc8555.AccountCreateRequest): Promise<rfc8555.Account>;
     updateAccount(data?: rfc8555.AccountUpdateRequest): Promise<rfc8555.Account>;
     updateAccountKey(newAccountKey: PrivateKeyBuffer | PrivateKeyString, data?: object): Promise<rfc8555.Account>;
-    createOrder(data: rfc8555.OrderCreateRequest): Promise<Order>;
+    createOrder(data: rfc8555.OrderCreateRequest & draftIetfAcmeAri06.OrderCreateRequest): Promise<Order>;
     getOrder(order: Order): Promise<Order>;
     finalizeOrder(order: Order, csr: CsrBuffer | CsrString): Promise<Order>;
     getAuthorizations(order: Order): Promise<Authorization[]>;
@@ -76,6 +84,9 @@ export class Client {
     getCertificate(order: Order, preferredChain?: string): Promise<string>;
     revokeCertificate(cert: CertificateBuffer | CertificateString, data?: rfc8555.CertificateRevocationRequest): Promise<void>;
     auto(opts: ClientAutoOptions): Promise<string>;
+    isAriSupported(): Promise<boolean>;
+    getAriUniqueIdentifier(certificate: string): AriUniqueIdentifierString;
+    getAriRenewalInfo(ariUniqueIdentifier: AriUniqueIdentifierString): Promise<Ari>;
 }
 
 /**
@@ -118,6 +129,8 @@ export interface CertificateInfo {
     domains: CertificateDomains;
     notAfter: Date;
     notBefore: Date;
+    serial: string;
+    authorityKeyIdentifier?: string;
 }
 
 export interface CsrOptions {
