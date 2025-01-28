@@ -309,12 +309,13 @@ class AcmeClient {
      *
      * https://datatracker.ietf.org/doc/html/rfc8555#section-7.4
      *
-     * @param {object} order Order object
+     * @param {object} order Object containing order URL
+     * @param {string} order.url Order URL
      * @returns {Promise<object>} Order
      *
      * @example
      * ```js
-     * const order = { ... }; // Previously created order object
+     * const order = { url: 'https://acme-provider.example.com/order/123' }; // Only URL is required
      * const result = await client.getOrder(order);
      * ```
      */

@@ -28,6 +28,7 @@ import * as acme from 'acme-client';
     });
 
     await client.getOrder(order);
+    await client.getOrder({ url: order.url });
 
     /* Authorizations / Challenges */
     const authorizations = await client.getAuthorizations(order);
