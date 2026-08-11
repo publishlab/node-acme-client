@@ -66,4 +66,11 @@ import * as acme from 'acme-client';
         challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
         challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
     });
+
+    await client.auto({
+        csr: certCsr,
+        selectChallengeFn: (authz) => authz.challenges[0],
+        challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
+        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
+    });
 })();

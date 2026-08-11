@@ -289,6 +289,48 @@ describe('client.auto', () => {
                 assert.isString(cert);
             });
 
+            it('should order certificate with selectChallengeFn per domain', async () => {
+                const httpDomain = `${uuid()}.${domainName}`;
+                const dnsDomain = `${uuid()}.${domainName}`;
+                const selectedTypes = {};
+
+                const [, csr] = await acme.crypto.createCsr({
+                    altNames: [httpDomain, dnsDomain],
+                }, await createKeyFn());
+
+                const cert = await testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    selectChallengeFn: (authz) => {
+                        const preferred = authz.identifier.value === dnsDomain ? 'dns-01' : 'http-01';
+                        return authz.challenges.find((c) => c.type === preferred);
+                    },
+                    challengeCreateFn: async (authz, challenge, keyAuthorization) => {
+                        selectedTypes[authz.identifier.value] = challenge.type;
+                        return cts.challengeCreateFn(authz, challenge, keyAuthorization);
+                    },
+                    challengeRemoveFn: cts.challengeRemoveFn,
+                });
+
+                assert.isString(cert);
+                assert.strictEqual(selectedTypes[httpDomain], 'http-01');
+                assert.strictEqual(selectedTypes[dnsDomain], 'dns-01');
+            });
+
+            it('should throw when selectChallengeFn returns invalid challenge', async () => {
+                const [, csr] = await acme.crypto.createCsr({
+                    commonName: `${uuid()}.${domainName}`,
+                }, await createKeyFn());
+
+                await assert.isRejected(testClient.auto({
+                    csr,
+                    termsOfServiceAgreed: true,
+                    selectChallengeFn: () => ({ type: 'http-01', url: 'https://invalid.example/challenge', token: 'x' }),
+                    challengeCreateFn: cts.challengeNoopFn,
+                    challengeRemoveFn: cts.challengeNoopFn,
+                }), /selectChallengeFn\(\) did not return a challenge from authz\.challenges/);
+            });
+
             it('should order san certificate', async () => {
                 const [, csr] = await acme.crypto.createCsr({
                     altNames: testSanDomains,

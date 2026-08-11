@@ -28,6 +28,7 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
     * [Legacy .forge interface](#legacy-forge-interface)
 * [Auto mode](#auto-mode)
     * [Challenge priority](#challenge-priority)
+    * [Per-domain challenge selection](#per-domain-challenge-selection)
     * [Internal challenge verification](#internal-challenge-verification)
     * [Certificate renewal using ARI](#certificate-renewal-using-ari)
 * [API](#api)
@@ -162,6 +163,22 @@ await client.auto({
     challengePriority: ['http-01', 'dns-01'],
 });
 ```
+
+### Per-domain challenge selection
+
+To choose a challenge type per domain instead of using the global priority list, provide `selectChallengeFn`. The function receives the authorization for each domain and must return one of the challenges from `authz.challenges`:
+
+```js
+await client.auto({
+    ...,
+    selectChallengeFn: (authz) => {
+        const preferred = authz.identifier.value === 'dns.example.com' ? 'dns-01' : 'http-01';
+        return authz.challenges.find((c) => c.type === preferred);
+    },
+});
+```
+
+When `selectChallengeFn` is set, `challengePriority` is not used.
 
 ### Internal challenge verification
 
