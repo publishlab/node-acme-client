@@ -30,6 +30,7 @@ async function selectChallenge(authz, opts) {
     const domain = authz.identifier.value;
 
     if (typeof opts.selectChallengeFn === 'function') {
+        log(`[auto] [${domain}] Selecting challenge using selectChallengeFn()`);
         const challenge = await opts.selectChallengeFn(authz);
 
         if (!challenge || !authz.challenges.includes(challenge)) {
@@ -38,6 +39,8 @@ async function selectChallenge(authz, opts) {
 
         return challenge;
     }
+
+    log(`[auto] [${domain}] Selecting challenge using challengePriority: ${opts.challengePriority.join(', ')}`);
 
     const challenge = [...authz.challenges].sort((a, b) => {
         const aidx = opts.challengePriority.indexOf(a.type);
