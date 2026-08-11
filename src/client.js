@@ -741,6 +741,7 @@ class AcmeClient {
      * @param {string} [opts.replacesCertificateId] Certificate ID to replace when renewing using ARI
      * @param {boolean} [opts.skipChallengeVerification] Skip internal challenge verification before notifying ACME provider, default: `false`
      * @param {string[]} [opts.challengePriority] Array defining challenge type priority, default: `['http-01', 'dns-01']`
+     * @param {function} [opts.selectChallengeFn] Function returning challenge to use for an authorization, default: `null`
      * @param {string} [opts.preferredChain] Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null`
      * @returns {Promise<string>} Certificate
      *
@@ -774,6 +775,21 @@ class AcmeClient {
      *     email: 'test@example.com',
      *     termsOfServiceAgreed: true,
      *     preferredChain: 'DST Root CA X3',
+     *     challengeCreateFn: async () => {},
+     *     challengeRemoveFn: async () => {},
+     * });
+     * ```
+     *
+     * @example Select challenge type per domain
+     * ```js
+     * const certificate = await client.auto({
+     *     csr: certificateRequest,
+     *     email: 'test@example.com',
+     *     termsOfServiceAgreed: true,
+     *     selectChallengeFn: (authz) => {
+     *         const preferred = authz.identifier.value === 'dns.example.com' ? 'dns-01' : 'http-01';
+     *         return authz.challenges.find((c) => c.type === preferred);
+     *     },
      *     challengeCreateFn: async () => {},
      *     challengeRemoveFn: async () => {},
      * });

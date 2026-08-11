@@ -473,6 +473,7 @@ Auto mode
 | [opts.termsOfServiceAgreed] | <code>boolean</code> | Agree to Terms of Service, default: `false` |
 | [opts.skipChallengeVerification] | <code>boolean</code> | Skip internal challenge verification before notifying ACME provider, default: `false` |
 | [opts.challengePriority] | <code>Array.&lt;string&gt;</code> | Array defining challenge type priority, default: `['http-01', 'dns-01']` |
+| [opts.selectChallengeFn] | <code>function</code> | Function returning challenge to use for an authorization, default: `null` |
 | [opts.preferredChain] | <code>string</code> | Indicate which certificate chain is preferred if a CA offers multiple, by exact issuer common name, default: `null` |
 
 **Example**  
@@ -506,6 +507,21 @@ const certificate = await client.auto({
     email: 'test@example.com',
     termsOfServiceAgreed: true,
     preferredChain: 'DST Root CA X3',
+    challengeCreateFn: async () => {},
+    challengeRemoveFn: async () => {},
+});
+```
+**Example**  
+Select challenge type per domain
+```js
+const certificate = await client.auto({
+    csr: certificateRequest,
+    email: 'test@example.com',
+    termsOfServiceAgreed: true,
+    selectChallengeFn: (authz) => {
+        const preferred = authz.identifier.value === 'dns.example.com' ? 'dns-01' : 'http-01';
+        return authz.challenges.find((c) => c.type === preferred);
+    },
     challengeCreateFn: async () => {},
     challengeRemoveFn: async () => {},
 });

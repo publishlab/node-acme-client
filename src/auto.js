@@ -13,9 +13,50 @@ const defaultOpts = {
     replacesCertificateId: null,
     skipChallengeVerification: false,
     challengePriority: ['http-01', 'dns-01'],
+    selectChallengeFn: null,
     challengeCreateFn: async () => { throw new Error('Missing challengeCreateFn()'); },
     challengeRemoveFn: async () => { throw new Error('Missing challengeRemoveFn()'); },
 };
+
+/**
+ * Select challenge for authorization
+ *
+ * @param {object} authz Authorization
+ * @param {object} opts Auto options
+ * @returns {Promise<object>} Challenge
+ */
+
+async function selectChallenge(authz, opts) {
+    const domain = authz.identifier.value;
+
+    if (typeof opts.selectChallengeFn === 'function') {
+        log(`[auto] [${domain}] Selecting challenge using selectChallengeFn()`);
+        const challenge = await opts.selectChallengeFn(authz);
+
+        if (!challenge || !authz.challenges.includes(challenge)) {
+            throw new Error(`Unable to select challenge for ${domain}, selectChallengeFn() did not return a challenge from authz.challenges`);
+        }
+
+        return challenge;
+    }
+
+    log(`[auto] [${domain}] Selecting challenge using challengePriority: ${opts.challengePriority.join(', ')}`);
+
+    const challenge = [...authz.challenges].sort((a, b) => {
+        const aidx = opts.challengePriority.indexOf(a.type);
+        const bidx = opts.challengePriority.indexOf(b.type);
+
+        if (aidx === -1) return 1;
+        if (bidx === -1) return -1;
+        return aidx - bidx;
+    })[0];
+
+    if (!challenge) {
+        throw new Error(`Unable to select challenge for ${domain}, no challenge found`);
+    }
+
+    return challenge;
+}
 
 /**
  * ACME client auto mode
@@ -96,19 +137,8 @@ module.exports = async (client, userOpts) => {
         }
 
         try {
-            // Select challenge based on priority
-            const challenge = authz.challenges.sort((a, b) => {
-                const aidx = opts.challengePriority.indexOf(a.type);
-                const bidx = opts.challengePriority.indexOf(b.type);
-
-                if (aidx === -1) return 1;
-                if (bidx === -1) return -1;
-                return aidx - bidx;
-            }).slice(0, 1)[0];
-
-            if (!challenge) {
-                throw new Error(`Unable to select challenge for ${d}, no challenge found`);
-            }
+            // Select challenge
+            const challenge = await selectChallenge(authz, opts);
 
             log(`[auto] [${d}] Found ${authz.challenges.length} challenges, selected type: ${challenge.type}`);
 

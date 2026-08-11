@@ -58,6 +58,7 @@ export interface ClientAutoOptions {
     termsOfServiceAgreed?: boolean;
     skipChallengeVerification?: boolean;
     challengePriority?: string[];
+    selectChallengeFn?: (authz: Authorization) => rfc8555.Challenge | Promise<rfc8555.Challenge>;
     preferredChain?: string;
     replacesCertificateId?: string;
 }
