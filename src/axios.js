@@ -26,6 +26,7 @@ instance.defaults.acmeSettings = {
 
     retryMaxAttempts: 5,
     retryDefaultDelay: 5,
+    retryMaxDelay: null,
 };
 
 /**
@@ -88,7 +89,7 @@ instance.interceptors.response.use(null, async (error) => {
 
     // Pick up errors we want to retry
     if (isRetryableError(error)) {
-        const { retryMaxAttempts, retryDefaultDelay } = instance.defaults.acmeSettings;
+        const { retryMaxAttempts, retryDefaultDelay, retryMaxDelay } = instance.defaults.acmeSettings;
         config.retryAttempt = ('retryAttempt' in config) ? (config.retryAttempt + 1) : 1;
 
         if (config.retryAttempt <= retryMaxAttempts) {
@@ -100,6 +101,14 @@ instance.interceptors.response.use(null, async (error) => {
 
             if (retryAfter > 0) {
                 log(`Found retry-after response header with value: ${response.headers['retry-after']}, waiting ${retryAfter} seconds`);
+
+                /* Hand long rate limits back to the caller instead of sleeping on them.
+                   A provider may ask us to wait hours or days, which is a decision for
+                   the caller to make, not something to sit out inside a request. */
+                if ((retryMaxDelay !== null) && (retryAfter > retryMaxDelay)) {
+                    log(`Retry-after of ${retryAfter} seconds exceeds retryMaxDelay of ${retryMaxDelay}, not retrying`);
+                    return validateStatus(response);
+                }
             }
             else {
                 retryAfter = (retryDefaultDelay * config.retryAttempt);
@@ -110,6 +119,12 @@ instance.interceptors.response.use(null, async (error) => {
             await new Promise((resolve) => { setTimeout(resolve, (retryAfter * 1000)); });
             return instance(config);
         }
+    }
+
+    /* Transport level failure, there is no response to validate. Reject with the
+       original error rather than tripping over an undefined response below. */
+    if (!response) {
+        return Promise.reject(error);
     }
 
     // Validate and return response

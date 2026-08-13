@@ -6,6 +6,7 @@ const tls = require('tls');
 const dns = require('dns').promises;
 const { readCertificateInfo, splitPemChain } = require('./crypto');
 const { log } = require('./logger');
+const HttpError = require('./error/http');
 
 /**
  * Exponential backoff
@@ -39,6 +40,26 @@ class Backoff {
 }
 
 /**
+ * Determine if an error has already been retried by the HTTP layer
+ *
+ * Mirrors isRetryableError() in axios.js. Those attempts honor the Retry-After the
+ * provider sent, so repeating them here on a blind backoff only spends more of a quota
+ * that is already exhausted, and multiplies out the attempts the caller asked for.
+ *
+ * @param {Error} e Error
+ * @returns {boolean} Error has already been retried
+ */
+
+function isRetriedHttpError(e) {
+    if (!(e instanceof HttpError) || !e.response) {
+        return false;
+    }
+
+    const { status } = e.response;
+    return ((status === 429) || ((status >= 500) && (status <= 599)));
+}
+
+/**
  * Retry promise
  *
  * @param {function} fn Function returning promise that should be retried
@@ -56,6 +77,14 @@ async function retryPromise(fn, attempts, backoff) {
     }
     catch (e) {
         if (aborted || ((backoff.attempts + 1) >= attempts)) {
+            throw e;
+        }
+
+        /* Already retried by the HTTP layer, leave the decision to the caller. Waiting
+           on a status to become valid throws a plain Error rather than an HttpError, so
+           that keeps its attempts here. */
+        if (isRetriedHttpError(e)) {
+            log(`Promise rejected with HTTP ${e.response.status} already retried by the HTTP layer, not retrying: ${e.message}`);
             throw e;
         }
 
