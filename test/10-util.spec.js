@@ -39,22 +39,25 @@ describe('util', () => {
         assert.strictEqual(attempts, 3);
     });
 
-    it('retry() should not retry a rate limit', async () => {
-        let attempts = 0;
+    it('retry() should not retry errors already retried by the http layer', async () => {
         const backoffOpts = {
             min: 100,
             max: 500,
         };
 
-        await assert.isRejected(util.retry(() => {
-            attempts += 1;
-            throw new HttpError('Rate Limit Exceeded', { status: 429 });
-        }, backoffOpts));
+        await Promise.all([429, 500, 503].map(async (status) => {
+            let attempts = 0;
 
-        assert.strictEqual(attempts, 1);
+            await assert.isRejected(util.retry(() => {
+                attempts += 1;
+                throw new HttpError(`HTTP ${status}`, { status });
+            }, backoffOpts));
+
+            assert.strictEqual(attempts, 1, `expected no retries for HTTP ${status}`);
+        }));
     });
 
-    it('retry() should retry other http errors', async () => {
+    it('retry() should retry http errors the http layer leaves alone', async () => {
         let attempts = 0;
         const backoffOpts = {
             min: 100,
@@ -63,7 +66,24 @@ describe('util', () => {
 
         await assert.isRejected(util.retry(() => {
             attempts += 1;
-            throw new HttpError('Internal Server Error', { status: 500 });
+            throw new HttpError('Forbidden', { status: 403 });
+        }, backoffOpts));
+
+        assert.strictEqual(attempts, 5);
+    });
+
+    it('retry() should retry while waiting for a valid status', async () => {
+        let attempts = 0;
+        const backoffOpts = {
+            min: 100,
+            max: 500,
+        };
+
+        /* waitForValidStatus() throws a plain Error while an item is still pending,
+           which must keep retrying regardless of the rules above */
+        await assert.isRejected(util.retry(() => {
+            attempts += 1;
+            throw new Error('Operation is pending or processing');
         }, backoffOpts));
 
         assert.strictEqual(attempts, 5);

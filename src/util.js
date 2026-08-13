@@ -40,14 +40,23 @@ class Backoff {
 }
 
 /**
- * Determine if an error is a rate limit
+ * Determine if an error has already been retried by the HTTP layer
+ *
+ * Mirrors isRetryableError() in axios.js. Those attempts honor the Retry-After the
+ * provider sent, so repeating them here on a blind backoff only spends more of a quota
+ * that is already exhausted, and multiplies out the attempts the caller asked for.
  *
  * @param {Error} e Error
- * @returns {boolean} Error is a rate limit
+ * @returns {boolean} Error has already been retried
  */
 
-function isRateLimitError(e) {
-    return ((e instanceof HttpError) && !!e.response && (e.response.status === 429));
+function isRetriedHttpError(e) {
+    if (!(e instanceof HttpError) || !e.response) {
+        return false;
+    }
+
+    const { status } = e.response;
+    return ((status === 429) || ((status >= 500) && (status <= 599)));
 }
 
 /**
@@ -71,12 +80,11 @@ async function retryPromise(fn, attempts, backoff) {
             throw e;
         }
 
-        /* A rate limit has already been through the retry in axios.js, which waits out
-           the Retry-After the provider asked for. Retrying here on a blind backoff
-           spends more of a quota that is already exhausted, and the provider told us
-           this needs more than a moment, so leave the decision to the caller. */
-        if (isRateLimitError(e)) {
-            log(`Promise rejected with rate limit, not retrying: ${e.message}`);
+        /* Already retried by the HTTP layer, leave the decision to the caller. Waiting
+           on a status to become valid throws a plain Error rather than an HttpError, so
+           that keeps its attempts here. */
+        if (isRetriedHttpError(e)) {
+            log(`Promise rejected with HTTP ${e.response.status} already retried by the HTTP layer, not retrying: ${e.message}`);
             throw e;
         }
 
