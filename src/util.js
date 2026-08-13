@@ -6,6 +6,7 @@ const tls = require('tls');
 const dns = require('dns').promises;
 const { readCertificateInfo, splitPemChain } = require('./crypto');
 const { log } = require('./logger');
+const HttpError = require('./error/http');
 
 /**
  * Exponential backoff
@@ -39,6 +40,17 @@ class Backoff {
 }
 
 /**
+ * Determine if an error is a rate limit
+ *
+ * @param {Error} e Error
+ * @returns {boolean} Error is a rate limit
+ */
+
+function isRateLimitError(e) {
+    return ((e instanceof HttpError) && !!e.response && (e.response.status === 429));
+}
+
+/**
  * Retry promise
  *
  * @param {function} fn Function returning promise that should be retried
@@ -56,6 +68,15 @@ async function retryPromise(fn, attempts, backoff) {
     }
     catch (e) {
         if (aborted || ((backoff.attempts + 1) >= attempts)) {
+            throw e;
+        }
+
+        /* A rate limit has already been through the retry in axios.js, which waits out
+           the Retry-After the provider asked for. Retrying here on a blind backoff
+           spends more of a quota that is already exhausted, and the provider told us
+           this needs more than a moment, so leave the decision to the caller. */
+        if (isRateLimitError(e)) {
+            log(`Promise rejected with rate limit, not retrying: ${e.message}`);
             throw e;
         }
 

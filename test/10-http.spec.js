@@ -103,6 +103,57 @@ describe('http', () => {
         assert.strictEqual(rateLimitCount, 3);
     });
 
+    it('should not retry on 429 rate limit above retryMaxDelay', async () => {
+        let rateLimitCount = 0;
+
+        nock(endpoint).persist().get('/').reply(() => {
+            rateLimitCount += 1;
+            return [429, 'Rate Limit Exceeded', { 'Retry-After': 120 }];
+        });
+
+        axios.defaults.acmeSettings.retryMaxDelay = 60;
+
+        try {
+            assert.strictEqual(rateLimitCount, 0);
+            const resp = await testClient.request(endpoint, 'get');
+
+            assert.isObject(resp);
+            assert.strictEqual(resp.status, 429);
+            assert.strictEqual(rateLimitCount, 1);
+        }
+        finally {
+            axios.defaults.acmeSettings.retryMaxDelay = null;
+        }
+    });
+
+    it('should retry on 429 rate limit below retryMaxDelay', async () => {
+        let rateLimitCount = 0;
+
+        nock(endpoint).persist().get('/').reply(() => {
+            rateLimitCount += 1;
+
+            if (rateLimitCount < 3) {
+                return [429, 'Rate Limit Exceeded', { 'Retry-After': 1 }];
+            }
+
+            return [200, 'ok'];
+        });
+
+        axios.defaults.acmeSettings.retryMaxDelay = 60;
+
+        try {
+            assert.strictEqual(rateLimitCount, 0);
+            const resp = await testClient.request(endpoint, 'get');
+
+            assert.isObject(resp);
+            assert.strictEqual(resp.status, 200);
+            assert.strictEqual(rateLimitCount, 3);
+        }
+        finally {
+            axios.defaults.acmeSettings.retryMaxDelay = null;
+        }
+    });
+
     it('should retry on 5xx server error', async () => {
         let serverErrorCount = 0;
 

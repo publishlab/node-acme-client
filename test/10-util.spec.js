@@ -7,6 +7,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { assert } = require('chai');
 const util = require('./../src/util');
+const HttpError = require('./../src/error/http');
 const { readCertificateInfo } = require('./../src/crypto');
 
 describe('util', () => {
@@ -36,6 +37,36 @@ describe('util', () => {
 
         assert.strictEqual(r, 'abc');
         assert.strictEqual(attempts, 3);
+    });
+
+    it('retry() should not retry a rate limit', async () => {
+        let attempts = 0;
+        const backoffOpts = {
+            min: 100,
+            max: 500,
+        };
+
+        await assert.isRejected(util.retry(() => {
+            attempts += 1;
+            throw new HttpError('Rate Limit Exceeded', { status: 429 });
+        }, backoffOpts));
+
+        assert.strictEqual(attempts, 1);
+    });
+
+    it('retry() should retry other http errors', async () => {
+        let attempts = 0;
+        const backoffOpts = {
+            min: 100,
+            max: 500,
+        };
+
+        await assert.isRejected(util.retry(() => {
+            attempts += 1;
+            throw new HttpError('Internal Server Error', { status: 500 });
+        }, backoffOpts));
+
+        assert.strictEqual(attempts, 5);
     });
 
     it('parseLinkHeader()', () => {
