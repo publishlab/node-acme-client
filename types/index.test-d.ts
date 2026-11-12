@@ -2,7 +2,7 @@
  * acme-client type definition tests
  */
 
-import * as acme from 'acme-client';
+import * as acme from "@chstewart/acme-client";
 
 (async () => {
     /* Client */
@@ -10,21 +10,21 @@ import * as acme from 'acme-client';
 
     const client = new acme.Client({
         accountKey,
-        directoryUrl: acme.directory.letsencrypt.staging
+        directoryUrl: acme.directory.letsencrypt.staging,
     });
 
     /* Account */
     await client.createAccount({
         termsOfServiceAgreed: true,
-        contact: ['mailto:test@example.com']
+        contact: ["mailto:test@example.com"],
     });
 
     /* Order */
     const order = await client.createOrder({
         identifiers: [
-            { type: 'dns', value: 'example.com' },
-            { type: 'dns', value: '*.example.com' },
-        ]
+            { type: "dns", value: "example.com" },
+            { type: "dns", value: "*.example.com" },
+        ],
     });
 
     await client.getOrder(order);
@@ -41,29 +41,29 @@ import * as acme from 'acme-client';
 
     /* Finalize */
     const [certKey, certCsr] = await acme.crypto.createCsr({
-        commonName: 'example.com',
-        altNames: ['example.com', '*.example.com']
+        commonName: "example.com",
+        altNames: ["example.com", "*.example.com"],
     });
 
     await client.finalizeOrder(order, certCsr);
     await client.getCertificate(order);
-    await client.getCertificate(order, 'DST Root CA X3');
+    await client.getCertificate(order, "DST Root CA X3");
 
     /* Auto */
     await client.auto({
         csr: certCsr,
         challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
-        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
+        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {},
     });
 
     await client.auto({
         csr: certCsr,
-        email: 'test@example.com',
+        email: "test@example.com",
         termsOfServiceAgreed: false,
         skipChallengeVerification: false,
-        challengePriority: ['http-01', 'dns-01'],
-        preferredChain: 'DST Root CA X3',
+        challengePriority: ["http-01", "dns-01"],
+        preferredChain: "DST Root CA X3",
         challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
-        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {}
+        challengeRemoveFn: async (authz, challenge, keyAuthorization) => {},
     });
 })();

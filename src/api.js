@@ -225,8 +225,8 @@ class AcmeApi {
      * @returns {Promise<object>} HTTP response
      */
 
-    revokeCert(data) {
-        return this.apiResourceRequest('revokeCert', data, [200]);
+    revokeCert(data, opts = {}) {
+        return this.apiResourceRequest('revokeCert', data, [200], opts);
     }
 }
 

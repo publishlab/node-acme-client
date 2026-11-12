@@ -1,11 +1,11 @@
-# acme-client [![test](https://github.com/publishlab/node-acme-client/actions/workflows/tests.yml/badge.svg)](https://github.com/publishlab/node-acme-client/actions/workflows/tests.yml)
+# acme-client [![test](https://github.com/chstewart/node-acme-client/actions/workflows/tests.yml/badge.svg)](https://github.com/chstewart/node-acme-client/actions/workflows/tests.yml)
 
-*A simple and unopinionated ACME client.*
+_A simple and unopinionated ACME client._
 
 This module is written to handle communication with a Boulder/Let's Encrypt-style ACME API.
 
-* RFC 8555 - Automatic Certificate Management Environment (ACME): [https://datatracker.ietf.org/doc/html/rfc8555](https://datatracker.ietf.org/doc/html/rfc8555)
-* Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
+- RFC 8555 - Automatic Certificate Management Environment (ACME): [https://datatracker.ietf.org/doc/html/rfc8555](https://datatracker.ietf.org/doc/html/rfc8555)
+- Boulder divergences from ACME: [https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md](https://github.com/letsencrypt/boulder/blob/master/docs/acme-divergences.md)
 
 ## Compatibility
 
@@ -19,33 +19,33 @@ This module is written to handle communication with a Boulder/Let's Encrypt-styl
 
 ## Table of contents
 
-* [Installation](#installation)
-* [Usage](#usage)
-    * [Directory URLs](#directory-urls)
-    * [External account binding](#external-account-binding)
-    * [Specifying the account URL](#specifying-the-account-url)
-* [Cryptography](#cryptography)
-    * [Legacy .forge interface](#legacy-forge-interface)
-* [Auto mode](#auto-mode)
-    * [Challenge priority](#challenge-priority)
-    * [Internal challenge verification](#internal-challenge-verification)
-* [API](#api)
-* [HTTP client defaults](#http-client-defaults)
-* [Debugging](#debugging)
-* [License](#license)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Directory URLs](#directory-urls)
+    - [External account binding](#external-account-binding)
+    - [Specifying the account URL](#specifying-the-account-url)
+- [Cryptography](#cryptography)
+    - [Legacy .forge interface](#legacy-forge-interface)
+- [Auto mode](#auto-mode)
+    - [Challenge priority](#challenge-priority)
+    - [Internal challenge verification](#internal-challenge-verification)
+- [API](#api)
+- [HTTP client defaults](#http-client-defaults)
+- [Debugging](#debugging)
+- [License](#license)
 
 ## Installation
 
 ```bash
-$ npm install acme-client
+$ npm install @chstewart/acme-client
 ```
 
 ## Usage
 
 ```js
-const acme = require('acme-client');
+const acme = require("@chstewart/acme-client");
 
-const accountPrivateKey = '<PEM encoded private key>';
+const accountPrivateKey = "<PEM encoded private key>";
 
 const client = new acme.Client({
     directoryUrl: acme.directory.letsencrypt.staging,
@@ -74,11 +74,11 @@ To enable [external account binding](https://datatracker.ietf.org/doc/html/rfc85
 
 ```js
 const client = new acme.Client({
-    directoryUrl: 'https://acme-provider.example.com/directory-url',
+    directoryUrl: "https://acme-provider.example.com/directory-url",
     accountKey: accountPrivateKey,
     externalAccountBinding: {
-        kid: 'YOUR-EAB-KID',
-        hmacKey: 'YOUR-EAB-HMAC-KEY',
+        kid: "YOUR-EAB-KID",
+        hmacKey: "YOUR-EAB-HMAC-KEY",
     },
 });
 ```
@@ -93,7 +93,7 @@ In some cases, for example with some EAB providers, this account creation step m
 const client = new acme.Client({
     directoryUrl: acme.directory.letsencrypt.staging,
     accountKey: accountPrivateKey,
-    accountUrl: 'https://acme-v02.api.letsencrypt.org/acme/acct/12345678',
+    accountUrl: "https://acme-v02.api.letsencrypt.org/acme/acct/12345678",
 });
 ```
 
@@ -109,14 +109,14 @@ For key pairs `acme-client` utilizes native Node.js cryptography APIs, supportin
 
 These utility methods are exposed through `.crypto`.
 
-* **Documentation: [docs/crypto.md](docs/crypto.md)**
+- **Documentation: [docs/crypto.md](docs/crypto.md)**
 
 ```js
 const privateRsaKey = await acme.crypto.createPrivateRsaKey();
 const privateEcdsaKey = await acme.crypto.createPrivateEcdsaKey();
 
 const [certificateKey, certificateCsr] = await acme.crypto.createCsr({
-    altNames: ['example.com', '*.example.com'],
+    altNames: ["example.com", "*.example.com"],
 });
 ```
 
@@ -126,19 +126,19 @@ The legacy `node-forge` crypto interface is still available for backward compati
 
 You should consider migrating to the new `.crypto` API at your earliest convenience. More details can be found in the [acme-client v5 upgrade guide](docs/upgrade-v5.md).
 
-* **Documentation: [docs/forge.md](docs/forge.md)**
+- **Documentation: [docs/forge.md](docs/forge.md)**
 
 ## Auto mode
 
 For convenience an `auto()` method is included in the client that takes a single config object. This method will handle the entire process of getting a certificate for one or multiple domains.
 
-* **Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)**
-* **Full example: [examples/auto.js](examples/auto.js)**
+- **Documentation: [docs/client.md#AcmeClient+auto](docs/client.md#AcmeClient+auto)**
+- **Full example: [examples/auto.js](examples/auto.js)**
 
 ```js
 const autoOpts = {
-    csr: '<PEM encoded CSR>',
-    email: 'test@example.com',
+    csr: "<PEM encoded CSR>",
+    email: "test@example.com",
     termsOfServiceAgreed: true,
     challengeCreateFn: async (authz, challenge, keyAuthorization) => {},
     challengeRemoveFn: async (authz, challenge, keyAuthorization) => {},
@@ -181,19 +181,19 @@ await client.auto({
 
 For more fine-grained control you can interact with the ACME API using the methods documented below.
 
-* **Documentation: [docs/client.md](docs/client.md)**
-* **Full example: [examples/api.js](examples/api.js)**
+- **Documentation: [docs/client.md](docs/client.md)**
+- **Full example: [examples/api.js](examples/api.js)**
 
 ```js
 const account = await client.createAccount({
     termsOfServiceAgreed: true,
-    contact: ['mailto:test@example.com'],
+    contact: ["mailto:test@example.com"],
 });
 
 const order = await client.createOrder({
     identifiers: [
-        { type: 'dns', value: 'example.com' },
-        { type: 'dns', value: '*.example.com' },
+        { type: "dns", value: "example.com" },
+        { type: "dns", value: "*.example.com" },
     ],
 });
 ```
@@ -205,18 +205,18 @@ This module uses [axios](https://github.com/axios/axios) when communicating with
 For example, should you need to change the default axios configuration to route requests through an HTTP proxy, this can be achieved as follows:
 
 ```js
-const acme = require('acme-client');
+const acme = require("@chstewart/acme-client");
 
 acme.axios.defaults.proxy = {
-    host: '127.0.0.1',
+    host: "127.0.0.1",
     port: 9000,
 };
 ```
 
 A complete list of axios options and documentation can be found at:
 
-* [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
-* [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
+- [https://github.com/axios/axios#request-config](https://github.com/axios/axios#request-config)
+- [https://github.com/axios/axios#custom-instance-defaults](https://github.com/axios/axios#custom-instance-defaults)
 
 ## Debugging
 

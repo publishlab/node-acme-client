@@ -6,6 +6,6 @@
         "noEmit": true,
         "esModuleInterop": true,
         "baseUrl": ".",
-        "paths": { "acme-client": ["."] }
+        "paths": { "@chstewart/acme-client": ["."] }
     }
 }
