@@ -87,6 +87,14 @@ instance.interceptors.response.use(null, async (error) => {
         return Promise.reject(error);
     }
 
+    /* A signed ACME request carries a single-use nonce, so sending the same body
+       again is always rejected with badNonce. Those requests opt out here and are
+       retried by HttpClient.signedRequest, which signs them again with a fresh
+       nonce. */
+    if (config.acmeRetry === false) {
+        return response ? validateStatus(response) : Promise.reject(error);
+    }
+
     // Pick up errors we want to retry
     if (isRetryableError(error)) {
         const { retryMaxAttempts, retryDefaultDelay, retryMaxDelay } = instance.defaults.acmeSettings;
